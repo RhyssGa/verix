@@ -1,121 +1,77 @@
 import { useCallback } from 'react'
 import { useAuditStore } from '@/stores/useAuditStore'
-import { FILE_MIN_COLS } from '@/constants/fileConfigs'
-import { parseGerance, parseGeranceZPointe, parseGeranceZMandats } from '@/lib/parsers/gerance'
-import { parseCopro, parseCoproZPointe } from '@/lib/parsers/copro'
-import type { ExcelRow } from '@/types/audit'
-
-function extractAgencies(rows: ExcelRow[], column: number): string[] {
-  const agencySet = new Set<string>()
-  rows.forEach((row) => {
-    const value = String(row[column] ?? '').trim()
-    if (value && !value.startsWith('Total') && !value.startsWith('Filtre')) {
-      agencySet.add(value)
-    }
-  })
-  return Array.from(agencySet).sort()
-}
+import type { GeranceData, CoproData } from '@/types/audit'
 
 export function useFileUpload() {
   const handleFile = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>, fileId: string) => {
+    async (event: React.ChangeEvent<HTMLInputElement>, fileId: string) => {
       const file = event.target.files?.[0]
       if (!file) return
-      const reader = new FileReader()
-      reader.onload = (readEvent) => {
-        const buffer = readEvent.target?.result as ArrayBuffer
-        if (!buffer) return
 
-        const store = useAuditStore.getState()
-        const { mode } = store
+      const store = useAuditStore.getState()
+      const { mode } = store
 
-        // Validate column count
-        try {
-          const XLSX = require('xlsx') as typeof import('xlsx')
-          const workbook = XLSX.read(buffer, { type: 'array' })
-          const sheet = workbook.Sheets[workbook.SheetNames[0]]
-          const rows = XLSX.utils.sheet_to_json(sheet, {
-            header: 1,
-            defval: null,
-          }) as (string | number | null)[][]
-          const effectiveColumns = Math.max(0, ...rows.slice(0, 5).map((row) => row.length))
-          const minColumns = FILE_MIN_COLS[mode]?.[fileId]
-          if (minColumns && effectiveColumns < minColumns) {
-            store.setFileError(
-              fileId,
-              `Fichier incorrect — ${effectiveColumns} colonnes détectées, minimum ${minColumns} attendu`,
-            )
-            return
-          }
-        } catch {
-          store.setFileError(fileId, 'Impossible de lire le fichier Excel')
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('fileId', fileId)
+      formData.append('mode', mode)
+
+      try {
+        const response = await fetch('/api/parse', { method: 'POST', body: formData })
+
+        if (!response.ok) {
+          const err = await response.json()
+          store.setFileError(fileId, err.error || 'Erreur de parsing')
           return
         }
 
+        const result = await response.json()
         store.clearFileError(fileId)
         store.setFileObject(fileId, file)
 
-        // Z-files: auto-fill sidebar fields
-        if (fileId === 'z_pointe') {
+        if (result.type === 'z_pointe') {
+          const peakMap = new Map(Object.entries(result.peakMap))
           if (mode === 'gerance') {
-            const peakMap = parseGeranceZPointe(buffer)
-            store.setZGerancePeak(peakMap)
-            const keys = Array.from(peakMap.keys()).sort()
-            if (store.agencies.length === 0) store.setAgencies(keys)
+            store.setZGerancePeak(peakMap as Map<string, { garantie: number; pointe: number }>)
           } else {
-            const peakMap = parseCoproZPointe(buffer)
-            store.setZCoproPeak(peakMap)
-            const keys = Array.from(peakMap.keys()).sort()
-            if (store.agencies.length === 0) store.setAgencies(keys)
+            store.setZCoproPeak(peakMap as Map<string, { garantie: number; pointe: number; nbCopro: number }>)
           }
-          store.setLoadedFile(fileId, file.name)
+          if (store.agencies.length === 0 && result.agencies) {
+            store.setAgencies(result.agencies)
+          }
+          store.setLoadedFile(fileId, result.fileName)
           return
         }
 
-        if (fileId === 'z_mandats') {
-          const mandateMap = parseGeranceZMandats(buffer)
+        if (result.type === 'z_mandats') {
+          const mandateMap = new Map<string, number>(Object.entries(result.mandateMap).map(([k, v]) => [k, Number(v)]))
           store.setZGeranceMandates(mandateMap)
           if (mandateMap.size === 1) {
             store.setMandateCount(Array.from(mandateMap.values())[0])
           }
-          store.setLoadedFile(fileId, file.name)
+          store.setLoadedFile(fileId, result.fileName)
           return
         }
 
         // Business files
         if (mode === 'gerance') {
-          const parsed = parseGerance({ [fileId]: buffer })
-          const merged = { ...useAuditStore.getState().geranceData, ...parsed }
+          const merged: GeranceData = { ...useAuditStore.getState().geranceData, ...result.parsedData }
           store.setGeranceData(merged)
-
-          const agencies = [
-            ...extractAgencies(merged.quittancement_rows ?? [], 0),
-            ...extractAgencies(merged.prop_deb, 0),
-            ...extractAgencies(merged.prop_deb_sorti ?? [], 0),
-            ...extractAgencies(merged.att_deb, 0),
-            ...extractAgencies(merged.factures, 1),
-            ...extractAgencies(merged.bq_nonrapp, 1),
-            ...extractAgencies(merged.cpta_nonrapp, 1),
-          ]
-          store.setAgencies(Array.from(new Set(agencies)).sort())
         } else {
-          const parsed = parseCopro({ [fileId]: buffer })
-          const merged = { ...useAuditStore.getState().coproData, ...parsed }
+          const merged: CoproData = { ...useAuditStore.getState().coproData, ...result.parsedData }
           store.setCoproData(merged)
-
-          const agencies = [
-            ...extractAgencies(merged.fourn_deb, 0),
-            ...extractAgencies(merged.att_deb, 0),
-            ...extractAgencies(merged.bilan, 0),
-            ...extractAgencies(merged.ventes_deb, 0),
-            ...extractAgencies(merged.bq_nonrapp, 1),
-            ...extractAgencies(merged.cpta_nonrapp, 0),
-          ]
-          store.setAgencies(Array.from(new Set(agencies)).sort())
         }
-        store.setLoadedFile(fileId, file.name)
+
+        if (result.agencies && result.agencies.length > 0) {
+          const existingAgencies = useAuditStore.getState().agencies
+          const allAgencies = Array.from(new Set([...existingAgencies, ...result.agencies])).sort()
+          store.setAgencies(allAgencies)
+        }
+
+        store.setLoadedFile(fileId, result.fileName)
+      } catch {
+        store.setFileError(fileId, 'Erreur réseau lors du parsing')
       }
-      reader.readAsArrayBuffer(file)
     },
     [],
   )

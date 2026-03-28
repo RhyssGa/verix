@@ -1,27 +1,28 @@
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
+  output     = "../generated/prisma"
+  engineType = "library"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
 }
 
-model Audit {
-  id          String    @id @default(cuid())
-  agence      String
-  mode        String    // 'gerance' | 'copro'
-  dateDebut   DateTime?
-  dateFin     DateTime?
-  garantie    Float?
-  pointe      Float?
-  pointeDate  DateTime?
-  donneesG    Json?     // GeranceData sérialisée
-  donneesC    Json?     // CoproData sérialisée
-  annotations Json?     // AnnotationsMap
-  scoreGlobal Float?
-  niveau      String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+model AuditSnapshot {
+  id            String   @id @default(uuid())
+  batchId       String
+  agence        String
+  mode          String
+  scoreGlobal   Float
+  niveau        String
+  nbAnomalies   Int
+  totalPenalite Float
+  metrics       Json?
+  sectionNotes  Json?
+  snapshot      Json
+  createdAt     DateTime @default(now())
+
+  @@index([batchId])
+  @@index([agence, mode])
+  @@index([createdAt])
 }

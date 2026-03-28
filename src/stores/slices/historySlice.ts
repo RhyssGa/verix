@@ -41,42 +41,25 @@ const initialHistoryState = {
   historyWarning: null as string | null,
 }
 
-export const createHistorySlice: StateCreator<HistorySlice, [], [], HistorySlice> = (set, get) => ({
+export const createHistorySlice: StateCreator<HistorySlice, [], [], HistorySlice> = (set) => ({
   ...initialHistoryState,
   setReportHistory: (entries) => set({ reportHistory: entries }),
   addHistoryEntries: (entries) =>
-    set((state) => {
-      const updated = [...entries, ...state.reportHistory]
-      try {
-        localStorage.setItem('c21_audit_history', JSON.stringify(updated))
-      } catch { /* noop */ }
-      return { reportHistory: updated }
-    }),
+    set((state) => ({
+      reportHistory: [...entries, ...state.reportHistory],
+    })),
   removeHistoryEntries: (ids) =>
     set((state) => {
       const idSet = new Set(ids)
-      const updated = state.reportHistory.filter((e) => !idSet.has(e.id))
-      try {
-        localStorage.setItem('c21_audit_history', JSON.stringify(updated))
-      } catch { /* noop */ }
-      // Also clean up snapshots
-      for (const id of ids) {
-        const entry = state.reportHistory.find((e) => e.id === id)
-        if (entry) {
-          try { localStorage.removeItem(`c21_audit_snap_${entry.batchId}`) } catch { /* noop */ }
-        }
+      return {
+        reportHistory: state.reportHistory.filter((e) => !idSet.has(e.id)),
+        selectedIds: new Set<string>(),
       }
-      return { reportHistory: updated, selectedIds: new Set<string>() }
     }),
   removeHistoryBatch: (batchId) =>
-    set((state) => {
-      const updated = state.reportHistory.filter((e) => e.batchId !== batchId)
-      try {
-        localStorage.setItem('c21_audit_history', JSON.stringify(updated))
-        localStorage.removeItem(`c21_audit_snap_${batchId}`)
-      } catch { /* noop */ }
-      return { reportHistory: updated }
-    }),
+    set((state) => ({
+      reportHistory: state.reportHistory.filter((e) => e.batchId !== batchId),
+    })),
   setSelectedIds: (ids) => set({ selectedIds: ids }),
   toggleSelectedId: (id) =>
     set((state) => {

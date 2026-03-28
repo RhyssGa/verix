@@ -1,48 +1,97 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-export async function GET() {
+// GET /api/audits — Liste historique (sans snapshot complet)
+// GET /api/audits?batchId=xxx — Filtrer par batch
+export async function GET(req: NextRequest) {
   try {
-    const audits = await prisma.audit.findMany({
+    const batchId = req.nextUrl.searchParams.get('batchId')
+
+    const where = batchId ? { batchId } : {}
+    const snapshots = await prisma.auditSnapshot.findMany({
+      where,
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
+        batchId: true,
         agence: true,
         mode: true,
-        dateDebut: true,
-        dateFin: true,
         scoreGlobal: true,
         niveau: true,
+        nbAnomalies: true,
+        totalPenalite: true,
+        metrics: true,
+        sectionNotes: true,
         createdAt: true,
       },
     })
-    return NextResponse.json(audits)
+
+    // Map to ReportEntry format for client
+    const entries = snapshots.map((s) => ({
+      id: s.id,
+      batchId: s.batchId,
+      datasetId: s.batchId,
+      timestamp: s.createdAt.toISOString(),
+      agence: s.agence,
+      mode: s.mode,
+      scoreGlobal: s.scoreGlobal,
+      niveau: s.niveau,
+      nbAnomalies: s.nbAnomalies,
+      totalPenalite: s.totalPenalite,
+      status: 'valid' as const,
+      metrics: s.metrics ?? {},
+      hasSnapshot: true,
+      ...(s.sectionNotes && Object.keys(s.sectionNotes as object).length > 0
+        ? { sectionNotes: s.sectionNotes }
+        : {}),
+    }))
+
+    return NextResponse.json(entries)
   } catch (error) {
+    console.error('GET /api/audits error:', error)
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
 }
 
+// POST /api/audits — Sauvegarder un snapshot
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const audit = await prisma.audit.create({
+
+    const snapshot = await prisma.auditSnapshot.create({
       data: {
+        batchId: body.batchId,
         agence: body.agence,
         mode: body.mode,
-        dateDebut: body.dateDebut ? new Date(body.dateDebut) : null,
-        dateFin: body.dateFin ? new Date(body.dateFin) : null,
-        garantie: body.garantie ?? null,
-        pointe: body.pointe ?? null,
-        pointeDate: body.pointeDate ? new Date(body.pointeDate) : null,
-        donneesG: body.donneesG ?? undefined,
-        donneesC: body.donneesC ?? undefined,
-        annotations: body.annotations ?? {},
-        scoreGlobal: body.scoreGlobal ?? null,
-        niveau: body.niveau ?? null,
+        scoreGlobal: body.scoreGlobal,
+        niveau: body.niveau,
+        nbAnomalies: body.nbAnomalies,
+        totalPenalite: body.totalPenalite,
+        metrics: body.metrics ?? {},
+        sectionNotes: body.sectionNotes ?? {},
+        snapshot: body.snapshot,
       },
     })
-    return NextResponse.json(audit, { status: 201 })
+
+    return NextResponse.json({ id: snapshot.id }, { status: 201 })
   } catch (error) {
+    console.error('POST /api/audits error:', error)
+    return NextResponse.json({ error: 'Database error' }, { status: 500 })
+  }
+}
+
+// DELETE /api/audits?batchId=xxx — Supprimer tout un batch
+export async function DELETE(req: NextRequest) {
+  try {
+    const batchId = req.nextUrl.searchParams.get('batchId')
+    if (!batchId) {
+      return NextResponse.json({ error: 'batchId requis' }, { status: 400 })
+    }
+
+    await prisma.auditSnapshot.deleteMany({ where: { batchId } })
+    return NextResponse.json({ deleted: true })
+  } catch (error) {
+    console.error('DELETE /api/audits error:', error)
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
 }

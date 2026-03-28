@@ -19,6 +19,7 @@ export function useFilteredGerance(): GeranceData {
   const reportAgencies = useAuditStore((s) => s.reportAgencies)
 
   return useMemo(() => {
+    if (!geranceData) return { ...EMPTY_GERANCE }
     const agencySelectMode = agencies.length > 0
     if (agencySelectMode && reportAgencies.length === 0) return { ...EMPTY_GERANCE }
     if (reportAgencies.length === 0) return geranceData
@@ -59,6 +60,7 @@ export function useFilteredCopro(): CoproData {
   const reportAgencies = useAuditStore((s) => s.reportAgencies)
 
   return useMemo(() => {
+    if (!coproData) return { ...EMPTY_COPRO }
     const agencySelectMode = agencies.length > 0
     if (agencySelectMode && reportAgencies.length === 0) return { ...EMPTY_COPRO }
     if (reportAgencies.length === 0) return coproData

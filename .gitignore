@@ -25,7 +25,7 @@ yarn-error.log*
 next-env.d.ts
 
 # Prisma
-prisma/generated/
+generated/
 
 # OS
 .DS_Store

@@ -4,37 +4,33 @@
 
 Outil d'audit comptable pour agences Century 21. Analyse les exports Power BI de deux activités : **Gérance** et **Copropriété**. L'auditeur importe des fichiers Excel, visualise les anomalies, annote/exclut des lignes, et génère un rapport **PDF**.
 
-L'application est **entièrement opérationnelle** en Next.js 14.
-
----
-
-## ⚠️ Évolution prévue — Migration BDD (à faire)
-
-**Toutes les données de sauvegarde doivent migrer vers Supabase, stockées par agence.**
-
-Situation actuelle : les snapshots complets (ExcelRow[], annotations, notes) sont écrits dans `localStorage` sous `c21_audit_snap_<id>`. Cette solution est fragile :
-- Limite ~5–10 Mo selon le navigateur → écriture silencieusement échouée si plein
-- Le navigateur peut vider le localStorage (mode privé, nettoyage)
-- `hasSnapshot: false` = données définitivement perdues
-
-**Cible :**
-- Table `audit_snapshots` dans Supabase avec une colonne JSONB pour le snapshot
-- L'index léger (`reportHistory`) peut rester en localStorage
-- Routes `/api/audits` et `/api/audits/:id` déjà partiellement en place
-- Données organisées par agence (clé = `normalizeAgence(agence)` + `mode`)
-
-**Ne pas coder avant validation explicite.**
+L'application est **entièrement opérationnelle** en Next.js 16 avec Zustand, composants découpés et persistance Supabase.
 
 ---
 
 ## Architecture
 
 ### Tech Stack
-- **Next.js 14** App Router, TypeScript strict
-- **Prisma ORM** + **Supabase** (PostgreSQL) — optionnel, fonctionne sans base
-- **CSS global** (`globals.css`) — pas de Tailwind
-- **xlsx** — parsing ET export Excel côté client
+- **Next.js 16** App Router, TypeScript strict, React 19
+- **Prisma 7** + **Supabase** (PostgreSQL) — persistance des snapshots d'audit
+- **Zustand 5** — état de session en mémoire (éphémère)
+- **Tailwind CSS** + styles inline (design C21)
+- **xlsx** — parsing côté serveur (`/api/parse`), export Excel côté client
 - **puppeteer** v24 — génération PDF côté serveur (`/api/rapport/pdf`)
+
+### Persistance
+- **Supabase** : table `AuditSnapshot` — snapshots complets en JSONB, historique, restauration
+- **localStorage** : **supprimé** — toute la persistance passe par l'API
+- L'app fonctionne sans DB (fallback gracieux, pas de crash)
+
+### Parsing Excel côté serveur
+- Upload fichier → `POST /api/parse` (FormData) → parsing + validation → données parsées retournées au client
+- Le client ne fait plus de parsing xlsx — il reçoit les données prêtes via l'API
+
+### Scoring temps réel côté client
+- `computed.ts` : filtrage par agence + scoring recalculé à chaque changement d'annotation
+- `engine.ts` : barèmes de scoring (fonctions pures)
+- Raison : chaque clic checkbox recalcule instantanément, un round-trip API serait trop lent
 
 ### Lancer le dev
 ```bash
@@ -189,16 +185,24 @@ interface CoproData {
 
 ---
 
-## Pipeline de données dans AuditClient.tsx
+## Pipeline de données
 
 ```
-fichiers importés → donneesG / donneesC (données brutes)
-    ↓ filterByAgence(rows, col)
+Upload .xlsx → POST /api/parse (serveur)
+    → validation colonnes + parsing → données parsées retournées au client
+    → store Zustand : geranceData / coproData
+
+geranceData / coproData (données brutes dans Zustand)
+    ↓ filterByAgency(rows, col)  [client — computed.ts]
 filteredG / filteredC  (filtrées par agence)
-    ↓ forcedOk overrides
+    ↓ forcedOk overrides  [client — computed.ts]
 scoredG / scoredC  (source de vérité pour render + rapport)
-    ↓ computeScore*()
+    ↓ computeScore*()  [client — engine.ts]
 score: ScoreResult | null
+
+Validation agence → POST /api/audits (Supabase)
+    → snapshot JSONB stocké en DB (plus de localStorage)
+Restauration → GET /api/audits/[id] → réhydrate le store
 ```
 
 **Colonnes de filtre agence (`filterByAgence`) :**
@@ -389,17 +393,18 @@ rows: Array<{
 **Sauvegarde multi-agences :**
 - Bouton **"Valider N agences ensemble"** apparaît quand plusieurs agences sont cochées dans le sélecteur
 - 1 seule entrée dans l'historique, label combiné = `"AGENCE1 + AGENCE2 + ..."` (N quelconque)
-- 1 seul snapshot partagé en localStorage (clé = `c21_audit_snap_<batchId>`)
+- 1 seul snapshot en DB (table `AuditSnapshot`, colonne JSONB `snapshot`)
 
-**Snapshot :**
-- Clé localStorage : `c21_audit_snap_<batchId>` (**temporaire** — voir migration BDD prévue)
-- Purge automatique des plus anciens batchIds si localStorage plein avant de sauvegarder
-- `hasSnapshot: false` = snapshot absent → bouton restauration grisé (classe `no-snap`) mais cliquable (restauration partielle)
+**Snapshot (Supabase) :**
+- Table `AuditSnapshot` avec colonnes : id, batchId, agence, mode, scoreGlobal, niveau, nbAnomalies, totalPenalite, metrics, sectionNotes, snapshot (JSONB complet), createdAt
+- `batchId` regroupe les entrées multi-agences
+- `hasSnapshot: true` toujours (plus de risque de perte comme avec localStorage)
+- `POST /api/audits` pour sauvegarder, `GET /api/audits` pour lister, `GET /api/audits/[id]` pour restaurer
 
 **Restauration :**
-- Snapshot cherché par `entry.batchId` d'abord, fallback `entry.id` (legacy)
+- `GET /api/audits/${entry.id}` → récupère le snapshot JSONB complet
 - Label multi parsé via `entry.agence.split(' + ')` → toutes les agences du batch sont recochées
-- `reportAgences` = tous les noms bruts du snapshot dont le normalisé figure dans le batch
+- `reportAgencies` = tous les noms bruts du snapshot dont le normalisé figure dans le batch
 
 **Comparaison :**
 - Panneau **toujours visible** dès qu'il existe un audit précédent avec le même ensemble d'agences
@@ -442,24 +447,45 @@ rows: Array<{
 ## Structure du projet
 
 ```
-audit-app/src/
-├── app/
-│   ├── globals.css                  # Tout le CSS
-│   ├── page.tsx                     # Sélecteur de mode
-│   └── audit/[mode]/page.tsx        # Page d'audit
-│   └── api/
-│       ├── audits/route.ts
-│       ├── audits/[id]/route.ts
-│       └── rapport/pdf/route.ts     # Puppeteer PDF
-├── components/
-│   └── AuditClient.tsx              # Composant principal 'use client'
-├── lib/
-│   ├── parsers/gerance.ts
-│   ├── parsers/copro.ts
-│   ├── report/pdf.ts                # buildPDFPayload + renderReportHTML
-│   ├── scoring/engine.ts            # computeScoreGerance / computeScoreCopro
-│   └── utils/format.ts             # eur(), pct(), truncate(), excelDateFmt()
-└── types/audit.ts
+audit-app/
+├── prisma/schema.prisma              # Modèle AuditSnapshot
+├── prisma.config.ts                  # Config Prisma 7 (datasource, dotenv)
+├── generated/prisma/                 # Client Prisma généré
+├── src/
+│   ├── app/
+│   │   ├── globals.css
+│   │   ├── page.tsx                  # Sélecteur de mode
+│   │   └── audit/[mode]/page.tsx
+│   │   └── api/
+│   │       ├── parse/route.ts        # POST — parsing Excel côté serveur
+│   │       ├── audits/route.ts       # GET liste / POST save / DELETE batch
+│   │       ├── audits/[id]/route.ts  # GET snapshot / DELETE
+│   │       └── rapport/pdf/route.ts  # Puppeteer PDF
+│   ├── components/
+│   │   ├── layout/TopBar, Sidebar
+│   │   ├── audit/AuditPage, FileUploadGrid, FileDropCard, ...
+│   │   ├── cards/AnomalyCard, GeranceCards, CoproCards, ...
+│   │   ├── modals/DetailModal, HistoryPanel, ...
+│   │   ├── comparison/ComparisonPanel, GlobalNote
+│   │   └── shared/StatusBadge, SectionNote, ScoreDetail
+│   ├── stores/
+│   │   ├── useAuditStore.ts          # Store Zustand (7 slices)
+│   │   ├── slices/                   # form, agency, file, data, annotation, history, ui
+│   │   └── computed.ts               # Filtrage + scoring temps réel
+│   ├── hooks/
+│   │   ├── useFileUpload.ts          # Upload → fetch /api/parse
+│   │   ├── useHistory.ts             # CRUD via /api/audits (Supabase)
+│   │   ├── useAnnotations.ts
+│   │   ├── useAgencySelection.ts
+│   │   └── useExport.ts
+│   ├── lib/
+│   │   ├── parsers/gerance.ts, copro.ts  # Parsers Excel (utilisés côté serveur)
+│   │   ├── report/pdf.ts             # buildPDFPayload + renderReportHTML
+│   │   ├── scoring/engine.ts         # Barèmes + calcul score
+│   │   ├── utils/format.ts, helpers.ts
+│   │   └── prisma.ts                 # Client Prisma singleton
+│   ├── constants/fileConfigs, emptyData, infoCids
+│   └── types/audit.ts
 ```
 
 ---
@@ -508,7 +534,10 @@ Cette protection est appliquée sur les 6 anomalies concernées (propdeb, propdb
 - Comparaison PDF filtre `a.type !== 'info'` pour les anomalies comparées
 - La synthèse PDF : `anomScored = syntheseRows.filter(r => !r.exclu && r.type === 'scoring').length`
 - Toutes les modales utilisent le layout flex (pas de `cols` dans `renderCardActions`) — le sous-texte via `subFn` encode résidence, date sortie, ancienneté, note Gesteam selon la section
-- `annotsByAgenceRef` et `notesByAgenceRef` sont des `useRef` (pas des states) — ils ne déclenchent pas de re-render mais persistent entre renders
-- `restoreKey` (useState number) s'incrémente à chaque `restoreFromHistory` — intégré dans la `key` des textareas (`renderSectionNote` + `renderGlobalNote`) pour forcer leur remount même si `selectedAgence` n'a pas changé
+- `annotsByAgency` et `notesByAgency` sont dans `annotationSlice` (Zustand) — swap automatique au changement d'agence
+- `restoreKey` dans `annotationSlice` s'incrémente à chaque `restoreFromHistory` — force remount des textareas
+- **Parsing Excel côté serveur** : `POST /api/parse` — le client envoie le fichier via FormData, le serveur parse et retourne les données
+- **Historique Supabase** : `useHistory.ts` appelle les API `/api/audits` — plus aucun `localStorage`
+- **Prisma 7** : config dans `prisma.config.ts` (dotenv + datasource), client généré dans `generated/prisma/`
 - Quittancement/encaissement : somme **sans** `Math.abs` — les montants négatifs (remboursements) doivent rester négatifs pour correspondre aux totaux Power BI
 - Badge "critique(s)" dans le header score : affiche uniquement le nombre, **sans** mention "note individuelle 0"

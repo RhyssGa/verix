@@ -4,14 +4,14 @@ import { normalizeAgency } from '@/lib/utils/helpers'
 import type { ScoreResult, AnomalyMetric, HistorySnapshot, ReportEntry } from '@/types/audit'
 
 export function useHistory() {
-  // Load history from localStorage on mount — no full store subscription
+  // Load history from Supabase on mount
   useEffect(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('c21_audit_history') || '[]')
-      if (stored.length > 0) useAuditStore.getState().setReportHistory(stored)
-    } catch {
-      /* noop */
-    }
+    fetch('/api/audits')
+      .then((res) => res.json())
+      .then((entries: ReportEntry[]) => {
+        if (entries.length > 0) useAuditStore.getState().setReportHistory(entries)
+      })
+      .catch(() => { /* noop — app works without DB */ })
   }, [])
 
   const saveToHistory = useCallback(
@@ -25,7 +25,7 @@ export function useHistory() {
   )
 
   const saveAgencesToHistory = useCallback(
-    (
+    async (
       score: ScoreResult,
       notes: Record<string, string> | undefined,
       agencyList: string[],
@@ -68,45 +68,8 @@ export function useHistory() {
         zGeranceMandats: Array.from(state.zGeranceMandates.entries()),
       }
 
-      const snapKey = `c21_audit_snap_${batchId}`
-      const snapData = JSON.stringify(snapshot)
-
-      const tryStore = (): boolean => {
-        try {
-          localStorage.setItem(snapKey, snapData)
-          return true
-        } catch {
-          return false
-        }
-      }
-
-      if (!tryStore()) {
-        const seenBatches = new Set<string>()
-        const oldBatchIds = [...state.reportHistory]
-          .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
-          .filter((entry) => {
-            if (seenBatches.has(entry.batchId)) return false
-            seenBatches.add(entry.batchId)
-            return true
-          })
-          .map((entry) => entry.batchId)
-
-        for (const oldBatch of oldBatchIds) {
-          try { localStorage.removeItem(`c21_audit_snap_${oldBatch}`) } catch { /* noop */ }
-          const legacyEntry = state.reportHistory.find((e) => e.batchId === oldBatch)
-          if (legacyEntry) {
-            try { localStorage.removeItem(`c21_audit_snap_${legacyEntry.id}`) } catch { /* noop */ }
-          }
-          if (tryStore()) break
-        }
-      }
-
-      const hasSnapshot = localStorage.getItem(snapKey) !== null
-      if (!hasSnapshot) {
-        alert("⚠️ Stockage navigateur plein : les données complètes n'ont pas pu être sauvegardées. Seul le résumé (score, anomalies) est conservé.")
-      }
-
       const agencyLabel = agencyList.length > 1 ? agencyList.join(' + ') : agencyList[0]
+
       const entry: ReportEntry = {
         id: crypto.randomUUID(),
         batchId,
@@ -120,8 +83,34 @@ export function useHistory() {
         totalPenalite: score.totalPenalite,
         status: 'valid',
         metrics,
-        hasSnapshot,
+        hasSnapshot: true,
         ...(Object.keys(storedNotes).length > 0 && { sectionNotes: storedNotes }),
+      }
+
+      // Save to Supabase
+      try {
+        const res = await fetch('/api/audits', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            batchId,
+            agence: agencyLabel,
+            mode: state.mode,
+            scoreGlobal: score.scoreGlobal,
+            niveau: score.niveau.label,
+            nbAnomalies: entry.nbAnomalies,
+            totalPenalite: score.totalPenalite,
+            metrics,
+            sectionNotes: storedNotes,
+            snapshot,
+          }),
+        })
+        if (res.ok) {
+          const { id } = await res.json()
+          entry.id = id
+        }
+      } catch {
+        console.warn('Sauvegarde Supabase échouée — données conservées en session uniquement')
       }
 
       useAuditStore.getState().addHistoryEntries([entry])
@@ -130,7 +119,7 @@ export function useHistory() {
   )
 
   const restoreFromHistory = useCallback(
-    (entry: ReportEntry) => {
+    async (entry: ReportEntry) => {
       const state = useAuditStore.getState()
       const store = useAuditStore.getState()
 
@@ -149,14 +138,15 @@ export function useHistory() {
       }
 
       try {
-        const raw =
-          localStorage.getItem(`c21_audit_snap_${entry.batchId}`) ??
-          localStorage.getItem(`c21_audit_snap_${entry.id}`)
-        if (!raw) {
-          alert('Données de restauration introuvables (peut-être effacées par le navigateur).')
+        // Fetch snapshot from Supabase
+        const res = await fetch(`/api/audits/${entry.id}`)
+        if (!res.ok) {
+          alert('Données de restauration introuvables.')
           return
         }
-        const snapshot: HistorySnapshot = JSON.parse(raw)
+        const dbRecord = await res.json()
+        const snapshot: HistorySnapshot = dbRecord.snapshot
+
         const batchAgencies = entry.agence.split(' + ').map((s) => s.trim())
         const primaryAgency = batchAgencies[0]
 
@@ -202,16 +192,38 @@ export function useHistory() {
   )
 
   const deleteHistoryBatch = useCallback(
-    (batchId: string) => {
+    async (batchId: string) => {
+      // Delete from Supabase
+      try {
+        await fetch(`/api/audits?batchId=${batchId}`, { method: 'DELETE' })
+      } catch {
+        console.warn('Suppression Supabase échouée')
+      }
       useAuditStore.getState().removeHistoryBatch(batchId)
       useAuditStore.getState().setDeleteConfirm(null)
     },
     [],
   )
 
-  const deleteSelectedHistory = useCallback(() => {
+  const deleteSelectedHistory = useCallback(async () => {
     const state = useAuditStore.getState()
-    useAuditStore.getState().removeHistoryEntries(Array.from(state.selectedIds))
+    const ids = Array.from(state.selectedIds)
+
+    // Find batch IDs to delete from Supabase
+    const batchIds = new Set<string>()
+    for (const id of ids) {
+      const entry = state.reportHistory.find((e) => e.id === id)
+      if (entry) batchIds.add(entry.batchId)
+    }
+
+    // Delete from Supabase
+    for (const batchId of batchIds) {
+      try {
+        await fetch(`/api/audits?batchId=${batchId}`, { method: 'DELETE' })
+      } catch { /* noop */ }
+    }
+
+    useAuditStore.getState().removeHistoryEntries(ids)
   }, [])
 
   return {
