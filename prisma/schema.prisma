@@ -1,0 +1,27 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Audit {
+  id          String    @id @default(cuid())
+  agence      String
+  mode        String    // 'gerance' | 'copro'
+  dateDebut   DateTime?
+  dateFin     DateTime?
+  garantie    Float?
+  pointe      Float?
+  pointeDate  DateTime?
+  donneesG    Json?     // GeranceData sérialisée
+  donneesC    Json?     // CoproData sérialisée
+  annotations Json?     // AnnotationsMap
+  scoreGlobal Float?
+  niveau      String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
