@@ -1,9 +1,11 @@
 import { notFound } from 'next/navigation'
-import AuditClient from '@/components/AuditClient'
+import { use } from 'react'
+import { AuditPage } from '@/components/audit/AuditPage'
 
-export default function AuditPage({ params }: { params: { mode: string } }) {
-  if (params.mode !== 'gerance' && params.mode !== 'copro') {
+export default function AuditRoute({ params }: { params: Promise<{ mode: string }> }) {
+  const { mode } = use(params)
+  if (mode !== 'gerance' && mode !== 'copro') {
     notFound()
   }
-  return <AuditClient mode={params.mode as 'gerance' | 'copro'} />
+  return <AuditPage mode={mode as 'gerance' | 'copro'} />
 }
