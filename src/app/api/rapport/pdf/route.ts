@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     const footerTemplate = `
       <div style="-webkit-print-color-adjust:exact;color-adjust:exact;width:100%;box-sizing:border-box;padding:0 48px;height:32px;display:flex;justify-content:space-between;align-items:center;border-top:1.5px solid #C49A2E;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:7pt;background:#fff">
         <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-weight:800;color:#C49A2E;letter-spacing:0.08em;font-size:7.5pt">CENTURY 21</span>
+          <span style="font-weight:800;color:#C49A2E;letter-spacing:0.08em;font-size:7.5pt">CENTURY 21 · GROUPE MARTINOT</span>
           <span style="color:#DCDCDC">&nbsp;·&nbsp;</span>
           <span style="color:#7A7A8C;letter-spacing:0.03em">AUDIT COMPTABLE ${modeUpperCase}</span>
           <span style="color:#DCDCDC">&nbsp;·&nbsp;</span>

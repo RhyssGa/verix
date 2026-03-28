@@ -2,6 +2,7 @@
 
 import { useAuditStore } from '@/stores/useAuditStore'
 import { useScoredGerance, useScore } from '@/stores/computed'
+import { useExport } from '@/hooks/useExport'
 import { GuaranteeCard } from './GuaranteeCard'
 import { QuittancementCard } from './QuittancementCard'
 import { DebtorCard } from './DebtorCard'
@@ -34,6 +35,8 @@ export function GeranceCards() {
     factures_nr30,
     factures_nr60,
   } = scored
+
+  const { exportXlsx } = useExport()
 
   const anomQuitt = score?.anomalies.find((a) => a.id === 'quitt') ?? null
   const anomPropDeb = score?.anomalies.find((a) => a.id === 'propdeb') ?? null
@@ -81,6 +84,10 @@ export function GeranceCards() {
             noteColumn: scored.prop_deb_nc ?? null,
           })
         }
+        onExport={() => exportXlsx('prop-debiteurs-actifs', 'Prop. débiteurs actifs', 'propdeb', prop_deb, (r) => String(r[1] || r[0] || '—'), (r) => Math.abs(parseFloat(String(r[6] ?? 0)) || 0), null, [
+          { header: 'Propriétaire', fn: (r) => String(r[1] || r[0] || '—') },
+          { header: 'Montant', fn: (r) => String(Math.abs(parseFloat(String(r[6] ?? 0)) || 0)) },
+        ], scored.prop_deb_nc ?? null)}
         scoreId="propdeb"
       />
 
@@ -114,6 +121,11 @@ export function GeranceCards() {
               r[2] != null ? `Date sortie : ${excelDateFmt(r[2])}` : '',
           })
         }
+        onExport={() => exportXlsx('prop-debiteurs-sortis', 'Prop. débiteurs sortis', 'propdbsorti', propSorti, (r) => String(r[1] || r[0] || '—'), (r) => Math.abs(parseFloat(String(r[10] ?? 0)) || 0), (r) => r[2] != null ? `Date sortie : ${excelDateFmt(r[2])}` : '', [
+          { header: 'Propriétaire', fn: (r) => String(r[1] || r[0] || '—') },
+          { header: 'Montant', fn: (r) => String(Math.abs(parseFloat(String(r[10] ?? 0)) || 0)) },
+          { header: 'Date sortie', fn: (r) => r[2] != null ? excelDateFmt(r[2]) : '' },
+        ])}
         scoreId="propdbsorti"
       />
 
@@ -147,6 +159,11 @@ export function GeranceCards() {
               r[2] != null ? `Date sortie : ${excelDateFmt(r[2])}` : '',
           })
         }
+        onExport={() => exportXlsx('prop-crediteurs-sortis', 'Prop. créditeurs sortis', 'propcred', prop_cred, (r) => String(r[1] || r[0] || '—'), (r) => Math.abs(parseFloat(String(r[6] ?? 0)) || 0), (r) => r[2] != null ? `Date sortie : ${excelDateFmt(r[2])}` : '', [
+          { header: 'Propriétaire', fn: (r) => String(r[1] || r[0] || '—') },
+          { header: 'Montant', fn: (r) => String(Math.abs(parseFloat(String(r[6] ?? 0)) || 0)) },
+          { header: 'Date sortie', fn: (r) => r[2] != null ? excelDateFmt(r[2]) : '' },
+        ])}
         scoreId="propcred"
       />
 
@@ -179,6 +196,11 @@ export function GeranceCards() {
             noteColumn: scored.att_deb_nc ?? null,
           })
         }
+        onExport={() => exportXlsx('cptes-attente-deb', "Cptes attente déb.", 'attdeb', att_deb, (r) => `${String(r[1] || r[3] || '—')} · ${String(r[6] || '')}`, (r) => Math.abs(parseFloat(String(r[8] ?? 0)) || 0), null, [
+          { header: 'Mandat · Libellé', fn: (r) => (String(r[3] || '—')) + (r[1] ? ' · ' + String(r[1]) : '') },
+          { header: 'Montant', fn: (r) => String(Math.abs(parseFloat(String(r[8] ?? 0)) || 0)) },
+          { header: 'Note Gesteam', fn: (r, nc) => nc != null ? String(r[nc] ?? '') : '' },
+        ], scored.att_deb_nc ?? null)}
         scoreId="attdeb"
       />
 
@@ -206,6 +228,10 @@ export function GeranceCards() {
                 .join(' · '),
           })
         }
+        onExport={() => exportXlsx('bq-nonrapp', 'Banque non rapprochée', 'bqrapp', bq_nonrapp, (r) => String(r[7] || r[0] || '—'), (r) => Math.abs(parseFloat(String(r[15] ?? 0)) || 0), (r) => r[14] ? excelDateFmt(r[14]) : '', [
+          { header: 'Banque · Date · Libellé', fn: (r) => `${String(r[0] || '')} · ${excelDateFmt(r[14])} · ${String(r[7] || '—')}` },
+          { header: 'Montant', fn: (r) => String(Math.abs(parseFloat(String(r[15] ?? 0)) || 0)) },
+        ])}
       />
 
       <ReconciliationCard
@@ -232,6 +258,10 @@ export function GeranceCards() {
             noteColumn: scored.cpta_nonrapp_nc ?? null,
           })
         }
+        onExport={() => exportXlsx('cpta-nonrapp', 'Compta non rapprochée', 'cptarapp', cpta_nonrapp, (r) => String(r[14] || r[6] || '—'), (r) => Math.abs(parseFloat(String(r[13] ?? 0)) || 0), (r) => [r[12] ? excelDateFmt(r[12]) : '', r[15] != null ? `${r[15]} j` : ''].filter(Boolean).join(' · '), [
+          { header: 'Banque · Date · Libellé', fn: (r) => `${String(r[6] || '')} · ${excelDateFmt(r[12])} · ${String(r[14] || '—')}` },
+          { header: 'Montant', fn: (r) => String(Math.abs(parseFloat(String(r[13] ?? 0)) || 0)) },
+        ], scored.cpta_nonrapp_nc ?? null)}
       />
 
       <InvoicesCard
@@ -261,6 +291,11 @@ export function GeranceCards() {
             noteColumn: scored.factures_nc ?? null,
           })
         }
+        onExport={() => exportXlsx('factures-nr60', 'Factures +60j', 'fact60', factures_nr60, (r) => String(r[4] || '—'), (r) => parseFloat(String(r[10] ?? 0)) || 0, (r) => [r[5] ? excelDateFmt(r[5]) : '', String(r[8] || ''), String(r[9] || ''), r[7] != null ? `${r[7]} j` : '', String(r[11] || '')].filter(Boolean).join(' · '), [
+          { header: 'Mandat · Date · Entreprise · Libellé', fn: (r) => `${String(r[4] || '—')} · ${excelDateFmt(r[5])} · ${String(r[8] || '—')} · ${String(r[9] || '—')}` },
+          { header: 'Montant', fn: (r) => String(parseFloat(String(r[10] ?? 0)) || 0) },
+          { header: 'Ancienneté · Note Gesteam', fn: (r, nc) => { const age = r[7] != null ? `${r[7]} j` : ''; const note = nc != null ? String(r[nc] ?? '') : ''; return age && note ? `${age} · ${note}` : age || note } },
+        ], scored.factures_nc ?? null)}
       />
     </>
   )

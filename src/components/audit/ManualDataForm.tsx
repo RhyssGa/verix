@@ -1,6 +1,7 @@
 'use client'
 
 import { useAuditStore } from '@/stores/useAuditStore'
+import { AgencySelector } from '@/components/audit/AgencySelector'
 
 interface ManualDataFormProps {
   mode: 'gerance' | 'copro'
@@ -49,18 +50,19 @@ export function ManualDataForm({ mode }: ManualDataFormProps) {
   const setMandateCount = useAuditStore((s) => s.setMandateCount)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       {/* Identification */}
-      <div style={{ marginBottom: 28 }}>
+      <div>
         <div style={{
           fontSize: 10, fontWeight: 600, letterSpacing: '0.8px',
           textTransform: 'uppercase', color: '#7A7A8C',
           marginBottom: 14, paddingBottom: 8,
           borderBottom: '1px solid #E8E4DC',
         }}>
-          Identification
+        
         </div>
-        <div style={{ marginBottom: 12 }}>
+        <AgencySelector />
+        <div style={{ marginTop: 16, marginBottom: 12 }}>
           <label style={labelStyle}>Début de période</label>
           <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
             style={inputStyle} />
@@ -73,14 +75,15 @@ export function ManualDataForm({ mode }: ManualDataFormProps) {
       </div>
 
       {/* Données manuelles */}
-      <div style={{ marginBottom: 28 }}>
+      <div>
         <div style={{
           fontSize: 10, fontWeight: 600, letterSpacing: '0.8px',
           textTransform: 'uppercase', color: '#7A7A8C',
           marginBottom: 14, paddingBottom: 8,
           borderBottom: '1px solid #E8E4DC',
         }}>
-          Données manuelles ✏
+          Informations agences
+          <div style={{ fontWeight: 400, fontSize: 9, color: '#AAA', textTransform: 'none', letterSpacing: 0, marginTop: 3 }}>Modifications possibles</div>
         </div>
         <div style={{ marginBottom: 12 }}>
           <label style={labelStyle}>Garantie financière (€) ✏</label>

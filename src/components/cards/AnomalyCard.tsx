@@ -148,7 +148,7 @@ export function AnomalyCard({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs h-7"
+                  className="text-xs h-7 flex-1"
                   onClick={onViewMore}
                 >
                   Voir plus ({rows.length})
@@ -158,7 +158,7 @@ export function AnomalyCard({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs h-7"
+                  className="text-xs h-7 px-2.5"
                   onClick={onExport}
                 >
                   ↓ Excel

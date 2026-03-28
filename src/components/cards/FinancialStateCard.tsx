@@ -12,12 +12,18 @@ interface FinancialStateCardProps {
   onOpenGroup?: (title: string, rows: ExcelRow[]) => void
 }
 
+// Retourne null si la valeur est aberrante (pas un ratio entre 0 et 50)
+function safeRatio(raw: unknown): number | null {
+  const v = parseFloat(String(raw ?? ''))
+  if (isNaN(v) || v < 0 || v > 50) return null
+  return v
+}
+
 function countAnomalies(r: ExcelRow): number {
-  const vCop = parseFloat(String(r[11] ?? 0)) || 0
-  const vChrg = parseFloat(String(r[16] ?? 0)) || 0
-  const vTvx =
-    r[18] != null && !isNaN(Number(r[18])) ? (parseFloat(String(r[18])) || 0) : null
-  const vBq = parseFloat(String(r[25] ?? 0)) || 0
+  const vCop  = safeRatio(r[11]) ?? 0
+  const vChrg = safeRatio(r[16]) ?? 0
+  const vTvx  = r[18] != null && !isNaN(Number(r[18])) ? safeRatio(r[18]) : null
+  const vBq   = safeRatio(r[25]) ?? 0
   let n = 0
   if (vCop > 0.3) n++
   if (vChrg > 1.0) n++
@@ -32,7 +38,7 @@ interface RiskRowsProps {
 
 function RiskRowHeader() {
   return (
-    <div className="flex items-center gap-1 text-[9px] text-muted-foreground font-normal py-0.5 px-1">
+    <div className="flex items-center gap-3 text-[9px] text-muted-foreground font-semibold uppercase tracking-wide py-1.5 px-2 border-b border-border mb-1">
       <span className="flex-1">Résidence</span>
       <span className="w-12 text-right">Lots</span>
       {['Impayés', 'Charges', 'Travaux', 'Trésor.'].map((h) => (
@@ -48,61 +54,35 @@ function RiskRows({ rows }: RiskRowsProps) {
   return (
     <>
       {rows.slice(0, 6).map((r, idx) => {
-        const vCop = parseFloat(String(r[11] ?? 0)) || 0
-        const vChrg = parseFloat(String(r[16] ?? 0)) || 0
-        const vTvx =
-          r[18] != null && !isNaN(Number(r[18]))
-            ? (parseFloat(String(r[18])) || 0)
-            : null
-        const vBq = parseFloat(String(r[25] ?? 0)) || 0
+        const vCop  = safeRatio(r[11]) ?? 0
+        const vChrg = safeRatio(r[16]) ?? 0
+        const vTvx  = r[18] != null && !isNaN(Number(r[18])) ? safeRatio(r[18]) : null
+        const vBq   = safeRatio(r[25]) ?? 0
         const pct = (v: number) => `${(v * 100).toFixed(0)}%`
 
+        const badge = (value: string, bad: boolean, na = false) => (
+          <span className={cn(
+            'w-10 text-center text-[10px] font-semibold rounded px-1 py-px',
+            na
+              ? 'bg-border/40 text-muted-foreground'
+              : bad
+              ? 'bg-status-red-bg text-status-red border border-status-red/30'
+              : 'bg-status-green-bg text-status-green border border-status-green/30',
+          )}>
+            {value}
+          </span>
+        )
+
         return (
-          <div key={idx} className="flex items-center gap-1 text-[10px] py-0.5 px-1">
+          <div key={idx} className="flex items-center gap-3 text-[10px] py-1 px-2">
             <span className="flex-1 truncate" title={String(r[1] || '')}>
               {truncate(String(r[1] || '—').replace(/^\d+-/, ''), 28)}
             </span>
             <span className="w-12 text-right text-muted-foreground">{r[4] || '?'} lots</span>
-            <span
-              className={cn(
-                'w-10 text-center font-medium',
-                vCop > 0.3 ? 'text-status-red' : 'text-status-green',
-              )}
-              title="Impayés copropriétaires — seuil 30 %"
-            >
-              {pct(vCop)}
-            </span>
-            <span
-              className={cn(
-                'w-10 text-center font-medium',
-                vChrg > 1.0 ? 'text-status-red' : 'text-status-green',
-              )}
-              title="Charges / Provisions — seuil 100 %"
-            >
-              {pct(vChrg)}
-            </span>
-            <span
-              className={cn(
-                'w-10 text-center font-medium',
-                vTvx != null
-                  ? vTvx > 1.0
-                    ? 'text-status-red'
-                    : 'text-status-green'
-                  : 'text-muted-foreground',
-              )}
-              title="Dépassement travaux — seuil 100 %"
-            >
-              {vTvx != null ? pct(vTvx) : '—'}
-            </span>
-            <span
-              className={cn(
-                'w-10 text-center font-medium',
-                vBq < 1.0 ? 'text-status-red' : 'text-status-green',
-              )}
-              title="Trésorerie — seuil 100 %"
-            >
-              {pct(vBq)}
-            </span>
+            {badge(pct(vCop),  vCop > 0.3)}
+            {badge(pct(vChrg), vChrg > 1.0)}
+            {vTvx != null ? badge(pct(vTvx), vTvx > 1.0) : badge('—', false, true)}
+            {badge(pct(vBq),   vBq < 1.0)}
           </div>
         )
       })}
@@ -146,13 +126,10 @@ export function FinancialStateCard({ bilan, onOpenGroup }: FinancialStateCardPro
   const total = bilan.length
   const nbRisque = risk4.length + risk3.length + risk2.length
 
-  const nCop = bilan.filter((r) => (parseFloat(String(r[11] ?? 0)) || 0) > 0.3).length
-  const nChrg = bilan.filter((r) => (parseFloat(String(r[16] ?? 0)) || 0) > 1.0).length
-  const nTvx = bilan.filter(
-    (r) =>
-      r[18] != null && !isNaN(Number(r[18])) && (parseFloat(String(r[18])) || 0) > 1.0,
-  ).length
-  const nBq = bilan.filter((r) => (parseFloat(String(r[25] ?? 0)) || 0) < 1.0).length
+  const nCop  = bilan.filter((r) => (safeRatio(r[11]) ?? 0) > 0.3).length
+  const nChrg = bilan.filter((r) => (safeRatio(r[16]) ?? 0) > 1.0).length
+  const nTvx  = bilan.filter((r) => r[18] != null && !isNaN(Number(r[18])) && (safeRatio(r[18]) ?? 0) > 1.0).length
+  const nBq   = bilan.filter((r) => (safeRatio(r[25]) ?? 0) < 1.0).length
 
   const level =
     risk4.length > 0 ? 'bad' : risk3.length > 0 ? 'warn' : risk2.length > 0 ? 'warn' : 'ok'

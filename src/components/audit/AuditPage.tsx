@@ -15,6 +15,7 @@ import { ConfirmDialog } from '@/components/modals/ConfirmDialog'
 import { HistoryPanel } from '@/components/modals/HistoryPanel'
 import { ComparisonPanel } from '@/components/comparison/ComparisonPanel'
 import { GlobalNote } from '@/components/comparison/GlobalNote'
+import { ValidationBlock } from './ValidationBlock'
 
 interface AuditPageProps {
   mode: 'gerance' | 'copro'
@@ -59,17 +60,34 @@ export function AuditPage({ mode }: AuditPageProps) {
           </div>
           <FileUploadGrid mode={mode} />
 
-          {/* Score banner */}
-          {score && <ScoreBanner score={score} />}
+          {/* Scoring global */}
+          {score && (
+            <>
+              <div style={{ ...sectionTitle, marginTop: 24 }}>
+                <span>Scoring global de l&apos;audit</span>
+                <span style={{ flex: 1, height: 1, background: '#E8E4DC' }} />
+              </div>
+              <ScoreBanner score={score} />
+            </>
+          )}
 
-          {/* Comparison panel */}
-          {score && <ComparisonPanel />}
+          {/* Clôture : note + validation */}
+          {score && (
+            <>
+              <div style={{ ...sectionTitle, marginTop: 24 }}>
+                <span>Clôture de l&apos;audit</span>
+                <span style={{ flex: 1, height: 1, background: '#E8E4DC' }} />
+              </div>
+              <div style={{ marginBottom: 20 }}><GlobalNote /></div>
+              <ValidationBlock />
+            </>
+          )}
 
-          {/* Global note */}
-          {score && <GlobalNote />}
+          {/* Comparaison */}
+          {score && <div style={{ marginTop: 24 }}><ComparisonPanel /></div>}
 
           {/* Anomaly cards */}
-          <div style={sectionTitle}>
+          <div style={{ ...sectionTitle, marginTop: 24 }}>
             <span>Récapitulatif des anomalies</span>
             <span style={{ flex: 1, height: 1, background: '#E8E4DC' }} />
           </div>
@@ -88,7 +106,7 @@ export function AuditPage({ mode }: AuditPageProps) {
               <div style={{ fontSize: 48, marginBottom: 14, opacity: 0.4 }}>
                 {mode === 'gerance' ? '🏠' : '🏢'}
               </div>
-              Importez vos fichiers Excel pour afficher le récapitulatif
+              Importez vos fichiers et sélectionnez une agence pour afficher le récapitulatif
             </div>
           )}
         </main>

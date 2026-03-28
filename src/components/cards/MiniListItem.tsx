@@ -14,6 +14,7 @@ interface MiniListItemProps {
   name: string
   value: string
   valueClass?: string
+  sub?: string
 }
 
 export function MiniListItem({
@@ -22,6 +23,7 @@ export function MiniListItem({
   name,
   value,
   valueClass = '',
+  sub,
 }: MiniListItemProps) {
   const annotations = useAuditStore((s) => s.annotations)
   const toggleInclude = useAuditStore((s) => s.toggleInclude)
@@ -40,16 +42,16 @@ export function MiniListItem({
       <div className="flex items-center gap-2">
         <span
           className={cn(
-            'flex-1 text-xs truncate',
+            'flex-1 text-[13px] font-medium truncate',
             isExcluded && 'line-through text-muted-foreground',
           )}
           title={displayName}
         >
-          {truncate(displayName, 28)}
+          {truncate(displayName, 40)}
         </span>
         <span
           className={cn(
-            'text-xs font-semibold whitespace-nowrap',
+            'text-[13px] font-bold whitespace-nowrap flex-shrink-0',
             isExcluded && 'line-through text-muted-foreground',
             !isExcluded && valueClass,
           )}
@@ -81,6 +83,9 @@ export function MiniListItem({
           💬
         </button>
       </div>
+      {sub && (
+        <div className="text-[11px] text-muted-foreground mt-1 leading-snug">{sub}</div>
+      )}
       {(commentOpen || hasComment) && (
         <div className="mt-1.5">
           <Textarea

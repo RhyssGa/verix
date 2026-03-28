@@ -29,6 +29,7 @@ export interface UiSlice {
   deleteConfirm: { batchId: string; count: number } | null
   validateConfirm: string | null
   validateMultiConfirm: string[] | null
+  resetConfirm: boolean
   isGeneratingPdf: boolean
   nonClosedIncluded: Record<string, boolean>
   showAllNonClosed: boolean
@@ -42,6 +43,7 @@ export interface UiSlice {
   setDeleteConfirm: (confirm: { batchId: string; count: number } | null) => void
   setValidateConfirm: (agency: string | null) => void
   setValidateMultiConfirm: (agencies: string[] | null) => void
+  setResetConfirm: (open: boolean) => void
   setIsGeneratingPdf: (generating: boolean) => void
   toggleNonClosedIncluded: (name: string) => void
   setNonClosedIncluded: (included: Record<string, boolean>) => void
@@ -69,6 +71,7 @@ const initialUiState = {
   deleteConfirm: null as { batchId: string; count: number } | null,
   validateConfirm: null as string | null,
   validateMultiConfirm: null as string[] | null,
+  resetConfirm: false,
   isGeneratingPdf: false,
   nonClosedIncluded: {} as Record<string, boolean>,
   showAllNonClosed: false,
@@ -88,6 +91,7 @@ export const createUiSlice: StateCreator<UiSlice, [], [], UiSlice> = (set) => ({
   setDeleteConfirm: (confirm) => set({ deleteConfirm: confirm }),
   setValidateConfirm: (agency) => set({ validateConfirm: agency }),
   setValidateMultiConfirm: (agencies) => set({ validateMultiConfirm: agencies }),
+  setResetConfirm: (open) => set({ resetConfirm: open }),
   setIsGeneratingPdf: (generating) => set({ isGeneratingPdf: generating }),
   toggleNonClosedIncluded: (name) =>
     set((state) => ({

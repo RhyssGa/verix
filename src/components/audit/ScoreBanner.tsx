@@ -19,7 +19,7 @@ export function ScoreBanner({ score }: ScoreBannerProps) {
   const infoCount = anomalies.filter((a) => a.exclu).length
 
   return (
-    <div className="flex items-center gap-6 bg-white rounded-xl p-5 shadow-card">
+    <div className="flex items-center gap-6 bg-white rounded-xl p-5 shadow-card" style={{ border: `1.5px solid ${niveau.color}22`, boxShadow: `0 4px 20px ${niveau.color}18, 0 1px 4px rgba(0,0,0,0.06)` }}>
       {/* Score Gauge */}
       <div className="relative w-24 h-24 flex-shrink-0">
         <svg className="w-full h-full" viewBox="0 0 96 96">

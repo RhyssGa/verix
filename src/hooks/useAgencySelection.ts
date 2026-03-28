@@ -51,8 +51,36 @@ export function useAgencySelection() {
   const handleAgencyChange = useCallback(
     (agency: string | null) => {
       const state = useAuditStore.getState()
-      state.swapAgencyAnnotations(state.selectedAgency, agency)
-      state.setSelectedAgency(agency)
+      // Normalise les clés pour cohérence avec les sauvegardes
+      const normTo = agency ? normalizeAgency(agency) : null
+      const normFrom = state.selectedAgency ? normalizeAgency(state.selectedAgency) : null
+      const alreadyHasCached = normTo !== null && normTo in state.annotsByAgency
+
+      state.swapAgencyAnnotations(normFrom, normTo)
+      state.setSelectedAgency(normTo)
+
+      // Si aucune annotation en cache, chercher dans l'historique
+      if (normTo && !alreadyHasCached) {
+        const currentState = useAuditStore.getState()
+        const match = currentState.reportHistory
+          .filter((e) => e.mode === currentState.mode)
+          .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
+          .find((e) =>
+            e.agence.split(' + ').some((s) => normalizeAgency(s.trim()) === normTo),
+          )
+
+        if (match?.hasSnapshot) {
+          fetch(`/api/audits/${match.id}`)
+            .then((res) => (res.ok ? res.json() : null))
+            .then((dbRecord) => {
+              if (!dbRecord?.snapshot) return
+              const annots = dbRecord.snapshot.annots || {}
+              const snNotes = dbRecord.snapshot.sectionNotes || {}
+              useAuditStore.getState().setAnnotsByAgency(normTo, annots, snNotes)
+            })
+            .catch(() => {})
+        }
+      }
     },
     [],
   )

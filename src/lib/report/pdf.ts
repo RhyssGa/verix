@@ -1004,7 +1004,7 @@ export function renderReportHTML(payload: PDFPayload, bgCoverBase64 = '', header
     return `<div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 4px">
       ${chips.map(c => `
         <div style="flex:1;min-width:110px;padding:13px 16px;border:1px solid #E8E4DC;border-radius:8px;background:#FAFAFA">
-          <div style="font-size:15pt;font-weight:800;color:${c.color || '#0F1F35'};line-height:1.1;word-break:keep-all">${esc(c.val)}</div>
+          <div style="font-size:15pt;font-weight:800;color:${c.color || '#0B1929'};line-height:1.1;word-break:keep-all">${esc(c.val)}</div>
           <div style="font-size:7.5pt;color:#9A9AB0;margin-top:4px;text-transform:uppercase;letter-spacing:0.07em">${esc(c.label)}</div>
         </div>`).join('')}
     </div>`
@@ -1036,7 +1036,7 @@ export function renderReportHTML(payload: PDFPayload, bgCoverBase64 = '', header
     const tbody = rows.map(r => `
       <tr${r.justified && showStatus ? ' class="row-ok"' : ''}>
         <td style="color:#1A1A2E">${esc(r.name)}</td>
-        <td style="text-align:right;font-weight:600;white-space:nowrap;color:#0F1F35">${esc(r.amount)}</td>
+        <td style="text-align:right;font-weight:600;white-space:nowrap;color:#0B1929">${esc(r.amount)}</td>
         ${hasDetail ? `<td style="color:#7A7A8C;font-size:9pt;word-break:break-word">${esc(r.detail || '—')}</td>` : ''}
         <td style="color:#7A7A8C;font-style:italic;font-size:9pt">${esc(r.comment || '—')}</td>
         ${showStatus ? `<td style="text-align:center;white-space:nowrap;font-size:8.5pt;font-weight:700;color:${r.justified ? '#1A7A4A' : '#B01A1A'}">${r.justified ? '✓ Justifié' : '✗ Injustifié'}</td>` : ''}
@@ -1066,7 +1066,7 @@ export function renderReportHTML(payload: PDFPayload, bgCoverBase64 = '', header
     kpiChips.push({ label: sec.mainStatLabel, val: sec.mainStat, color: accentColor })
     sec.kvRows.forEach(kv => {
       if (/^Règle/.test(kv.label)) return
-      const c = kv.level === 'bad' ? '#B01A1A' : kv.level === 'warn' ? '#D06020' : kv.level === 'ok' ? '#1A7A4A' : '#0F1F35'
+      const c = kv.level === 'bad' ? '#B01A1A' : kv.level === 'warn' ? '#D06020' : kv.level === 'ok' ? '#1A7A4A' : '#0B1929'
       kpiChips.push({ label: kv.label, val: kv.value, color: c })
     })
 
@@ -1112,7 +1112,7 @@ export function renderReportHTML(payload: PDFPayload, bgCoverBase64 = '', header
       <div style="display:flex;align-items:flex-start;gap:14px;padding:18px 24px 16px;border-bottom:1px solid #F0F0F6">
         <span style="font-size:19pt;flex-shrink:0;margin-top:1px">${sec.icon}</span>
         <div style="flex:1">
-          <div style="font-size:12pt;font-weight:700;color:#0F1F35;line-height:1.2">${esc(sec.title)}</div>
+          <div style="font-size:12pt;font-weight:700;color:#0B1929;line-height:1.2">${esc(sec.title)}</div>
           <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
             ${statusPill(sec.level)}
           </div>
@@ -1171,13 +1171,13 @@ h1, h2, h3, .section-title {
 .card-header-block { page-break-after: avoid; }
 
 /* Cover — fixed to exactly 1 page, overflow hidden prevents spill onto page 2 */
-.cover { height: 100vh; overflow: hidden; display: flex; flex-direction: column; background: #0F1F35; }
+.cover { height: 100vh; overflow: hidden; display: flex; flex-direction: column; background: #0B1929; }
 
 /* Data table — long tables repeat header on next page */
 .data-table { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
 .data-table thead { display: table-header-group; }   /* repeat on page break */
 .data-table thead tr { background: #F3F3F9; }
-.data-table th { padding: 9px 12px; font-size: 8pt; font-weight: 700; color: #0F1F35; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 2px solid #DCDCEC; word-break: keep-all; white-space: nowrap; }
+.data-table th { padding: 9px 12px; font-size: 8pt; font-weight: 700; color: #0B1929; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 2px solid #DCDCEC; word-break: keep-all; white-space: nowrap; }
 .data-table td { padding: 9px 12px; border-bottom: 1px solid #F0F0F6; vertical-align: top; }
 .data-table tr:last-child td { border-bottom: none; }
 .data-table tr.row-ok td { background: #F2FAF6; }
@@ -1186,7 +1186,7 @@ h1, h2, h3, .section-title {
 /* Synthesis table */
 .synth-table { width: 100%; border-collapse: collapse; font-size: 10pt; margin: 18px 0; }
 .synth-table thead { display: table-header-group; }
-.synth-table th { background: #0F1F35; color: white; padding: 10px 14px; font-size: 8pt; font-weight: 700; text-align: left; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+.synth-table th { background: #0B1929; color: white; padding: 10px 14px; font-size: 8pt; font-weight: 700; text-align: left; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
 .synth-table td { padding: 9px 14px; border-bottom: 1px solid #F0F0F6; vertical-align: middle; }
 .synth-table tr:nth-child(even) td { background: #FAFAFA; }
 .pen { font-weight: 700; text-align: right !important; }
@@ -1194,12 +1194,12 @@ h1, h2, h3, .section-title {
 .pen.neg { color: #B01A1A; }
 
 /* Section title */
-.section-title { font-size: 12pt; font-weight: 700; color: #0F1F35; text-transform: uppercase; letter-spacing: 0.08em; padding-bottom: 11px; border-bottom: 2px solid #C49A2E; margin-bottom: 28px; }
+.section-title { font-size: 12pt; font-weight: 700; color: #0B1929; text-transform: uppercase; letter-spacing: 0.08em; padding-bottom: 11px; border-bottom: 2px solid #C49A2E; margin-bottom: 28px; }
 
 /* Bilan table */
 .bilan-table { width: 100%; border-collapse: collapse; font-size: 9pt; margin: 6px 0 18px; }
 .bilan-table thead { display: table-header-group; }
-.bilan-table th { background: #F3F3F9; color: #0F1F35; padding: 8px 10px; font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 2px solid #DCDCEC; white-space: nowrap; }
+.bilan-table th { background: #F3F3F9; color: #0B1929; padding: 8px 10px; font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 2px solid #DCDCEC; white-space: nowrap; }
 .bilan-table td { padding: 8px 10px; border-bottom: 1px solid #F0F0F6; }
 .bilan-table tr:last-child td { border-bottom: none; }
 .bilan-table tbody tr { page-break-inside: avoid; }
@@ -1209,7 +1209,7 @@ h1, h2, h3, .section-title {
 
   const coverBgStyle = bgCoverBase64
     ? `background-image:url('data:image/png;base64,${bgCoverBase64}');background-size:cover;background-position:center;background-repeat:no-repeat`
-    : 'background:#0F1F35'
+    : 'background:#0B1929'
 
   const coverHTML = `
   <div class="cover" style="${coverBgStyle}">
@@ -1240,8 +1240,8 @@ h1, h2, h3, .section-title {
   const synthKpi = kpiStrip([
     { label: 'Score global', val: `${globalScore} / 100`, color: niveauColor },
     { label: 'Pénalité cumulée', val: `−${penalite.toFixed(1)} pts`, color: penalite > 0 ? '#B01A1A' : '#1A7A4A' },
-    ...(garantie > 0 ? [{ label: 'Garantie financière', val: eurFmt(garantie), color: '#0F1F35' }] : []),
-    ...(pointe > 0 ? [{ label: pointeDate ? `Pointe au ${dateFmt(pointeDate)}` : 'Pointe', val: eurFmt(pointe), color: '#0F1F35' }] : []),
+    ...(garantie > 0 ? [{ label: 'Garantie financière', val: eurFmt(garantie), color: '#0B1929' }] : []),
+    ...(pointe > 0 ? [{ label: pointeDate ? `Pointe au ${dateFmt(pointeDate)}` : 'Pointe', val: eurFmt(pointe), color: '#0B1929' }] : []),
   ])
 
   const synthRows = syntheseRows.map(row => {
@@ -1299,7 +1299,7 @@ h1, h2, h3, .section-title {
     synthComparisonBlock = `
     <div style="margin-top:28px;border:1.5px solid #DDD8CF;border-radius:10px;overflow:hidden;page-break-inside:avoid">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#F5F3EE;border-bottom:1px solid #DDD8CF">
-        <div style="font-size:10pt;font-weight:700;color:#0F1F35">🔄 Évolution vs audit précédent</div>
+        <div style="font-size:10pt;font-weight:700;color:#0B1929">🔄 Évolution vs audit précédent</div>
         <div style="font-size:8.5pt;color:#9A9AB0;font-style:italic">Réf. : ${esc(comparison.refAgence)} — ${esc(refDateFmtSynth)}</div>
       </div>
       <div style="display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid #DDD8CF">
@@ -1308,7 +1308,7 @@ h1, h2, h3, .section-title {
           <div style="display:flex;align-items:baseline;gap:8px">
             <span style="font-size:11pt;color:#9A9AB0;text-decoration:line-through">${comparison.prevScore}</span>
             <span style="font-size:9pt;color:#9A9AB0">→</span>
-            <span style="font-size:15pt;font-weight:800;color:#0F1F35">${comparison.currScore}<span style="font-size:9pt;font-weight:400;color:#9A9AB0">/100</span></span>
+            <span style="font-size:15pt;font-weight:800;color:#0B1929">${comparison.currScore}<span style="font-size:9pt;font-weight:400;color:#9A9AB0">/100</span></span>
           </div>
         </div>
         <div style="margin-left:16px;padding:5px 14px;border-radius:20px;background:${sBg};color:${sColor};font-size:10.5pt;font-weight:800;white-space:nowrap">
@@ -1356,7 +1356,7 @@ h1, h2, h3, .section-title {
       </thead>
       <tbody>${synthRows}</tbody>
       <tfoot>
-        <tr style="background:#0F1F35">
+        <tr style="background:#0B1929">
           <td colspan="4" style="color:#C49A2E;font-weight:700;padding:10px 14px;font-size:10pt;letter-spacing:0.04em">SCORE GLOBAL</td>
           <td colspan="3" style="color:#C49A2E;font-weight:800;font-size:13pt;text-align:right;padding:10px 14px">${globalScore} / 100 &nbsp;—&nbsp; ${esc(niveauLabel)}</td>
         </tr>
@@ -1440,7 +1440,7 @@ h1, h2, h3, .section-title {
         <div style="display:flex;align-items:flex-start;gap:14px;padding:16px 20px 14px;border-bottom:1px solid #F0F0F6">
           <span style="font-size:19pt;flex-shrink:0;margin-top:1px">📊</span>
           <div style="flex:1">
-            <div style="font-size:12pt;font-weight:700;color:#0F1F35">État financier des copropriétés</div>
+            <div style="font-size:12pt;font-weight:700;color:#0B1929">État financier des copropriétés</div>
             <div style="margin-top:6px">${statusPill(bilanLvl)}</div>
           </div>
           <div style="text-align:right;white-space:nowrap">
@@ -1452,7 +1452,7 @@ h1, h2, h3, .section-title {
           <div style="font-size:9.5pt;color:#5A5A72;font-style:italic;line-height:1.6;margin-bottom:4px">${esc(bilanInterpret)}</div>
           ${bilanNoteHtml}
           ${kpiStrip([
-            { label: 'Total copropriétés', val: String(bilan.total), color: '#0F1F35' },
+            { label: 'Total copropriétés', val: String(bilan.total), color: '#0B1929' },
             { label: 'Risque critique (4 anom.)', val: String(risk4count), color: risk4count > 0 ? '#B01A1A' : '#9A9AB0' },
             { label: 'Risque élevé (3 anom.)', val: String(risk3count), color: risk3count > 0 ? '#C05C1A' : '#9A9AB0' },
             { label: 'Risque modéré (2 anom.)', val: String(risk2count), color: risk2count > 0 ? '#C05C1A' : '#9A9AB0' },

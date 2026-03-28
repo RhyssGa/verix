@@ -2,6 +2,7 @@
 
 import { useAuditStore } from '@/stores/useAuditStore'
 import { useScoredCopro, useScore } from '@/stores/computed'
+import { useExport } from '@/hooks/useExport'
 import { GuaranteeCard } from './GuaranteeCard'
 import { BalanceCard } from './BalanceCard'
 import { DebtorCard } from './DebtorCard'
@@ -38,6 +39,8 @@ export function CoproCards() {
     bilan = [],
   } = scored
 
+  const { exportXlsx } = useExport()
+
   const anomBalance = score?.anomalies.find((a) => a.id === 'balance') ?? null
   const anomFournDeb = score?.anomalies.find((a) => a.id === 'fourndeb') ?? null
   const anomAttDeb = score?.anomalies.find((a) => a.id === 'cattdeb') ?? null
@@ -63,6 +66,10 @@ export function CoproCards() {
             subFn: null,
           })
         }
+        onExport={() => exportXlsx('balances-desequilibrees', 'Balances déséquilibrées', 'balance', balance_bad, (r) => String(r[3] || r[1] || '—'), (r) => Math.abs(parseFloat(String(r[7] ?? 0)) || 0), null, [
+          { header: 'Libellé', fn: (r) => String(r[3] || r[1] || '—') },
+          { header: 'Écart', fn: (r) => String(Math.abs(parseFloat(String(r[7] ?? 0)) || 0)) },
+        ])}
       />
 
       {/* Fournisseurs débiteurs */}
@@ -111,6 +118,11 @@ export function CoproCards() {
             noteColumn: scored.fourn_deb_nc ?? null,
           })
         }
+        onExport={() => exportXlsx('fourn-debiteurs', 'Fournisseurs débiteurs', 'fourndeb', fourn_deb, (r) => `${String(r[7] || '—')} · ${String(r[8] || '')}`, (r) => parseFloat(String(r[10] ?? 0)) || 0, (r) => String(r[1] || ''), [
+          { header: 'Résidence · Fournisseur', fn: (r) => String(r[1] || '') + ' · ' + (String(r[7] || '—')) + (r[8] ? ' · ' + String(r[8]) : '') },
+          { header: 'Montant', fn: (r) => String(parseFloat(String(r[10] ?? 0)) || 0) },
+          { header: 'Note Gesteam', fn: (r, nc) => nc != null ? String(r[nc] ?? '') : '' },
+        ], scored.fourn_deb_nc ?? null)}
         scoreId="fourndeb"
       />
 
@@ -160,6 +172,11 @@ export function CoproCards() {
             noteColumn: scored.att_deb_nc ?? null,
           })
         }
+        onExport={() => exportXlsx('cptes-attente-deb', "Cptes attente déb.", 'cattdeb', att_deb, (r) => `${String(r[6] || '—')} · ${String(r[5] || '')}`, (r) => Math.abs(parseFloat(String(r[9] ?? 0)) || 0), (r) => String(r[1] || ''), [
+          { header: 'Résidence · Libellé', fn: (r) => String(r[1] || '') + ' · ' + (String(r[6] || '—')) + (r[5] ? ' · ' + String(r[5]) : '') },
+          { header: 'Montant', fn: (r) => String(Math.abs(parseFloat(String(r[9] ?? 0)) || 0)) },
+          { header: 'Note Gesteam', fn: (r, nc) => nc != null ? String(r[nc] ?? '') : '' },
+        ], scored.att_deb_nc ?? null)}
         scoreId="cattdeb"
       />
 
@@ -209,6 +226,11 @@ export function CoproCards() {
             noteColumn: scored.att_cred_nc ?? null,
           })
         }
+        onExport={() => exportXlsx('cptes-attente-cred', "Cptes attente créd.", 'cattcred', att_cred, (r) => `${String(r[6] || '—')} · ${String(r[5] || '')}`, (r) => Math.abs(parseFloat(String(r[9] ?? 0)) || 0), (r) => String(r[1] || ''), [
+          { header: 'Résidence · Libellé', fn: (r) => String(r[1] || '') + ' · ' + (String(r[6] || '—')) + (r[5] ? ' · ' + String(r[5]) : '') },
+          { header: 'Montant', fn: (r) => String(Math.abs(parseFloat(String(r[9] ?? 0)) || 0)) },
+          { header: 'Note Gesteam', fn: (r, nc) => nc != null ? String(r[nc] ?? '') : '' },
+        ], scored.att_cred_nc ?? null)}
         scoreId="cattcred"
       />
 
@@ -262,6 +284,11 @@ export function CoproCards() {
             noteColumn: scored.ventes_nc ?? null,
           })
         }
+        onExport={() => exportXlsx('copro-sortis-deb', 'Copro. sortis débiteurs', 'ventesdeb', ventes_deb, (r) => `${String(r[1] || '—')} · ${String(r[7] || '')}`, (r) => parseFloat(String(r[10] ?? 0)) || 0, (r) => [r[8] ? `Sortie : ${new Date(String(r[8])).toLocaleDateString('fr-FR')}` : '', r[9] != null ? `${r[9]} j` : ''].filter(Boolean).join(' · '), [
+          { header: 'Résidence · Copropriétaire', fn: (r) => String(r[1] || '—') + ' · ' + String(r[7] || '') },
+          { header: 'Montant', fn: (r) => String(parseFloat(String(r[10] ?? 0)) || 0) },
+          { header: 'Ancienneté', fn: (r) => r[9] != null ? `${r[9]} j` : '' },
+        ], scored.ventes_nc ?? null)}
         scoreId="ventesdeb"
       />
 
@@ -317,6 +344,11 @@ export function CoproCards() {
             noteColumn: scored.ventes_nc ?? null,
           })
         }
+        onExport={() => exportXlsx('copro-sortis-cred', 'Copro. sortis créditeurs', 'ventescred', ventes_cred, (r) => `${String(r[1] || '—')} · ${String(r[7] || '')}`, (r) => Math.abs(parseFloat(String(r[10] ?? 0)) || 0), (r) => [r[8] ? `Sortie : ${new Date(String(r[8])).toLocaleDateString('fr-FR')}` : '', r[9] != null ? `${r[9]} j` : ''].filter(Boolean).join(' · '), [
+          { header: 'Résidence · Copropriétaire', fn: (r) => String(r[1] || '—') + ' · ' + String(r[7] || '') },
+          { header: 'Montant', fn: (r) => String(Math.abs(parseFloat(String(r[10] ?? 0)) || 0)) },
+          { header: 'Ancienneté', fn: (r) => r[9] != null ? `${r[9]} j` : '' },
+        ], scored.ventes_nc ?? null)}
         scoreId="ventescred"
       />
 
@@ -348,6 +380,11 @@ export function CoproCards() {
                 .join(' · '),
           })
         }
+        onExport={() => exportXlsx('bq-nonrapp', 'Banque non rapprochée', 'bqrapp', bq_nonrapp, (r) => String(r[19] || r[0] || '—'), (r) => Math.abs(parseFloat(String(r[18] ?? 0)) || 0), (r) => [r[15] ? excelDateFmt(r[15]) : '', r[2] ? String(r[2]) : ''].filter(Boolean).join(' · '), [
+          { header: 'Résidence · Date · Libellé', fn: (r) => `${String(r[2] || '')} · ${excelDateFmt(r[15])} · ${String(r[19] || '—')}` },
+          { header: 'Montant', fn: (r) => String(Math.abs(parseFloat(String(r[18] ?? 0)) || 0)) },
+          { header: 'Ancienneté', fn: (r) => r[12] != null ? `${r[12]} j` : '' },
+        ])}
       />
 
       <ReconciliationCard
@@ -378,6 +415,10 @@ export function CoproCards() {
             noteColumn: scored.cpta_nonrapp_nc ?? null,
           })
         }
+        onExport={() => exportXlsx('cpta-nonrapp', 'Compta non rapprochée', 'cptarapp', cpta_nonrapp, (r) => String(r[14] || r[0] || '—'), (r) => Math.abs(parseFloat(String(r[13] ?? 0)) || 0), (r) => [r[10] ? excelDateFmt(r[10]) : '', r[1] ? String(r[1]) : '', r[11] != null ? `${r[11]} j` : ''].filter(Boolean).join(' · '), [
+          { header: 'Résidence · Date · Libellé', fn: (r) => `${String(r[1] || '')} · ${excelDateFmt(r[10])} · ${String(r[14] || '—')}` },
+          { header: 'Montant', fn: (r) => String(Math.abs(parseFloat(String(r[13] ?? 0)) || 0)) },
+        ], scored.cpta_nonrapp_nc ?? null)}
       />
 
       <InvoicesCard
@@ -407,6 +448,11 @@ export function CoproCards() {
             noteColumn: scored.factures_nc ?? null,
           })
         }
+        onExport={() => exportXlsx('factures-nr60', 'Factures +60j', 'fact60', factures_nr60, (r) => String(r[7] || '—'), (r) => parseFloat(String(r[11] ?? 0)) || 0, (r) => [r[4] ? excelDateFmt(r[4]) : '', String(r[8] || ''), String(r[9] || ''), r[6] != null ? `${r[6]} j` : '', String(r[10] || '')].filter(Boolean).join(' · '), [
+          { header: 'Résidence · Date · Entreprise · Libellé', fn: (r) => `${String(r[7] || '—')} · ${excelDateFmt(r[4])} · ${String(r[8] || '—')} · ${String(r[9] || '—')}` },
+          { header: 'Montant', fn: (r) => String(parseFloat(String(r[11] ?? 0)) || 0) },
+          { header: 'Ancienneté · Note Gesteam', fn: (r, nc) => { const age = r[6] != null ? `${r[6]} j` : ''; const note = nc != null ? String(r[nc] ?? '') : ''; return age && note ? `${age} · ${note}` : age || note } },
+        ], scored.factures_nc ?? null)}
       />
 
       <FinancialStateCard

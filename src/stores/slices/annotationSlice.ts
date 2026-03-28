@@ -17,6 +17,7 @@ export interface AnnotationSlice {
   setForcedOk: (forcedOk: Record<string, boolean>) => void
   toggleForcedOk: (key: string) => void
   swapAgencyAnnotations: (fromAgency: string | null, toAgency: string | null) => void
+  setAnnotsByAgency: (agency: string, annotations: AnnotationsMap, notes: Record<string, string>) => void
   incrementRestoreKey: () => void
   resetAnnotations: () => void
 }
@@ -87,6 +88,14 @@ export const createAnnotationSlice: StateCreator<AnnotationSlice, [], [], Annota
         sectionNotes: newNotes,
       }
     }),
+  setAnnotsByAgency: (agency, annotations, notes) =>
+    set((state) => ({
+      annotations,
+      sectionNotes: notes,
+      annotsByAgency: { ...state.annotsByAgency, [agency]: annotations },
+      notesByAgency: { ...state.notesByAgency, [agency]: notes },
+      restoreKey: state.restoreKey + 1,
+    })),
   incrementRestoreKey: () => set((state) => ({ restoreKey: state.restoreKey + 1 })),
   resetAnnotations: () => set(initialAnnotationState),
 })

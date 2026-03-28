@@ -124,7 +124,7 @@ export function InvoicesCard({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs h-7"
+                  className="text-xs h-7 flex-1"
                   onClick={onViewMore}
                 >
                   Voir plus ({factures_nr60.length})
@@ -134,7 +134,7 @@ export function InvoicesCard({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs h-7"
+                  className="text-xs h-7 px-2.5"
                   onClick={onExport}
                 >
                   ↓ Excel

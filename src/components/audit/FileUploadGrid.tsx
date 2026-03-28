@@ -13,8 +13,8 @@ export function FileUploadGrid({ mode }: FileUploadGridProps) {
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(175px, 1fr))',
-      gap: 10,
+      gridTemplateColumns: `repeat(${configs.length}, 1fr)`,
+      gap: 8,
       marginBottom: 32,
     }}>
       {configs.map((config) => (

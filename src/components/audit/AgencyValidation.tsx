@@ -24,11 +24,20 @@ export function AgencyValidation() {
 
   if (reportAgencies.length === 0) return null
 
+  // Déduplique par nom normalisé
+  const seen = new Set<string>()
+  const uniqueAgencies = reportAgencies.filter((a) => {
+    const norm = normalizeAgency(a)
+    if (seen.has(norm)) return false
+    seen.add(norm)
+    return true
+  })
+
   return (
     <div>
       <div style={sbLabel}>Validation</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {reportAgencies.map((agency) => {
+        {uniqueAgencies.map((agency) => {
           const norm = normalizeAgency(agency)
           const isValidated = validatedAgencies.has(norm)
           return (
@@ -60,10 +69,10 @@ export function AgencyValidation() {
             </button>
           )
         })}
-        {reportAgencies.length >= 2 && (
+        {uniqueAgencies.length >= 2 && (
           <button
             disabled={!score}
-            onClick={() => setValidateMultiConfirm(reportAgencies)}
+            onClick={() => setValidateMultiConfirm(uniqueAgencies)}
             style={{
               marginTop: 4,
               fontSize: 11,
@@ -80,7 +89,7 @@ export function AgencyValidation() {
             onMouseOver={(e) => { if (score) e.currentTarget.style.background = 'rgba(15,31,53,0.08)' }}
             onMouseOut={(e) => { e.currentTarget.style.background = 'transparent' }}
           >
-            ✅ Valider {reportAgencies.length} agences ensemble
+            ✅ Valider {uniqueAgencies.length} agences ensemble
           </button>
         )}
       </div>

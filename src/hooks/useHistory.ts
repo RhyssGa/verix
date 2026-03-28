@@ -68,7 +68,9 @@ export function useHistory() {
         zGeranceMandats: Array.from(state.zGeranceMandates.entries()),
       }
 
-      const agencyLabel = agencyList.length > 1 ? agencyList.join(' + ') : agencyList[0]
+      const agencyLabel = agencyList.length > 1
+        ? agencyList.map((a) => normalizeAgency(a)).join(' + ')
+        : normalizeAgency(agencyList[0])
 
       const entry: ReportEntry = {
         id: crypto.randomUUID(),

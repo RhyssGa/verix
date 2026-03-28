@@ -494,7 +494,7 @@ audit-app/
 
 ```css
 :root {
-  --navy: #0F1F35; --navy2: #1A3252; --gold: #C49A2E; --gold-light: #F0D080;
+  --navy: #0B1929; --navy2: #1A3252; --gold: #C49A2E; --gold-light: #F0D080;
   --cream: #FAF8F4; --border: #E8E4DC; --text: #1A1A2E; --muted: #7A7A8C;
   --green: #1A7A4A; --green-bg: #EAF6EF; --orange: #C05C1A; --orange-bg: #FDF0E6;
   --red: #B01A1A; --red-bg: #FAEAEA; --info: #2A5A9A; --info-bg: #EAF0FA;

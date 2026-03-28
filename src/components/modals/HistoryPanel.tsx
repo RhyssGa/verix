@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useAuditStore } from '@/stores/useAuditStore'
 import { useHistory } from '@/hooks/useHistory'
 import { Button } from '@/components/ui/button'
@@ -18,7 +19,7 @@ function formatTs(ts: string): string {
 }
 
 function scoreColor(score: number): string {
-  if (score >= 85) return 'text-status-green'
+  if (score >= 80) return 'text-status-green'
   if (score >= 60) return 'text-status-orange'
   return 'text-status-red'
 }
@@ -27,30 +28,45 @@ export function HistoryPanel() {
   const showHistory = useAuditStore((s) => s.showHistory)
   const setShowHistory = useAuditStore((s) => s.setShowHistory)
   const reportHistory = useAuditStore((s) => s.reportHistory)
-  const agencyFilter = useAuditStore((s) => s.agencyFilter)
-  const setAgencyFilter = useAuditStore((s) => s.setAgencyFilter)
-  const modeFilter = useAuditStore((s) => s.modeFilter)
-  const setModeFilter = useAuditStore((s) => s.setModeFilter)
   const setDeleteConfirm = useAuditStore((s) => s.setDeleteConfirm)
   const mode = useAuditStore((s) => s.mode)
   const { restoreFromHistory } = useHistory()
 
+  const [nameFilter, setNameFilter] = useState('')
+  const [monthFilter, setMonthFilter] = useState('')  // format "MM"
+  const [yearFilter, setYearFilter] = useState('')
+
   if (!showHistory) return null
 
-  // Group by batchId
+  // Group by batchId — only current mode
   const batchMap = new Map<string, ReportEntry[]>()
   for (const entry of reportHistory) {
+    if (entry.mode !== mode) continue
     if (!batchMap.has(entry.batchId)) batchMap.set(entry.batchId, [])
     batchMap.get(entry.batchId)!.push(entry)
   }
 
-  // Filter batches
   const filtered = Array.from(batchMap.entries()).filter(([, entries]) => {
     const first = entries[0]
-    if (modeFilter && first.mode !== modeFilter) return false
-    if (agencyFilter && !first.agence.toLowerCase().includes(agencyFilter.toLowerCase())) return false
+    if (nameFilter && !first.agence.toLowerCase().includes(nameFilter.toLowerCase())) return false
+    if (monthFilter || yearFilter) {
+      const ts = new Date(first.timestamp)
+      if (monthFilter && String(ts.getMonth() + 1).padStart(2, '0') !== monthFilter) return false
+      if (yearFilter && String(ts.getFullYear()) !== yearFilter) return false
+    }
     return true
   })
+
+  const modeLabel = mode === 'gerance' ? 'Gérance' : 'Copropriété'
+
+  // Mois/années disponibles dans les données filtrées par mode
+  const MONTH_NAMES = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']
+  const availableYears = Array.from(new Set(
+    reportHistory.filter(e => e.mode === mode).map(e => String(new Date(e.timestamp).getFullYear()))
+  )).sort((a, b) => Number(b) - Number(a))
+  const availableMonths = Array.from(new Set(
+    reportHistory.filter(e => e.mode === mode).map(e => String(new Date(e.timestamp).getMonth() + 1).padStart(2, '0'))
+  )).sort()
 
   return (
     <div className="fixed inset-0 z-50 flex">
@@ -63,7 +79,10 @@ export function HistoryPanel() {
       <div className="relative ml-auto w-full max-w-sm h-full bg-white shadow-xl flex flex-col">
         {/* Header */}
         <div className="px-4 py-3 border-b border-border flex items-center justify-between bg-navy text-white">
-          <span className="font-semibold text-sm">Historique des audits</span>
+          <div>
+            <div className="font-semibold text-sm">Historique des audits</div>
+            <div className="text-[11px] text-white/50">{modeLabel}</div>
+          </div>
           <button
             onClick={() => setShowHistory(false)}
             className="text-white/70 hover:text-white text-lg leading-none"
@@ -75,24 +94,38 @@ export function HistoryPanel() {
         {/* Filters */}
         <div className="px-3 py-2.5 border-b border-border space-y-2">
           <Input
-            placeholder="Filtrer par agence…"
-            value={agencyFilter}
-            onChange={(e) => setAgencyFilter(e.target.value)}
+            placeholder="Filtrer par nom d'agence…"
+            value={nameFilter}
+            onChange={(e) => setNameFilter(e.target.value)}
             className="h-7 text-xs"
           />
-          <div className="flex gap-1.5">
-            {(['', 'gerance', 'copro'] as const).map((m) => (
-              <button
-                key={m}
-                onClick={() => setModeFilter(m)}
-                className={`text-[11px] px-2 py-0.5 rounded border transition-colors ${
-                  modeFilter === m
-                    ? 'bg-navy text-white border-navy'
-                    : 'border-border text-muted-foreground hover:border-navy/50'
-                }`}
-              >
-                {m === '' ? 'Tous' : m === 'gerance' ? 'Gérance' : 'Copro'}
-              </button>
+          <div className="flex gap-1.5 items-center">
+            {[
+              { label: 'Mois', value: monthFilter, onChange: setMonthFilter, options: [
+                ['', 'Tous'] as [string, string],
+                ...availableMonths.map(m => [m, MONTH_NAMES[Number(m) - 1]] as [string, string]),
+              ]},
+              { label: 'Année', value: yearFilter, onChange: setYearFilter, options: [
+                ['', 'Toutes'] as [string, string],
+                ...availableYears.map(y => [y, y] as [string, string]),
+              ]},
+            ].map(({ label, value, onChange, options }) => (
+              <div key={label} style={{ flex: 1 }}>
+                <div className="text-[10px] text-muted-foreground mb-0.5">{label}</div>
+                <select
+                  value={value}
+                  onChange={(e) => onChange(e.target.value)}
+                  style={{
+                    width: '100%', padding: '3px 6px', fontSize: 11,
+                    border: '1px solid #E8E4DC', borderRadius: 6,
+                    fontFamily: 'inherit', background: '#FAF8F4', color: '#1A1A2E',
+                  }}
+                >
+                  {options.map(([v, l]) => (
+                    <option key={v} value={v}>{l}</option>
+                  ))}
+                </select>
+              </div>
             ))}
           </div>
         </div>
@@ -106,7 +139,6 @@ export function HistoryPanel() {
           ) : (
             filtered.map(([batchId, entries]) => {
               const first = entries[0]
-              const isSameMode = first.mode === mode
               const count = entries.length > 1 ? entries.length : undefined
 
               return (
@@ -122,13 +154,12 @@ export function HistoryPanel() {
                         {count && ` · ${count} agences`}
                       </div>
                       <div className="text-[11px] text-muted-foreground">
-                        {first.mode === 'gerance' ? 'Gérance' : 'Copro'}
-                        {' · '}{first.nbAnomalies} anomalie{first.nbAnomalies !== 1 ? 's' : ''}
+                        {first.nbAnomalies} anomalie{first.nbAnomalies !== 1 ? 's' : ''}
                       </div>
                     </div>
                     <div className="flex-shrink-0 text-right">
                       <div className={`text-lg font-bold leading-none ${scoreColor(first.scoreGlobal)}`}>
-                        {first.scoreGlobal.toFixed(0)}
+                        {first.scoreGlobal % 1 === 0 ? first.scoreGlobal.toFixed(0) : first.scoreGlobal.toFixed(1)}
                       </div>
                       <div className="text-[10px] text-muted-foreground">{first.niveau}</div>
                     </div>
@@ -137,7 +168,7 @@ export function HistoryPanel() {
                     <Button
                       variant="outline"
                       size="sm"
-                      disabled={!isSameMode || !first.hasSnapshot}
+                      disabled={!first.hasSnapshot}
                       className="flex-1 text-xs h-7"
                       onClick={() => restoreFromHistory(first)}
                     >
@@ -147,18 +178,11 @@ export function HistoryPanel() {
                       variant="outline"
                       size="sm"
                       className="text-xs h-7 border-status-red text-status-red hover:bg-status-red-bg px-2"
-                      onClick={() =>
-                        setDeleteConfirm({ batchId, count: entries.length })
-                      }
+                      onClick={() => setDeleteConfirm({ batchId, count: entries.length })}
                     >
                       🗑
                     </Button>
                   </div>
-                  {!isSameMode && (
-                    <div className="text-[10px] text-status-orange">
-                      Mode différent — ouvrez la page {first.mode === 'gerance' ? 'Gérance' : 'Copro'} pour restaurer
-                    </div>
-                  )}
                 </div>
               )
             })

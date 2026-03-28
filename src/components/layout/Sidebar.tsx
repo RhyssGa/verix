@@ -2,8 +2,7 @@
 
 import { useAuditStore } from '@/stores/useAuditStore'
 import { ManualDataForm } from '@/components/audit/ManualDataForm'
-import { AgencySelector } from '@/components/audit/AgencySelector'
-import { AgencyValidation } from '@/components/audit/AgencyValidation'
+
 import { GERANCE_FILE_CONFIGS, COPRO_FILE_CONFIGS } from '@/constants/fileConfigs'
 
 interface SidebarProps {
@@ -23,6 +22,7 @@ const sbLabel: React.CSSProperties = {
 
 export function Sidebar({ mode }: SidebarProps) {
   const loadedFiles = useAuditStore((s) => s.loadedFiles)
+  const forcedOk = useAuditStore((s) => s.forcedOk)
   const configs = mode === 'gerance' ? GERANCE_FILE_CONFIGS : COPRO_FILE_CONFIGS
 
   return (
@@ -32,16 +32,41 @@ export function Sidebar({ mode }: SidebarProps) {
       padding: '24px 20px',
       overflowY: 'auto',
       height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 12,
     }}>
+      {/* Mode actif + switcher */}
+      <div>
+        <div style={{
+          background: '#0B1929',
+          borderRadius: 10,
+          padding: '12px 14px',
+          marginBottom: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 4,
+        }}>
+          <span style={{ fontSize: 22 }}>{mode === 'gerance' ? '🏠' : '🏢'}</span>
+          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', fontWeight: 600, letterSpacing: '0.6px', textTransform: 'uppercase' }}>
+            Mode actif
+          </div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: '#C49A2E', letterSpacing: '0.2px' }}>
+            {mode === 'gerance' ? 'Gérance' : 'Copropriété'}
+          </div>
+        </div>
+      </div>
+
       {/* Identification + données manuelles */}
       <ManualDataForm mode={mode} />
 
       {/* Fichiers chargés */}
-      <div style={{ marginBottom: 28 }}>
+      <div>
         <div style={sbLabel}>Fichiers chargés</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {configs.map((config) => {
-            const loaded = !!loadedFiles[config.id]
+            const loaded = !!loadedFiles[config.id] || !!forcedOk[config.id]
             return (
               <div
                 key={config.id}
@@ -73,15 +98,7 @@ export function Sidebar({ mode }: SidebarProps) {
         </div>
       </div>
 
-      {/* Agences (si disponibles) */}
-      <div style={{ marginBottom: 28 }}>
-        <AgencySelector />
-      </div>
 
-      {/* Validation */}
-      <div style={{ marginBottom: 28 }}>
-        <AgencyValidation />
-      </div>
     </div>
   )
 }

@@ -14,9 +14,12 @@ export function ConfirmDialog() {
   const deleteConfirm = useAuditStore((s) => s.deleteConfirm)
   const validateConfirm = useAuditStore((s) => s.validateConfirm)
   const validateMultiConfirm = useAuditStore((s) => s.validateMultiConfirm)
+  const resetConfirm = useAuditStore((s) => s.resetConfirm)
   const setDeleteConfirm = useAuditStore((s) => s.setDeleteConfirm)
   const setValidateConfirm = useAuditStore((s) => s.setValidateConfirm)
   const setValidateMultiConfirm = useAuditStore((s) => s.setValidateMultiConfirm)
+  const setResetConfirm = useAuditStore((s) => s.setResetConfirm)
+  const resetAll = useAuditStore((s) => s.resetAll)
   const sectionNotes = useAuditStore((s) => s.sectionNotes)
   const score = useScore()
   const { deleteHistoryBatch, saveToHistory, saveAgencesToHistory } = useHistory()
@@ -93,6 +96,27 @@ export function ConfirmDialog() {
               }}
             >
               ✅ Valider
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      {/* Reset confirm */}
+      <AlertDialog open={resetConfirm} onOpenChange={(o) => { if (!o) setResetConfirm(false) }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Réinitialiser toutes les données ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tous les fichiers importés, annotations et paramètres seront effacés.
+              L&apos;historique des audits sauvegardés est conservé.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-status-red text-white hover:bg-status-red/90"
+              onClick={() => { resetAll(); setResetConfirm(false) }}
+            >
+              ↺ Réinitialiser
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
