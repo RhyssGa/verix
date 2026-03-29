@@ -2,6 +2,7 @@
 
 import { useAuditStore } from '@/stores/useAuditStore'
 import { useScore } from '@/stores/computed'
+import { useExport } from '@/hooks/useExport'
 import { normalizeAgency } from '@/lib/utils/helpers'
 
 export function ValidationBlock() {
@@ -9,7 +10,9 @@ export function ValidationBlock() {
   const validatedAgencies = useAuditStore((s) => s.validatedAgencies)
   const setValidateConfirm = useAuditStore((s) => s.setValidateConfirm)
   const setValidateMultiConfirm = useAuditStore((s) => s.setValidateMultiConfirm)
+  const isGeneratingPdf = useAuditStore((s) => s.isGeneratingPdf)
   const score = useScore()
+  const { generateReportV2 } = useExport()
 
   if (!score || reportAgencies.length === 0) return null
 
@@ -50,7 +53,21 @@ export function ValidationBlock() {
       </div>
 
       {/* Boutons */}
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex gap-2 flex-wrap items-center">
+        {/* Rapport PDF */}
+        <button
+          onClick={generateReportV2}
+          disabled={isGeneratingPdf}
+          className="px-[22px] py-[10px] rounded-[8px] cursor-pointer font-[inherit] font-bold text-[13px] tracking-[0.3px] flex items-center gap-2 border-none"
+          style={{
+            background: isGeneratingPdf ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.1)',
+            color: isGeneratingPdf ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.85)',
+            cursor: isGeneratingPdf ? 'not-allowed' : 'pointer',
+            ...(allValidated ? { background: 'rgba(26,122,74,0.12)', color: '#1A7A4A' } : {}),
+          }}
+        >
+          {isGeneratingPdf ? '⏳ Génération…' : '📄 Rapport PDF'}
+        </button>
         {uniqueAgencies.length === 1 ? (
           <button
             onClick={() => setValidateConfirm(uniqueAgencies[0])}

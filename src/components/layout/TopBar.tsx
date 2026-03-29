@@ -5,8 +5,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useAuditStore } from '@/stores/useAuditStore'
-import { useScore } from '@/stores/computed'
-import { useExport } from '@/hooks/useExport'
 import { UserMenu } from '@/components/layout/UserMenu'
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
@@ -24,8 +22,6 @@ export function TopBar({ mode }: TopBarProps) {
   const isGeneratingPdf = useAuditStore((s) => s.isGeneratingPdf)
   const setResetConfirm = useAuditStore((s) => s.setResetConfirm)
   const resetAll = useAuditStore((s) => s.resetAll)
-  const score = useScore()
-  const { generateReportV2 } = useExport()
   const router = useRouter()
   const [showGoHomeConfirm, setShowGoHomeConfirm] = useState(false)
 
@@ -127,23 +123,6 @@ export function TopBar({ mode }: TopBarProps) {
         </button>
 
         <UserMenu />
-
-        {score && (
-          <button
-            onClick={generateReportV2}
-            disabled={isGeneratingPdf}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-[12px] font-semibold transition-all text-[#0B1929] border-none"
-            style={{
-              background: isGeneratingPdf
-                ? 'rgba(196,154,46,0.4)'
-                : 'linear-gradient(135deg, #C49A2E, #A87E20)',
-              cursor: isGeneratingPdf ? 'not-allowed' : 'pointer',
-              boxShadow: isGeneratingPdf ? 'none' : '0 2px 8px rgba(196,154,46,0.35)',
-            }}
-          >
-            {isGeneratingPdf ? '⏳ Génération…' : '📄 Rapport PDF'}
-          </button>
-        )}
       </div>
     </header>
 

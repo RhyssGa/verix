@@ -33,14 +33,14 @@ export function ReportingTopBar() {
 
       <div className="flex-1" />
 
-      <UserMenu />
-
       <button
         onClick={() => router.back()}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all border border-[rgba(255,255,255,0.12)] text-[rgba(255,255,255,0.6)] hover:bg-[rgba(255,255,255,0.12)] hover:text-white"
       >
         ← Retour à l&apos;audit
       </button>
+
+      <UserMenu />
 
     </header>
   )
