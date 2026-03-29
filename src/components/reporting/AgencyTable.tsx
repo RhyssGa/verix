@@ -34,19 +34,28 @@ function DeltaBadge({ delta }: { delta: number | null }) {
 
 function ScoreBar({ score, target }: { score: number; target: number }) {
   const targetPct = Math.min(100, target)
+  const barColor = score >= 80 ? '#1A7A4A' : score >= 70 ? '#C8A020' : score >= 60 ? '#C05C1A' : '#B01A1A'
   return (
-    <div className="relative w-full h-[6px] bg-[#F0EDE8] rounded-full overflow-hidden">
+    <div className="relative w-full flex items-center" style={{ height: '20px' }}>
+      {/* Barre de fond + remplissage */}
+      <div className="relative w-full h-[8px] bg-[#F0EDE8] rounded-full overflow-hidden">
+        <div
+          className="absolute inset-y-0 left-0 rounded-full"
+          style={{ width: `${score}%`, background: barColor }}
+        />
+      </div>
+      {/* Marqueur objectif — dépasse la barre, doré */}
       <div
-        className="absolute inset-y-0 left-0 rounded-full"
+        className="absolute rounded-sm"
         style={{
-          width: `${score}%`,
-          background: score >= 80 ? '#1A7A4A' : score >= 70 ? '#C8A020' : score >= 60 ? '#C05C1A' : '#B01A1A',
+          left: `${targetPct}%`,
+          transform: 'translateX(-50%)',
+          top: 0,
+          bottom: 0,
+          width: '3px',
+          background: '#C49A2E',
+          boxShadow: '0 0 4px rgba(196,154,46,0.6)',
         }}
-      />
-      {/* Ligne objectif */}
-      <div
-        className="absolute inset-y-0 w-[2px] bg-[#0B1929] opacity-40"
-        style={{ left: `${targetPct}%` }}
       />
     </div>
   )
