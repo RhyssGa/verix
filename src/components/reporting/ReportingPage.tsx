@@ -1,9 +1,11 @@
 'use client'
 
 import { useEffect, useState, useMemo, useCallback } from 'react'
-import { ReportingFilters } from './ReportingFilters'
+import { ReportingTopBar } from './ReportingTopBar'
+import { ReportingFilters, type ViewMode } from './ReportingFilters'
 import { GroupAvgCard } from './GroupAvgCard'
 import { AgencyTable } from './AgencyTable'
+import { CumulatedTable } from './CumulatedTable'
 import { TrendTable } from './TrendTable'
 import { PDFOptions, type PDFSections } from './PDFOptions'
 import {
@@ -12,6 +14,7 @@ import {
   buildAgencyRows,
   buildTrendRows,
   buildAnomalyAggregates,
+  buildCumulatedRows,
   type ReportingEntry,
 } from '@/lib/reporting/aggregations'
 import { getAvailableYears, quarterLabel, type Quarter } from '@/lib/reporting/quarters'
@@ -36,6 +39,7 @@ export function ReportingPage() {
   const [year, setYear] = useState(currentYear)
   const [quarter, setQuarter] = useState<Quarter>(1)
   const [mode, setMode] = useState<'gerance' | 'copro'>('gerance')
+  const [viewMode, setViewMode] = useState<ViewMode>('quarter')
   const [target, setTarget] = useState(85)
   const [pdfSections, setPdfSections] = useState<PDFSections>(DEFAULT_PDF_SECTIONS)
 
@@ -64,6 +68,13 @@ export function ReportingPage() {
     localStorage.setItem('reporting_target', String(v))
   }, [])
 
+  // Quand on passe en mode cumulé, year=0 = toutes les années
+  function handleViewModeChange(v: ViewMode) {
+    setViewMode(v)
+    if (v === 'cumul') setYear(0)
+    else if (year === 0) setYear(currentYear)
+  }
+
   // Fetch tous les audits
   useEffect(() => {
     setLoading(true)
@@ -73,9 +84,7 @@ export function ReportingPage() {
         if (!r.ok) throw new Error('Erreur réseau')
         return r.json()
       })
-      .then((data: ReportingEntry[]) => {
-        setEntries(data)
-      })
+      .then((data: ReportingEntry[]) => setEntries(data))
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
   }, [])
@@ -83,28 +92,44 @@ export function ReportingPage() {
   const years = useMemo(() => getAvailableYears(entries.map((e) => e.timestamp)), [entries])
 
   const quarterRef = useMemo(() => ({ year, quarter }), [year, quarter])
+  const isCumul = viewMode === 'cumul'
 
+  // Mode trimestriel
   const currentEntries = useMemo(
-    () => filterByQuarter(entries, quarterRef, mode),
-    [entries, quarterRef, mode],
+    () => (isCumul ? [] : filterByQuarter(entries, quarterRef, mode)),
+    [isCumul, entries, quarterRef, mode],
   )
-
   const groupAvg = useMemo(() => computeGroupAvg(currentEntries), [currentEntries])
-
   const agencyRows = useMemo(
-    () => buildAgencyRows(currentEntries, entries, quarterRef, mode),
-    [currentEntries, entries, quarterRef, mode],
+    () => (isCumul ? [] : buildAgencyRows(currentEntries, entries, quarterRef, mode)),
+    [isCumul, currentEntries, entries, quarterRef, mode],
   )
-
   const trendRows = useMemo(
-    () => buildTrendRows(entries, year, mode),
-    [entries, year, mode],
+    () => buildTrendRows(entries, year === 0 ? currentYear : year, mode),
+    [entries, year, currentYear, mode],
+  )
+  const anomalyAggregates = useMemo(
+    () => buildAnomalyAggregates(isCumul ? [] : currentEntries),
+    [isCumul, currentEntries],
   )
 
-  const anomalyAggregates = useMemo(
-    () => buildAnomalyAggregates(currentEntries),
-    [currentEntries],
+  // Mode cumulé
+  const cumulatedRows = useMemo(
+    () => (isCumul ? buildCumulatedRows(entries, mode, year === 0 ? undefined : year) : []),
+    [isCumul, entries, mode, year],
   )
+  const cumulatedGroupAvg = useMemo(
+    () => (isCumul && cumulatedRows.length > 0
+      ? Math.round((cumulatedRows.reduce((s, r) => s + r.scoreGlobal, 0) / cumulatedRows.length) * 10) / 10
+      : null),
+    [isCumul, cumulatedRows],
+  )
+  const activeGroupAvg = isCumul ? cumulatedGroupAvg : groupAvg
+  const activeEntryCount = isCumul ? cumulatedRows.length : currentEntries.length
+
+  const periodLabel = isCumul
+    ? (year === 0 ? 'Tous trimestres' : `Toute l'année ${year}`)
+    : quarterLabel(quarterRef)
 
   async function handleExportPDF() {
     setPdfLoading(true)
@@ -113,7 +138,7 @@ export function ReportingPage() {
         period: quarterRef,
         mode,
         exportDate: new Date().toISOString(),
-        groupAvg,
+        groupAvg: activeGroupAvg,
         target,
         sections: pdfSections,
         agencies: agencyRows,
@@ -130,7 +155,7 @@ export function ReportingPage() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `reporting-${quarterLabel(quarterRef).replace(' ', '-')}-${mode}.pdf`
+      a.download = `reporting-${periodLabel.replace(/\s/g, '-')}-${mode}.pdf`
       a.click()
       URL.revokeObjectURL(url)
     } catch (e) {
@@ -142,32 +167,38 @@ export function ReportingPage() {
 
   return (
     <div className="min-h-screen bg-[#FAF8F4] flex flex-col">
-      {/* Header */}
-      <div className="bg-[#0B1929] px-8 py-5 flex items-center gap-4 border-b border-[rgba(196,154,46,0.2)]">
-        <div>
-          <div className="text-[11px] font-semibold text-[rgba(255,255,255,0.4)] uppercase tracking-[0.8px]">
-            Century 21
-          </div>
-          <div className="text-[20px] font-extrabold text-white tracking-[-0.3px]">
-            Reporting <span className="text-[#C49A2E]">groupe</span>
-          </div>
-        </div>
-      </div>
+      <ReportingTopBar />
 
-      {/* Contenu */}
       <div className="flex-1 px-8 py-7 flex flex-col gap-6 max-w-[1100px] w-full mx-auto">
-        {/* Filtres */}
+
+        {/* ① Filtres + Options PDF en haut */}
         <div className={CARD}>
-          <div className={SECTION_TITLE}>Filtres</div>
-          <ReportingFilters
-            years={years.length > 0 ? years : [currentYear]}
-            year={year}
-            quarter={quarter}
-            mode={mode}
-            onYearChange={setYear}
-            onQuarterChange={setQuarter}
-            onModeChange={setMode}
-          />
+          <div className="flex flex-col gap-5">
+            <div>
+              <div className={SECTION_TITLE}>Filtres</div>
+              <ReportingFilters
+                years={years.length > 0 ? years : [currentYear]}
+                year={year}
+                quarter={quarter}
+                mode={mode}
+                viewMode={viewMode}
+                onYearChange={setYear}
+                onQuarterChange={setQuarter}
+                onModeChange={setMode}
+                onViewModeChange={handleViewModeChange}
+              />
+            </div>
+            <div className="border-t border-[#F0EDE8] pt-5">
+              <div className={SECTION_TITLE}>Options du rapport PDF</div>
+              <PDFOptions
+                sections={pdfSections}
+                onChange={setPdfSections}
+                onExport={handleExportPDF}
+                loading={pdfLoading}
+                disabled={activeEntryCount === 0}
+              />
+            </div>
+          </div>
         </div>
 
         {loading && (
@@ -185,40 +216,34 @@ export function ReportingPage() {
 
         {!loading && !error && (
           <>
-            {/* KPIs groupe */}
+            {/* ② KPIs groupe */}
             <GroupAvgCard
-              groupAvg={groupAvg}
+              groupAvg={activeGroupAvg}
               target={target}
-              entryCount={currentEntries.length}
+              entryCount={activeEntryCount}
               onTargetChange={handleTargetChange}
             />
 
-            {/* Tableau agences */}
+            {/* ③ Tableau principal */}
             <div className={CARD}>
               <div className={SECTION_TITLE}>
-                Scores par agence — {quarterLabel(quarterRef)} · {mode === 'gerance' ? 'Gérance' : 'Copropriété'}
+                {isCumul
+                  ? `Vue cumulée — ${periodLabel} · ${mode === 'gerance' ? 'Gérance' : 'Copropriété'}`
+                  : `Scores par agence — ${periodLabel} · ${mode === 'gerance' ? 'Gérance' : 'Copropriété'}`
+                }
               </div>
-              <AgencyTable rows={agencyRows} groupAvg={groupAvg} target={target} />
+              {isCumul
+                ? <CumulatedTable rows={cumulatedRows} groupAvg={cumulatedGroupAvg} />
+                : <AgencyTable rows={agencyRows} groupAvg={groupAvg} target={target} />
+              }
             </div>
 
-            {/* Évolution trimestrielle */}
+            {/* ④ Évolution trimestrielle */}
             <div className={CARD}>
               <div className={SECTION_TITLE}>
-                Évolution trimestrielle {year} · {mode === 'gerance' ? 'Gérance' : 'Copropriété'}
+                Évolution trimestrielle {year === 0 ? currentYear : year} · {mode === 'gerance' ? 'Gérance' : 'Copropriété'}
               </div>
-              <TrendTable rows={trendRows} year={year} />
-            </div>
-
-            {/* Options PDF + export */}
-            <div className={CARD}>
-              <div className={SECTION_TITLE}>Options du rapport PDF</div>
-              <PDFOptions
-                sections={pdfSections}
-                onChange={setPdfSections}
-                onExport={handleExportPDF}
-                loading={pdfLoading}
-                disabled={currentEntries.length === 0}
-              />
+              <TrendTable rows={trendRows} year={year === 0 ? currentYear : year} />
             </div>
           </>
         )}

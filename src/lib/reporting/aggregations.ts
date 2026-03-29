@@ -2,7 +2,7 @@
  * Calculs de reporting : moyenne groupe, deltas, agrégation anomalies.
  */
 
-import { getQuarter, getPreviousQuarter, sameQuarter, type QuarterRef } from './quarters'
+import { getQuarter, getPreviousQuarter, sameQuarter, type QuarterRef, type Quarter } from './quarters'
 
 export interface ReportingEntry {
   id: string
@@ -152,6 +152,64 @@ export function buildTrendRows(
       }
     })
     .sort((a, b) => a.agence.localeCompare(b.agence))
+}
+
+export interface CumulatedRow {
+  agence: string
+  scoreGlobal: number
+  niveau: string
+  nbAnomalies: number
+  totalPenalite: number
+  deltaGroupe: number | null
+  year: number
+  quarter: Quarter
+  timestamp: string
+}
+
+/**
+ * Vue cumulée : toutes les entrées (par mode, optionnellement filtrées par année).
+ * Une ligne par (agence, year, quarter) — garde le plus récent si doublons.
+ */
+export function buildCumulatedRows(
+  allEntries: ReportingEntry[],
+  mode: 'gerance' | 'copro',
+  filterYear?: number,
+): CumulatedRow[] {
+  const grouped = new Map<string, { entry: ReportingEntry; year: number; quarter: Quarter }>()
+
+  for (const e of allEntries) {
+    if (e.mode !== mode) continue
+    const q = getQuarter(new Date(e.timestamp))
+    if (filterYear !== undefined && q.year !== filterYear) continue
+    const key = `${e.agence}__${q.year}__${q.quarter}`
+    const existing = grouped.get(key)
+    if (!existing || e.timestamp > existing.entry.timestamp) {
+      grouped.set(key, { entry: e, year: q.year, quarter: q.quarter })
+    }
+  }
+
+  const all = Array.from(grouped.values())
+  const groupAvg = all.length > 0
+    ? Math.round((all.reduce((s, x) => s + x.entry.scoreGlobal, 0) / all.length) * 10) / 10
+    : null
+
+  return all
+    .map(({ entry, year, quarter }) => ({
+      agence: entry.agence,
+      scoreGlobal: entry.scoreGlobal,
+      niveau: entry.niveau,
+      nbAnomalies: entry.nbAnomalies,
+      totalPenalite: entry.totalPenalite,
+      deltaGroupe: groupAvg !== null ? Math.round((entry.scoreGlobal - groupAvg) * 10) / 10 : null,
+      year,
+      quarter,
+      timestamp: entry.timestamp,
+    }))
+    .sort((a, b) => {
+      if (b.year !== a.year) return b.year - a.year
+      if (b.quarter !== a.quarter) return b.quarter - a.quarter
+      return b.scoreGlobal - a.scoreGlobal
+    })
 }
 
 /**
