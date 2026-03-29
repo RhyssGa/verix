@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireAuth } from '@/lib/auth-guard'
 
 // GET /api/audits/[id] — Récupérer un snapshot complet pour restauration
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const { error: authError } = await requireAuth(_req)
+  if (authError) return authError
   try {
     const { id } = await params
     const snapshot = await prisma.auditSnapshot.findUnique({ where: { id } })
@@ -21,6 +24,8 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const { error: authError } = await requireAuth(_req)
+  if (authError) return authError
   try {
     const { id } = await params
     await prisma.auditSnapshot.delete({ where: { id } })

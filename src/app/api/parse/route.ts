@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/auth-guard'
 import { FILE_MIN_COLS } from '@/constants/fileConfigs'
 import { parseGerance, parseGeranceZPointe, parseGeranceZMandats } from '@/lib/parsers/gerance'
 import { parseCopro, parseCoproZPointe } from '@/lib/parsers/copro'
@@ -17,6 +18,8 @@ function extractAgencies(rows: ExcelRow[], column: number): string[] {
 }
 
 export async function POST(req: NextRequest) {
+  const { error: authError } = await requireAuth(req)
+  if (authError) return authError
   try {
     const formData = await req.formData()
     const file = formData.get('file') as File | null

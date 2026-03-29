@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireAuth } from '@/lib/auth-guard'
 
 // GET /api/audits — Liste historique (sans snapshot complet)
 // GET /api/audits?batchId=xxx — Filtrer par batch
 export async function GET(req: NextRequest) {
+  const { error: authError } = await requireAuth(req)
+  if (authError) return authError
   try {
     const batchId = req.nextUrl.searchParams.get('batchId')
 
@@ -55,6 +58,8 @@ export async function GET(req: NextRequest) {
 
 // POST /api/audits — Sauvegarder un snapshot
 export async function POST(req: NextRequest) {
+  const { error: authError } = await requireAuth(req)
+  if (authError) return authError
   try {
     const body = await req.json()
 
@@ -82,6 +87,8 @@ export async function POST(req: NextRequest) {
 
 // DELETE /api/audits?batchId=xxx — Supprimer tout un batch
 export async function DELETE(req: NextRequest) {
+  const { error: authError } = await requireAuth(req)
+  if (authError) return authError
   try {
     const batchId = req.nextUrl.searchParams.get('batchId')
     if (!batchId) {

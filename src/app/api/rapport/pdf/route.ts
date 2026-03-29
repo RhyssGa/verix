@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/auth-guard'
 import { renderReportHTML } from '@/lib/report/pdf'
 import { readFile } from 'fs/promises'
 import { join } from 'path'
@@ -15,6 +16,8 @@ async function loadAssetBase64(filename: string): Promise<string> {
 }
 
 export async function POST(req: NextRequest) {
+  const { error: authError } = await requireAuth(req)
+  if (authError) return authError
   try {
     const raw = await req.json()
     const payloads = Array.isArray(raw) ? raw : [raw]
