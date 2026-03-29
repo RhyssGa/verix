@@ -134,13 +134,22 @@ export function FinancialStateCard({ bilan, onOpenGroup }: FinancialStateCardPro
   const level =
     risk4.length > 0 ? 'bad' : risk3.length > 0 ? 'warn' : risk2.length > 0 ? 'warn' : 'ok'
 
-  const segments = [
-    { n: risk0.length, color: '#1A7A4A', label: 'Sain' },
-    { n: risk1.length, color: '#4A8A2A', label: '1 anomalie' },
-    { n: risk2.length, color: '#C05C1A', label: '2 anomalies' },
-    { n: risk3.length, color: '#E07020', label: '3 anomalies' },
-    { n: risk4.length, color: '#B01A1A', label: '4 anomalies' },
-  ].filter((s) => s.n > 0)
+  const sainFaible = risk0.length + risk1.length
+  const segments4 = [
+    { n: risk4.length, color: '#B01A1A', label: 'Critique' },
+    { n: risk3.length, color: '#C05C1A', label: 'Élevé' },
+    { n: risk2.length, color: '#C8A020', label: 'Modéré' },
+    { n: sainFaible,   color: '#1A7A4A', label: 'Sain / Faible' },
+  ]
+
+  const CIRC = 2 * Math.PI * 50
+  let _accumulated = 0
+  const donutArcs = segments4.map((s) => {
+    const arcLen = total > 0 ? (s.n / total) * CIRC : 0
+    const arc = { ...s, arcLen, offset: _accumulated }
+    _accumulated += arcLen
+    return arc
+  })
 
   const freqData = [
     { label: 'Impayés copropriétaires', sub: '> 30\u202f% des appels de fonds', n: nCop },
@@ -189,33 +198,57 @@ export function FinancialStateCard({ bilan, onOpenGroup }: FinancialStateCardPro
       </CardHeader>
       <CardContent className="pt-0">
         {/* Portfolio distribution label */}
-        <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-2">
+        <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-3">
           Répartition du portefeuille
         </div>
 
-        {/* Bar chart */}
-        <div className="h-5 rounded-md overflow-hidden flex mb-2">
-          {segments.map((s, idx) => (
-            <div
-              key={idx}
-              style={{
-                width: `${((s.n / total) * 100).toFixed(1)}%`,
-                background: s.color,
-              }}
-              title={`${s.label} : ${s.n} (${((s.n / total) * 100).toFixed(1)}%)`}
-            />
-          ))}
-        </div>
-        <div className="flex flex-wrap gap-3 mb-4">
-          {segments.map((s, idx) => (
-            <span key={idx} className="flex items-center gap-1 text-[10px]">
-              <span
-                className="w-2.5 h-2.5 rounded-sm inline-block flex-shrink-0"
-                style={{ background: s.color }}
-              />
-              {s.label} : <b>{s.n}</b>
-            </span>
-          ))}
+        {/* Donut + bars */}
+        <div className="flex items-center gap-4 mb-4">
+          {/* SVG donut */}
+          <div className="flex-shrink-0">
+            <svg viewBox="0 0 140 140" width="110" height="110">
+              <circle cx="70" cy="70" r="50" fill="none" stroke="#E8E4DC" strokeWidth="22" />
+              <g transform="rotate(-90 70 70)">
+                {donutArcs.map((arc, i) =>
+                  arc.n > 0 ? (
+                    <circle
+                      key={i}
+                      cx="70" cy="70" r="50"
+                      fill="none"
+                      stroke={arc.color}
+                      strokeWidth="22"
+                      strokeDasharray={`${arc.arcLen} ${CIRC - arc.arcLen}`}
+                      strokeDashoffset={-arc.offset}
+                      strokeLinecap="butt"
+                    />
+                  ) : null
+                )}
+              </g>
+              <text x="70" y="65" textAnchor="middle" fontSize="22" fontWeight="700" fill="#1A1A2E">{total}</text>
+              <text x="70" y="80" textAnchor="middle" fontSize="10" fill="#7A7A8C">copros</text>
+            </svg>
+          </div>
+
+          {/* Distribution bars */}
+          <div className="flex-1 min-w-0">
+            {segments4.map((s, i) => {
+              const pct = total > 0 ? Math.round((s.n / total) * 100) : 0
+              return (
+                <div key={i} className="flex items-center gap-2 mb-2">
+                  <span className="text-[10px] text-muted-foreground w-20 flex-shrink-0 truncate">{s.label}</span>
+                  <div className="flex-1 bg-border rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className="h-full rounded-full"
+                      style={{ width: `${pct}%`, background: s.color }}
+                    />
+                  </div>
+                  <span className="text-[10px] font-semibold w-8 text-right flex-shrink-0" style={{ color: s.color }}>
+                    {pct}%
+                  </span>
+                </div>
+              )
+            })}
+          </div>
         </div>
 
         <div className="border-t border-border my-3" />

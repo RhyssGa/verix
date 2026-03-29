@@ -278,7 +278,6 @@ export function renderReportHTMLV2(payload: PDFPayload, bgCoverBase64 = '', _log
           <div style="font-size:12.5pt;font-weight:700;color:${NAVY};line-height:1.2;margin-bottom:6px">${esc(sec.title)}</div>
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
             ${pill(sec.level)}
-            <span style="font-size:8.5pt;color:#9A9AB0">${esc(sec.subtitle)}</span>
           </div>
         </div>
         ${impactLabel}
@@ -539,64 +538,132 @@ h1, h2, h3, .section-title {
   if (comparison) {
     const refDateFmt = new Date(comparison.refDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })
     const sDelta = comparison.currScore - comparison.prevScore
-    const sColor = sDelta > 0 ? '#1A7A4A' : sDelta < 0 ? '#B01A1A' : '#7A7A8C'
-    const sBg    = sDelta > 0 ? '#EAF6EF' : sDelta < 0 ? '#FAEAEA' : '#F2F2F2'
+    const sDeltaStr = (sDelta >= 0 ? '+' : '') + sDelta.toFixed(1)
+    const sColor  = sDelta > 0 ? '#1A7A4A' : sDelta < 0 ? '#B01A1A' : '#7A7A8C'
+    const sBg     = sDelta > 0 ? '#EAF6EF' : sDelta < 0 ? '#FAEAEA' : '#F2F2F2'
     const sBorder = sDelta > 0 ? '#A8D8BC' : sDelta < 0 ? '#F5AAAA' : '#DCDCEC'
+    const sArrow  = sDelta > 0 ? '↑' : sDelta < 0 ? '↓' : '→'
 
-    const miniRows = comparison.rows.map(r => {
+    // Compute prev niveau from score
+    const pn = comparison.prevScore >= 90 ? { label: 'Excellent', color: '#1A7A4A', bg: '#EAF6EF' }
+             : comparison.prevScore >= 85 ? { label: 'Bien',      color: '#2A7A3A', bg: '#EAF6EF' }
+             : comparison.prevScore >= 80 ? { label: 'Satisfaisant', color: '#4A8A2A', bg: '#EAF6EF' }
+             : comparison.prevScore >= 60 ? { label: 'Vigilance', color: '#C05C1A', bg: '#FDF0E6' }
+             : { label: 'Dégradé', color: '#B01A1A', bg: '#FAEAEA' }
+
+    // nb anomalies (rows with non-zero counts)
+    const prevNbAnom = comparison.rows.filter(r => r.prevNb !== null && r.prevNb > 0).length
+    const currNbAnom = comparison.rows.filter(r => r.currNb !== null && r.currNb > 0).length
+    const anomDelta  = currNbAnom - prevNbAnom
+    const anomColor  = anomDelta < 0 ? '#1A7A4A' : anomDelta > 0 ? '#B01A1A' : '#1A1A2E'
+
+    const miniRows = comparison.rows.map((r, ri) => {
       const nbD = r.prevNb !== null && r.currNb !== null ? r.currNb - r.prevNb : null
       const mtD = r.prevMontant !== null && r.currMontant !== null ? r.currMontant - r.prevMontant : null
       if (nbD === 0 && (mtD === null || mtD === 0)) return ''
       const nbColor = nbD === null || nbD === 0 ? '#7A7A8C' : nbD < 0 ? '#1A7A4A' : '#B01A1A'
       const mtColor = mtD === null || mtD === 0 ? '#7A7A8C' : mtD < 0 ? '#1A7A4A' : '#B01A1A'
-      return `<tr>
-        <td style="padding:7px 13px;font-size:9pt;color:#1A1A2E;font-weight:500">${esc(r.label)}</td>
-        <td style="padding:7px 13px;text-align:right;font-size:9pt;white-space:nowrap">
-          <span style="color:#B0B0C8;text-decoration:line-through;margin-right:5px">${r.prevNb ?? '—'}</span>
-          <span style="font-weight:700;color:${nbColor}">${r.currNb ?? '—'}${nbD !== null && nbD !== 0 ? ` <span style="font-size:8pt">(${nbD > 0 ? '+' : ''}${nbD})</span>` : ''}</span>
+      const rowBg = ri % 2 === 0 ? '#fff' : '#FAFAFA'
+      return `<tr style="background:${rowBg}">
+        <td style="padding:8px 14px;font-size:9pt;color:#1A1A2E;font-weight:500;border-bottom:1px solid #F0EDE8">${esc(r.label)}</td>
+        <td style="padding:8px 14px;text-align:right;font-size:9pt;white-space:nowrap;border-bottom:1px solid #F0EDE8">
+          <span style="color:#C0C0D0;text-decoration:line-through;margin-right:6px;font-size:8.5pt">${r.prevNb ?? '—'}</span>
+          <span style="font-weight:700;color:${nbColor}">${r.currNb ?? '—'}${nbD !== null && nbD !== 0 ? `<span style="font-size:7.5pt;margin-left:3px">(${nbD > 0 ? '+' : ''}${nbD})</span>` : ''}</span>
         </td>
-        <td style="padding:7px 13px;text-align:right;font-size:9pt;white-space:nowrap">
+        <td style="padding:8px 14px;text-align:right;font-size:9pt;white-space:nowrap;border-bottom:1px solid #F0EDE8">
           ${r.prevMontant !== null && r.currMontant !== null
-            ? `<span style="color:#B0B0C8;text-decoration:line-through;margin-right:5px">${eurFmt(r.prevMontant)}</span>
-               <span style="font-weight:700;color:${mtColor}">${eurFmt(r.currMontant)}</span>`
-            : '<span style="color:#9A9AB0">—</span>'}
+            ? `<span style="color:#C0C0D0;text-decoration:line-through;margin-right:6px;font-size:8.5pt">${eurFmt(r.prevMontant)}</span><span style="font-weight:700;color:${mtColor}">${eurFmt(r.currMontant)}</span>`
+            : '<span style="color:#C0C0D0">—</span>'}
         </td>
       </tr>`
     }).filter(Boolean).join('')
 
     synthComparisonBlock = `
-    <div style="margin-top:28px;border:1px solid ${sBorder};border-radius:12px;overflow:hidden;page-break-inside:avoid;box-shadow:0 2px 8px rgba(11,25,41,0.06)">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:${CREAM};border-bottom:1px solid ${BORDER}">
-        <div style="font-size:10pt;font-weight:700;color:${NAVY}">🔄 Évolution vs audit précédent</div>
-        <div style="font-size:8.5pt;color:#9A9AB0;font-style:italic">Réf. : ${esc(comparison.refAgence)} — ${esc(refDateFmt)}</div>
+    <div style="margin-top:30px;page-break-inside:avoid">
+
+      <!-- Section title -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <span style="font-size:8pt;font-weight:700;color:#B0B0C8;text-transform:uppercase;letter-spacing:0.1em;white-space:nowrap">Comparaison audit précédent</span>
+        <span style="flex:1;height:1px;background:#E8E4DC"></span>
       </div>
-      <div style="display:flex;align-items:center;gap:16px;padding:16px 20px;border-bottom:1px solid #F2F2F8">
-        <div>
-          <div style="font-size:7pt;text-transform:uppercase;letter-spacing:0.08em;color:#9A9AB0;font-weight:700;margin-bottom:5px">Score global</div>
-          <div style="display:flex;align-items:baseline;gap:10px">
-            <span style="font-size:11pt;color:#B0B0C8;text-decoration:line-through">${comparison.prevScore}</span>
-            <span style="font-size:9pt;color:#B0B0C8">→</span>
-            <span style="font-size:16pt;font-weight:800;color:${NAVY}">${comparison.currScore}<span style="font-size:9pt;font-weight:400;color:#9A9AB0">/100</span></span>
+
+      <div style="border:1px solid #E8E4DC;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(11,25,41,0.06)">
+
+        <!-- Header bar -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:${CREAM};border-bottom:1px solid ${BORDER}">
+          <div style="font-size:9pt;font-weight:600;color:${NAVY}">Audit du <strong>${esc(refDateFmt)}</strong></div>
+          <div style="font-size:8pt;color:#9A9AB0">${esc(comparison.refAgence)}</div>
+        </div>
+
+        <!-- Score 3-column grid -->
+        <div style="display:grid;grid-template-columns:1fr 64px 1fr;align-items:center;gap:10px;padding:18px 20px;border-bottom:1px solid #F0EDE8">
+
+          <!-- Précédent -->
+          <div style="background:#FAF8F4;border:1px solid #E8E4DC;border-radius:10px;padding:14px 16px">
+            <div style="font-size:7.5pt;font-weight:700;color:#9A9AB0;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:7px">Précédent</div>
+            <div style="font-size:26pt;font-weight:800;color:#1A1A2E;line-height:1;margin-bottom:7px">
+              ${comparison.prevScore}<span style="font-size:11pt;font-weight:400;color:#9A9AB0">/100</span>
+            </div>
+            <div style="display:inline-block;padding:2px 9px;border-radius:20px;font-size:8.5pt;font-weight:600;background:${esc(pn.bg)};color:${esc(pn.color)};margin-bottom:5px">${esc(pn.label)}</div>
+            <div style="font-size:8.5pt;color:#9A9AB0">${esc(refDateFmt)}</div>
+          </div>
+
+          <!-- Delta circle -->
+          <div style="display:flex;flex-direction:column;align-items:center;gap:5px">
+            <div style="width:52px;height:52px;border-radius:50%;background:${sBg};border:1.5px solid ${sColor}40;display:flex;flex-direction:column;align-items:center;justify-content:center">
+              <span style="font-size:15pt;color:${sColor};line-height:1">${sArrow}</span>
+              <span style="font-size:8.5pt;font-weight:800;color:${sColor};line-height:1.1">${sDeltaStr}</span>
+            </div>
+            <div style="font-size:7.5pt;color:#9A9AB0;font-weight:600;letter-spacing:0.03em">pts</div>
+          </div>
+
+          <!-- Actuel -->
+          <div style="background:${esc(niveauBg)};border:1px solid ${esc(niveauColor)}33;border-radius:10px;padding:14px 16px">
+            <div style="font-size:7.5pt;font-weight:700;color:${esc(niveauColor)};text-transform:uppercase;letter-spacing:0.06em;margin-bottom:7px">Actuel</div>
+            <div style="font-size:26pt;font-weight:800;color:#1A1A2E;line-height:1;margin-bottom:7px">
+              ${comparison.currScore}<span style="font-size:11pt;font-weight:400;color:#9A9AB0">/100</span>
+            </div>
+            <div style="display:inline-block;padding:2px 9px;border-radius:20px;font-size:8.5pt;font-weight:600;background:rgba(255,255,255,0.65);color:${esc(niveauColor)}">${esc(niveauLabel)}</div>
           </div>
         </div>
-        <div style="padding:6px 16px;border-radius:20px;background:${sBg};color:${sColor};font-size:11pt;font-weight:800;white-space:nowrap;border:1px solid ${sBorder}">
-          ${sDelta >= 0 ? '↑ +' : '↓ '}${sDelta.toFixed(1)} pts
+
+        <!-- Stats row -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 20px;background:#FAFAF8;border-bottom:1px solid #F0EDE8">
+          <div style="background:#fff;border:1px solid #E8E4DC;border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:8.5pt;color:#9A9AB0">Postes en anomalie</span>
+            <span style="font-size:9.5pt;font-weight:700;color:#1A1A2E">
+              <span style="color:#C0C0D0;font-weight:400">${prevNbAnom}</span>
+              <span style="color:#9A9AB0;margin:0 4px">→</span>
+              <span style="color:${anomColor}">${currNbAnom}</span>
+            </span>
+          </div>
+          <div style="background:#fff;border:1px solid #E8E4DC;border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:8.5pt;color:#9A9AB0">Score</span>
+            <span style="font-size:9.5pt;font-weight:700;color:#1A1A2E">
+              <span style="color:#C0C0D0;font-weight:400">${comparison.prevScore}</span>
+              <span style="color:#9A9AB0;margin:0 4px">→</span>
+              <span style="color:${esc(niveauColor)}">${comparison.currScore}</span>
+            </span>
+          </div>
         </div>
+
+        <!-- Changes table -->
+        ${miniRows ? `
+        <table style="width:100%;border-collapse:collapse">
+          <thead>
+            <tr style="background:#F5F4F0">
+              <th style="text-align:left;padding:8px 14px;font-size:7.5pt;color:#B0B0C8;font-weight:700;text-transform:uppercase;letter-spacing:0.08em">Poste</th>
+              <th style="text-align:right;padding:8px 14px;font-size:7.5pt;color:#B0B0C8;font-weight:700;text-transform:uppercase;letter-spacing:0.08em">Nombre</th>
+              <th style="text-align:right;padding:8px 14px;font-size:7.5pt;color:#B0B0C8;font-weight:700;text-transform:uppercase;letter-spacing:0.08em">Montant</th>
+            </tr>
+          </thead>
+          <tbody>${miniRows}</tbody>
+        </table>` : `
+        <div style="padding:14px 18px;font-size:9pt;color:#1A7A4A;font-weight:600;background:#EAF6EF;display:flex;align-items:center;gap:8px">
+          <span>✓</span> Aucun écart significatif par rapport à l'audit de référence.
+        </div>`}
+
       </div>
-      ${miniRows ? `
-      <table style="width:100%;border-collapse:collapse">
-        <thead>
-          <tr style="background:#F9F8F5">
-            <th style="text-align:left;padding:7px 13px;font-size:7.5pt;color:#9A9AB0;font-weight:700;text-transform:uppercase;letter-spacing:0.07em">Anomalie</th>
-            <th style="text-align:right;padding:7px 13px;font-size:7.5pt;color:#9A9AB0;font-weight:700;text-transform:uppercase;letter-spacing:0.07em">Nombre</th>
-            <th style="text-align:right;padding:7px 13px;font-size:7.5pt;color:#9A9AB0;font-weight:700;text-transform:uppercase;letter-spacing:0.07em">Montant</th>
-          </tr>
-        </thead>
-        <tbody>${miniRows}</tbody>
-      </table>` : `
-      <div style="padding:14px 18px;font-size:9pt;color:#1A7A4A;font-weight:600;background:#EAF6EF;display:flex;align-items:center;gap:8px">
-        <span>✓</span> Aucun écart significatif par rapport à l'audit de référence.
-      </div>`}
     </div>`
   }
 
@@ -703,9 +770,8 @@ h1, h2, h3, .section-title {
       : ''
 
     const groupsHTML = bilan.groups.map(g => {
-      const isRed = g.riskColor === '#B01A1A'
-      const grpBg = isRed ? '#FEF5F5' : '#FEF9F3'
-      const grpBorder = isRed ? '#F5AAAA' : '#F5C89A'
+      const grpBg = g.riskColor === '#B01A1A' ? '#FEF5F5' : g.riskColor === '#C05C1A' ? '#FEF9F0' : g.riskColor === '#C8A020' ? '#FFFBEC' : '#EAF6EF'
+      const grpBorder = g.riskColor === '#B01A1A' ? '#F5AAAA' : g.riskColor === '#C05C1A' ? '#F5C89A' : g.riskColor === '#C8A020' ? '#E8D89A' : '#A8D8BC'
       return `
       <div style="margin-top:22px">
         <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:8px;background:${grpBg};margin-bottom:10px;border:1px solid ${grpBorder}">

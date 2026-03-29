@@ -93,8 +93,8 @@ export function FileDropCard({ config, mode }: FileDropCardProps) {
         {loaded ? '✓ Chargé' : isForced ? '✓ OK' : error ? '⚠ Erreur' : '+ Importer'}
       </div>
 
-      {/* Bouton supprimer (fichier chargé) */}
-      {loaded && (
+      {/* Bouton supprimer (fichier chargé ou en erreur) */}
+      {(loaded || error) && (
         <button
           style={{
             position: 'absolute',

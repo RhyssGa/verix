@@ -16,7 +16,7 @@ export function TopBar({ mode }: TopBarProps) {
   const isGeneratingPdf = useAuditStore((s) => s.isGeneratingPdf)
   const setResetConfirm = useAuditStore((s) => s.setResetConfirm)
   const score = useScore()
-  const { generateReport, generateReportV2 } = useExport()
+  const { generateReportV2 } = useExport()
 
 
   return (
@@ -108,41 +108,22 @@ export function TopBar({ mode }: TopBarProps) {
         </button>
 
         {score && (
-          <>
-            <button
-              onClick={generateReport}
-              disabled={isGeneratingPdf}
-              className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-[12px] font-semibold transition-all"
-              style={{
-                background: isGeneratingPdf
-                  ? 'rgba(196,154,46,0.4)'
-                  : 'linear-gradient(135deg, #C49A2E, #A87E20)',
-                color: '#0B1929',
-                border: 'none',
-                cursor: isGeneratingPdf ? 'not-allowed' : 'pointer',
-                boxShadow: isGeneratingPdf ? 'none' : '0 2px 8px rgba(196,154,46,0.35)',
-              }}
-            >
-              {isGeneratingPdf ? '⏳ Génération…' : '📄 Rapport PDF'}
-            </button>
-
-            <button
-              onClick={generateReportV2}
-              disabled={isGeneratingPdf}
-              className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-[12px] font-semibold transition-all"
-              style={{
-                background: isGeneratingPdf
-                  ? 'rgba(99,102,241,0.3)'
-                  : 'linear-gradient(135deg, #6366F1, #4F46E5)',
-                color: '#fff',
-                border: 'none',
-                cursor: isGeneratingPdf ? 'not-allowed' : 'pointer',
-                boxShadow: isGeneratingPdf ? 'none' : '0 2px 8px rgba(99,102,241,0.35)',
-              }}
-            >
-              {isGeneratingPdf ? '⏳ Génération…' : '✦ PDF V2'}
-            </button>
-          </>
+          <button
+            onClick={generateReportV2}
+            disabled={isGeneratingPdf}
+            className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-[12px] font-semibold transition-all"
+            style={{
+              background: isGeneratingPdf
+                ? 'rgba(196,154,46,0.4)'
+                : 'linear-gradient(135deg, #C49A2E, #A87E20)',
+              color: '#0B1929',
+              border: 'none',
+              cursor: isGeneratingPdf ? 'not-allowed' : 'pointer',
+              boxShadow: isGeneratingPdf ? 'none' : '0 2px 8px rgba(196,154,46,0.35)',
+            }}
+          >
+            {isGeneratingPdf ? '⏳ Génération…' : '📄 Rapport PDF'}
+          </button>
         )}
       </div>
     </header>

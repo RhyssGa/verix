@@ -738,8 +738,8 @@ export function buildPDFPayload(
       const groups: PDFBilanGroup[] = []
       if (risk4Items.length > 0) groups.push({ riskLabel: '✗✗✗✗ Risque critique (4 anomalies)', riskColor: '#B01A1A', rows: makeGroup(risk4Items) })
       if (risk3Items.length > 0) groups.push({ riskLabel: '✗✗✗ Risque élevé (3 anomalies)', riskColor: '#C05C1A', rows: makeGroup(risk3Items) })
-      if (risk2Items.length > 0) groups.push({ riskLabel: '✗✗ Risque modéré (2 anomalies)', riskColor: '#C05C1A', rows: makeGroup(risk2Items) })
-      if (risk1Items.length > 0) groups.push({ riskLabel: '✗ Risque faible (1 anomalie)', riskColor: '#7A7A8C', rows: makeGroup(risk1Items) })
+      if (risk2Items.length > 0) groups.push({ riskLabel: '✗✗ Risque modéré (2 anomalies)', riskColor: '#C8A020', rows: makeGroup(risk2Items) })
+      if (risk1Items.length > 0) groups.push({ riskLabel: '✗ Risque faible (1 anomalie)', riskColor: '#1A7A4A', rows: makeGroup(risk1Items) })
 
       bilan = {
         note: sectionNotes['bilan'] || '',
@@ -1398,7 +1398,7 @@ h1, h2, h3, .section-title {
       : ''
 
     const groupsHTML = bilan.groups.map(g => {
-      const grpBg = g.riskColor === '#B01A1A' ? '#FEF5F5' : '#FEF8F0'
+      const grpBg = g.riskColor === '#B01A1A' ? '#FEF5F5' : g.riskColor === '#C05C1A' ? '#FEF8F0' : g.riskColor === '#C8A020' ? '#FFFBEC' : '#EAF6EF'
       return `
       <div style="margin-top:20px">
         <div style="display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:6px;background:${grpBg};margin-bottom:8px">
