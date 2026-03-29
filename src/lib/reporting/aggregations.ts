@@ -4,6 +4,15 @@
 
 import { getQuarter, getPreviousQuarter, sameQuarter, type QuarterRef, type Quarter } from './quarters'
 
+function scoreToNiveau(score: number): string {
+  if (score >= 90) return 'Excellent'
+  if (score >= 85) return 'Bien'
+  if (score >= 80) return 'Satisfaisant'
+  if (score >= 70) return 'Attention'
+  if (score >= 60) return 'Vigilance'
+  return 'Dégradé'
+}
+
 export interface ReportingEntry {
   id: string
   batchId: string
@@ -105,7 +114,7 @@ export function buildAgencyRows(
       return {
         agence: e.agence,
         scoreGlobal: e.scoreGlobal,
-        niveau: e.niveau,
+        niveau: scoreToNiveau(e.scoreGlobal),
         nbAnomalies: e.nbAnomalies,
         totalPenalite: e.totalPenalite,
         deltaGroupe,
@@ -197,7 +206,7 @@ export function buildCumulatedRows(
     .map(({ entry, year, quarter }) => ({
       agence: entry.agence,
       scoreGlobal: entry.scoreGlobal,
-      niveau: entry.niveau,
+      niveau: scoreToNiveau(entry.scoreGlobal),
       nbAnomalies: entry.nbAnomalies,
       totalPenalite: entry.totalPenalite,
       deltaGroupe: groupAvg !== null ? Math.round((entry.scoreGlobal - groupAvg) * 10) / 10 : null,
