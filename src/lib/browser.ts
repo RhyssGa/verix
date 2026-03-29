@@ -10,9 +10,23 @@ export async function launchBrowser() {
   if (isProduction) {
     const chromium = (await import('@sparticuz/chromium')).default
     const puppeteer = (await import('puppeteer-core')).default
+
+    const executablePath = await chromium.executablePath()
+
+    if (!executablePath) {
+      throw new Error('[browser] executablePath vide — @sparticuz/chromium n\'a pas pu résoudre le binaire Chromium')
+    }
+
     return puppeteer.launch({
-      args: chromium.args,
-      executablePath: await chromium.executablePath(),
+      args: [
+        ...chromium.args,
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--single-process',
+      ],
+      executablePath,
       headless: true,
     })
   }
