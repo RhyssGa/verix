@@ -21,17 +21,7 @@ interface AuditPageProps {
   mode: 'gerance' | 'copro'
 }
 
-const sectionTitle: React.CSSProperties = {
-  fontSize: 11,
-  fontWeight: 600,
-  letterSpacing: '0.8px',
-  textTransform: 'uppercase',
-  color: '#7A7A8C',
-  marginBottom: 14,
-  display: 'flex',
-  alignItems: 'center',
-  gap: 10,
-}
+const sectionTitleClass = 'text-[11px] font-semibold tracking-[0.8px] uppercase text-[#7A7A8C] mb-[14px] flex items-center gap-[10px]'
 
 export function AuditPage({ mode }: AuditPageProps) {
   const setMode = useAuditStore((s) => s.setMode)
@@ -43,29 +33,29 @@ export function AuditPage({ mode }: AuditPageProps) {
   }, [mode, setMode])
 
   return (
-    <div style={{ minHeight: '100vh', background: '#FAF8F4', display: 'flex', flexDirection: 'column' }}>
+    <div className="min-h-screen bg-[#FAF8F4] flex flex-col">
       <TopBar mode={mode} />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+      <div className="grid flex-1 min-h-0 overflow-hidden" style={{ gridTemplateColumns: '280px 1fr' }}>
         {/* Sidebar */}
         <Sidebar mode={mode} />
 
         {/* Main content */}
-        <main style={{ padding: 28, overflowY: 'auto' }}>
+        <main className="p-7 overflow-y-auto">
 
           {/* Imports Power BI */}
-          <div style={sectionTitle}>
+          <div className={sectionTitleClass}>
             <span>Imports Power BI</span>
-            <span style={{ flex: 1, height: 1, background: '#E8E4DC' }} />
+            <span className="flex-1 h-px bg-[#E8E4DC]" />
           </div>
           <FileUploadGrid mode={mode} />
 
           {/* Scoring global */}
           {score && (
             <>
-              <div style={{ ...sectionTitle, marginTop: 24 }}>
+              <div className={`${sectionTitleClass} mt-6`}>
                 <span>Scoring global de l&apos;audit</span>
-                <span style={{ flex: 1, height: 1, background: '#E8E4DC' }} />
+                <span className="flex-1 h-px bg-[#E8E4DC]" />
               </div>
               <ScoreBanner score={score} />
             </>
@@ -74,36 +64,31 @@ export function AuditPage({ mode }: AuditPageProps) {
           {/* Clôture : note + validation */}
           {score && (
             <>
-              <div style={{ ...sectionTitle, marginTop: 24 }}>
+              <div className={`${sectionTitleClass} mt-6`}>
                 <span>Clôture de l&apos;audit</span>
-                <span style={{ flex: 1, height: 1, background: '#E8E4DC' }} />
+                <span className="flex-1 h-px bg-[#E8E4DC]" />
               </div>
-              <div style={{ marginBottom: 20 }}><GlobalNote /></div>
+              <div className="mb-5"><GlobalNote /></div>
               <ValidationBlock />
             </>
           )}
 
           {/* Comparaison */}
-          {score && <div style={{ marginTop: 24 }}><ComparisonPanel /></div>}
+          {score && <div className="mt-6"><ComparisonPanel /></div>}
 
           {/* Anomaly cards */}
-          <div style={{ ...sectionTitle, marginTop: 24 }}>
+          <div className={`${sectionTitleClass} mt-6`}>
             <span>Récapitulatif des anomalies</span>
-            <span style={{ flex: 1, height: 1, background: '#E8E4DC' }} />
+            <span className="flex-1 h-px bg-[#E8E4DC]" />
           </div>
 
           {hasData ? (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-              gap: 14,
-              marginBottom: 32,
-            }}>
+            <div className="grid gap-[14px] mb-8" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
               {mode === 'gerance' ? <GeranceCards /> : <CoproCards />}
             </div>
           ) : (
-            <div style={{ textAlign: 'center', padding: '60px 20px', color: '#7A7A8C', fontSize: 13 }}>
-              <div style={{ fontSize: 48, marginBottom: 14, opacity: 0.4 }}>
+            <div className="text-center px-5 py-[60px] text-[#7A7A8C] text-[13px]">
+              <div className="text-[48px] mb-[14px] opacity-40">
                 {mode === 'gerance' ? '🏠' : '🏢'}
               </div>
               Importez vos fichiers et sélectionnez une agence pour afficher le récapitulatif

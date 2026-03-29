@@ -76,7 +76,7 @@ export function QuittancementCard({
           </div>
           <div className="flex justify-between text-[10px] text-muted-foreground mt-0.5">
             <span>0%</span>
-            <span style={{ color: barColor, fontWeight: 600 }}>{pct(ratio)}</span>
+            <span className="font-semibold" style={{ color: barColor }}>{pct(ratio)}</span>
             <span>100%</span>
           </div>
         </div>

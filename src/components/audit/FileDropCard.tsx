@@ -33,28 +33,16 @@ export function FileDropCard({ config, mode }: FileDropCardProps) {
 
   const isOk = loaded || isForced
 
-  const cardStyle: React.CSSProperties = {
-    border: isOk
-      ? '1.5px solid #1A7A4A'
-      : error
-      ? '1.5px solid #B01A1A'
-      : '1.5px dashed #E8E4DC',
-    borderRadius: 10,
-    padding: '10px 6px',
-    cursor: isOk ? 'default' : 'pointer',
-    position: 'relative',
-    background: isOk ? '#EAF6EF' : error ? '#FAEAEA' : '#fff',
-    transition: 'border-color .15s, background .15s',
-    textAlign: 'center' as const,
-    minWidth: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  }
-
   return (
     <div
-      style={cardStyle}
+      className={[
+        'rounded-[10px] p-[10px_6px] relative text-center min-w-0 flex flex-col items-center transition-[border-color,background] duration-150',
+        isOk
+          ? 'border-[1.5px] border-[#1A7A4A] bg-[#EAF6EF] cursor-default'
+          : error
+          ? 'border-[1.5px] border-[#B01A1A] bg-[#FAEAEA] cursor-pointer'
+          : 'border-[1.5px] border-dashed border-[#E8E4DC] bg-white cursor-pointer',
+      ].join(' ')}
       onClick={() => !isOk && inputRef.current?.click()}
       onMouseOver={(e) => {
         if (!isOk && !error) {
@@ -69,45 +57,22 @@ export function FileDropCard({ config, mode }: FileDropCardProps) {
         }
       }}
     >
-      <span style={{ fontSize: 18, marginBottom: 4, display: 'block', flexShrink: 0 }}>{config.icon}</span>
-      <div style={{
-        fontSize: 10,
-        fontWeight: 600,
-        color: '#1A1A2E',
-        marginBottom: 2,
-        lineHeight: 1.3,
-        flex: 1,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
+      <span className="text-[18px] mb-1 block shrink-0">{config.icon}</span>
+      <div className="text-[10px] font-semibold text-[#1A1A2E] mb-0.5 leading-[1.3] flex-1 flex items-center justify-center">
         {config.name}
       </div>
-      <div style={{
-        fontSize: 9,
-        fontWeight: 600,
-        marginTop: 4,
-        color: isOk ? '#1A7A4A' : error ? '#B01A1A' : '#7A7A8C',
-        flexShrink: 0,
-      }}>
+      <div className={[
+        'text-[9px] font-semibold mt-1 shrink-0',
+        isOk ? 'text-[#1A7A4A]' : error ? 'text-[#B01A1A]' : 'text-[#7A7A8C]',
+      ].join(' ')}>
         {loaded ? '✓ Chargé' : isForced ? '✓ OK' : error ? '⚠ Erreur' : '+ Importer'}
       </div>
 
       {/* Bouton supprimer (fichier chargé ou en erreur) */}
       {(loaded || error) && (
         <button
-          style={{
-            position: 'absolute',
-            top: 6,
-            right: 8,
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            fontSize: 12,
-            color: '#B01A1A',
-            padding: '0 2px',
-            lineHeight: 1,
-          }}
+          className="absolute top-[6px] right-2 bg-none border-none cursor-pointer text-[12px] text-[#B01A1A] px-0.5 py-0 leading-none"
+          style={{ background: 'none' }}
           onClick={(e) => { e.stopPropagation(); removeFile(config.id) }}
           title="Supprimer le fichier"
         >✕</button>
@@ -115,22 +80,13 @@ export function FileDropCard({ config, mode }: FileDropCardProps) {
 
       {/* Bouton "Aucune anomalie" — toujours présent pour aligner les hauteurs */}
       <button
-        style={{
-          marginTop: 5,
-          display: 'block',
-          width: '100%',
-          padding: '2px 4px',
-          fontSize: 8,
-          fontWeight: 600,
-          border: `1px solid ${isForced ? '#1A7A4A' : '#E8E4DC'}`,
-          borderRadius: 6,
-          cursor: canForce && !loaded ? 'pointer' : 'default',
-          background: isForced ? '#1A7A4A' : 'transparent',
-          color: isForced ? '#fff' : '#7A7A8C',
-          letterSpacing: '0.3px',
-          visibility: (canForce && !loaded) ? 'visible' : 'hidden',
-          flexShrink: 0,
-        }}
+        className={[
+          'mt-[5px] block w-full px-1 py-0.5 text-[8px] font-semibold rounded-[6px] tracking-[0.3px] shrink-0',
+          isForced
+            ? 'border border-[#1A7A4A] bg-[#1A7A4A] text-white'
+            : 'border border-[#E8E4DC] bg-transparent text-[#7A7A8C]',
+          (canForce && !loaded) ? 'cursor-pointer visible' : 'cursor-default invisible',
+        ].join(' ')}
         onClick={(e) => { e.stopPropagation(); if (canForce && !loaded) toggleForcedOk(config.id) }}
         title={isForced ? 'Annuler — remettre ce fichier en attente' : 'Forcer aucune anomalie sans importer le fichier'}
       >
@@ -141,7 +97,7 @@ export function FileDropCard({ config, mode }: FileDropCardProps) {
         ref={inputRef}
         type="file"
         accept=".xlsx,.xls"
-        style={{ display: 'none' }}
+        className="hidden"
         onChange={(e) => handleFile(e, config.id)}
       />
     </div>

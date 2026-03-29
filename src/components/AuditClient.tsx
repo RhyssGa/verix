@@ -1002,7 +1002,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
     nc?: number | null,
   ) {
     return (
-      <div style={{ display: 'flex', gap: '6px', marginTop: '8px' }}>
+      <div className="flex gap-[6px] mt-[8px]">
         <button className="voir-tous-btn" onClick={() => openModal(cId, title, rows, nameFn, valFn, valClass, subFn, cols, nc)}>
           Voir plus ({nb})
         </button>
@@ -1037,12 +1037,12 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
             />
           </svg>
           <div className="score-gauge-center">
-            <span className="score-gauge-val" style={{ color: niveau.color }}>{scoreGlobal}</span>
+            <span className="score-gauge-val" style={{ color: niveau.color }}>{scoreGlobal}</span>{/* dynamic runtime color */}
             <span className="score-gauge-max">/100</span>
           </div>
         </div>
         <div className="score-info">
-          <span className="score-level-badge" style={{ background: niveau.bg, color: niveau.color }}>
+          <span className="score-level-badge" style={{ background: niveau.bg, color: niveau.color }}>{/* dynamic runtime colors */}
             {niveau.label}
           </span>
           <div className="score-title">Score d&apos;audit</div>
@@ -1065,12 +1065,12 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
             )}
           </div>
         </div>
-        <div style={{ textAlign: 'right', minWidth: '110px', flexShrink: 0 }}>
-          <div style={{ fontSize: '10px', color: 'var(--muted)', marginBottom: '4px' }}>Pénalité totale</div>
-          <div style={{ fontSize: '22px', fontWeight: 800, color: totalPenalite > 0 ? 'var(--red)' : 'var(--green)' }}>
+        <div className="text-right min-w-[110px] shrink-0">
+          <div className="text-[10px] text-[color:var(--muted)] mb-[4px]">Pénalité totale</div>
+          <div className="text-[22px] font-[800]" style={{ color: totalPenalite > 0 ? 'var(--red)' : 'var(--green)' }}>{/* dynamic color */}
             {totalPenalite > 0 ? '−' + totalPenalite.toFixed(1) : '0'}
           </div>
-          <div style={{ fontSize: '10px', color: 'var(--muted)', marginTop: '4px' }}>
+          <div className="text-[10px] text-[color:var(--muted)] mt-[4px]">
             {anomalies.filter(a => !a.exclu).length} éléments évalués
           </div>
         </div>
@@ -1123,7 +1123,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
         )}
         <div className="sd-total">
           <span>Total</span>
-          <span style={{ color: anom.penalite > 0 ? 'var(--red)' : 'var(--green)', fontWeight: 700 }}>
+          <span className="font-[700]" style={{ color: anom.penalite > 0 ? 'var(--red)' : 'var(--green)' }}>{/* dynamic color */}
             {anom.penalite > 0 ? '−' + anom.penalite.toFixed(1) : '0'} / {anom.penaliteMax} pts
           </span>
         </div>
@@ -1170,15 +1170,14 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
               <div className="rc-divider" />
               <div className="rc-row">
                 <span className="rc-row-label">Écart garantie − pointe</span>
-                <span className={`rc-row-val ${lvl}`} style={{ fontSize: '15px' }}>
+                <span className={`rc-row-val ${lvl} text-[15px]`}>
                   {ecart >= 0 ? '+' : ''}{eur(ecart, 2)}
                 </span>
               </div>
-              <div style={{
-                marginTop: '10px', fontSize: '11px', padding: '8px 10px', borderRadius: '7px',
-                background: ok ? 'var(--green-bg)' : 'var(--red-bg)',
-                color: ok ? 'var(--green)' : 'var(--red)',
-              }}>
+              <div
+                className="mt-[10px] text-[11px] p-[8px_10px] rounded-[7px]"
+                style={{ background: ok ? 'var(--green-bg)' : 'var(--red-bg)', color: ok ? 'var(--green)' : 'var(--red)' }}
+              >{/* dynamic bg/color based on ok boolean */}
                 {ok
                   ? '✓ La garantie couvre la pointe. Situation conforme.'
                   : '✗ La pointe dépasse la garantie. Risque de non-conformité.'}
@@ -1186,10 +1185,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
             </>
           )}
           {noData && (
-            <div style={{
-              marginTop: '10px', fontSize: '11px', padding: '8px 10px', borderRadius: '7px',
-              background: 'var(--orange-bg)', color: 'var(--orange)',
-            }}>
+            <div className="mt-[10px] text-[11px] p-[8px_10px] rounded-[7px] bg-[color:var(--orange-bg)] text-[color:var(--orange)]">
               ⚠ Renseignez les deux champs pour le contrôle.
             </div>
           )}
@@ -1239,7 +1235,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
           {items.length > 0 ? (
             <>
               <div className="rc-divider" />
-              <div style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '4px' }}>
+              <div className="text-[11px] text-[color:var(--muted)] mb-[4px]">
                 {includedCount}/{items.length} inclus dans le rapport PDF
               </div>
               <div className="mini-list">
@@ -1263,8 +1259,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
               </div>
               {items.length > MAX_PREVIEW && (
                 <button
-                  className="voir-tous-btn"
-                  style={{ marginTop: '6px' }}
+                  className="voir-tous-btn mt-[6px]"
                   onClick={() => setShowAllNonClot(v => !v)}
                 >
                   {showAllNonClot ? 'Voir moins' : `Voir tous (${items.length})`}
@@ -1272,7 +1267,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
               )}
             </>
           ) : (
-            <div style={{ fontSize: '12px', color: 'var(--info)', paddingTop: '4px' }}>Tous rapprochements clôturés</div>
+            <div className="text-[12px] text-[color:var(--info)] pt-[4px]">Tous rapprochements clôturés</div>
           )}
           {renderSectionNote('bq_nonclot')}
         </div>
@@ -1329,7 +1324,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
               )}
             </>
           ) : (
-            <div style={{ fontSize: '12px', color: 'var(--green)', paddingTop: '4px' }}>✓ Banque à jour</div>
+            <div className="text-[12px] text-[color:var(--green)] pt-[4px]">✓ Banque à jour</div>
           )}
           {anomBq && renderScoreDetail(anomBq)}
           {renderSectionNote('bqrapp')}
@@ -1392,7 +1387,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
               )}
             </>
           ) : (
-            <div style={{ fontSize: '12px', color: 'var(--green)', paddingTop: '4px' }}>✓ Compta à jour</div>
+            <div className="text-[12px] text-[color:var(--green)] pt-[4px]">✓ Compta à jour</div>
           )}
           {anomCpta && renderScoreDetail(anomCpta)}
           {renderSectionNote('cptarapp')}
@@ -1467,7 +1462,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
 
   function renderCarteEtatFinancier(bilan: ExcelRow[]) {
     if (!bilan.length) return (
-      <div className="recap-card" style={{ gridColumn: '1 / -1' }}>
+      <div className="recap-card col-[1_/_-1]">
         <div className="rc-header">
           <div className="rc-icon icon-orange">📊</div>
           <div>
@@ -1477,7 +1472,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
           <span className="rc-badge badge-info">—</span>
         </div>
         <div className="rc-body">
-          <div style={{ fontSize: '12px', color: 'var(--muted)', padding: '8px 0' }}>
+          <div className="text-[12px] text-[color:var(--muted)] py-[8px]">
             Déposez le fichier <strong>Bilan / État financier</strong> pour afficher l&apos;analyse du portefeuille.
           </div>
         </div>
@@ -1528,11 +1523,11 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
 
     const riskHeader = (
       <div className="risk-header">
-        <span className="risk-row-name" style={{ fontSize: '9px', fontWeight: 400 }}>Résidence</span>
-        <span className="risk-row-lots" style={{ fontSize: '9px' }}>Lots</span>
+        <span className="risk-row-name text-[9px] font-normal">Résidence</span>
+        <span className="risk-row-lots text-[9px]">Lots</span>
         <span className="risk-row-pct">
           {['Impayés', 'Charges', 'Travaux', 'Trésor.'].map(h => (
-            <span key={h} style={{ width: '42px', textAlign: 'center', fontSize: '9px', display: 'inline-block' }}>{h}</span>
+            <span key={h} className="w-[42px] text-center text-[9px] inline-block">{h}</span>
           ))}
         </span>
       </div>
@@ -1571,7 +1566,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
     }
 
     return (
-      <div className="recap-card" style={{ gridColumn: '1 / -1' }}>
+      <div className="recap-card col-[1_/_-1]">
         <div className="rc-header">
           <div className="rc-icon icon-orange">📊</div>
           <div>
@@ -1581,10 +1576,10 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
           {renderBadge(lvl)}
         </div>
         <div className="rc-body">
-          <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: '7px' }}>
+          <div className="text-[10px] font-[700] text-[color:var(--muted)] uppercase tracking-[0.5px] mb-[7px]">
             Répartition du portefeuille
           </div>
-          <div style={{ display: 'flex', height: '20px', borderRadius: '6px', overflow: 'hidden', marginBottom: '7px' }}>
+          <div className="flex h-[20px] rounded-[6px] overflow-hidden mb-[7px]">
             {segments.map((s, idx) => (
               <div
                 key={idx}
@@ -1598,34 +1593,34 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
               />
             ))}
           </div>
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '14px' }}>
+          <div className="flex gap-[12px] flex-wrap mb-[14px]">
             {segments.map((s, idx) => (
-              <span key={idx} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '10px' }}>
-                <span style={{ width: '10px', height: '10px', borderRadius: '2px', background: s.color, display: 'inline-block', flexShrink: 0 }} />
+              <span key={idx} className="flex items-center gap-[4px] text-[10px]">
+                <span className="w-[10px] h-[10px] rounded-[2px] inline-block shrink-0" style={{ background: s.color }} />{/* dynamic per-segment color */}
                 {s.label} : <b>{s.n}</b>
               </span>
             ))}
           </div>
           <div className="rc-divider" />
-          <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.5px', margin: '12px 0 10px' }}>
+          <div className="text-[10px] font-[700] text-[color:var(--muted)] uppercase tracking-[0.5px] my-[12px_0_10px]">
             Fréquence par type d&apos;anomalie
           </div>
           {freqData.map((f, idx) => {
             const fpct = total > 0 ? (f.n / total * 100).toFixed(0) : '0'
             const color = f.n > 0 ? 'var(--red)' : 'var(--green)'
             return (
-              <div key={idx} style={{ marginBottom: '9px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '3px' }}>
+              <div key={idx} className="mb-[9px]">
+                <div className="flex justify-between items-baseline mb-[3px]">
                   <div>
-                    <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text)' }}>{f.label}</span>
-                    <span style={{ fontSize: '10px', color: 'var(--muted)', marginLeft: '6px' }}>{f.sub}</span>
+                    <span className="text-[11px] font-[600] text-[color:var(--text)]">{f.label}</span>
+                    <span className="text-[10px] text-[color:var(--muted)] ml-[6px]">{f.sub}</span>
                   </div>
-                  <span style={{ fontSize: '12px', fontWeight: 700, color, flexShrink: 0, marginLeft: '8px' }}>
+                  <span className="text-[12px] font-[700] shrink-0 ml-[8px]" style={{ color }}>{/* dynamic: red if n>0, green if 0 */}
                     {f.n} / {total}
                   </span>
                 </div>
-                <div style={{ background: 'var(--border)', borderRadius: '4px', height: '8px', overflow: 'hidden' }}>
-                  <div style={{ width: `${fpct}%`, background: color, height: '100%', borderRadius: '4px' }} />
+                <div className="bg-[color:var(--border)] rounded-[4px] h-[8px] overflow-hidden">
+                  <div className="h-full rounded-[4px]" style={{ width: `${fpct}%`, background: color }} />{/* dynamic width + color */}
                 </div>
               </div>
             )
@@ -1633,7 +1628,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
           {nbRisque > 0 && (
             <>
               <div className="rc-divider" />
-              <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.5px', margin: '12px 0 8px' }}>
+              <div className="text-[10px] font-[700] text-[color:var(--muted)] uppercase tracking-[0.5px] my-[12px_0_8px]">
                 Détail — copropriétés à risque (≥2 anomalies)
               </div>
               {risk4.length > 0 && (
@@ -1642,7 +1637,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
                   {riskHeader}
                   {riskRows(risk4)}
                   {risk4.length > 6 && (
-                    <div style={{ cursor: 'pointer', color: 'var(--navy2)', fontSize: '11px', marginTop: '4px' }}
+                    <div className="cursor-pointer text-[color:var(--navy2)] text-[11px] mt-[4px]"
                       onClick={() => setBilanModal({ open: true, title: 'Risque ++++ — 4 anomalies', rows: risk4 })}>
                       → Voir les {risk4.length}
                     </div>
@@ -1655,7 +1650,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
                   {riskHeader}
                   {riskRows(risk3)}
                   {risk3.length > 6 && (
-                    <div style={{ cursor: 'pointer', color: 'var(--navy2)', fontSize: '11px', marginTop: '4px' }}
+                    <div className="cursor-pointer text-[color:var(--navy2)] text-[11px] mt-[4px]"
                       onClick={() => setBilanModal({ open: true, title: 'Risque +++ — 3 anomalies', rows: risk3 })}>
                       → Voir les {risk3.length}
                     </div>
@@ -1668,7 +1663,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
                   {riskHeader}
                   {riskRows(risk2)}
                   {risk2.length > 6 && (
-                    <div style={{ cursor: 'pointer', color: 'var(--navy2)', fontSize: '11px', marginTop: '4px' }}
+                    <div className="cursor-pointer text-[color:var(--navy2)] text-[11px] mt-[4px]"
                       onClick={() => setBilanModal({ open: true, title: 'Risque ++ — 2 anomalies', rows: risk2 })}>
                       → Voir les {risk2.length}
                     </div>
@@ -1683,7 +1678,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
               {riskHeader}
               {riskRows(risk1)}
               {risk1.length > 6 && (
-                <div style={{ cursor: 'pointer', color: 'var(--navy2)', fontSize: '11px', marginTop: '4px' }}
+                <div className="cursor-pointer text-[color:var(--navy2)] text-[11px] mt-[4px]"
                   onClick={() => setBilanModal({ open: true, title: 'Risque + — 1 anomalie', rows: risk1 })}>
                   → Voir les {risk1.length}
                 </div>
@@ -1691,7 +1686,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
             </div>
           )}
           {nbRisque === 0 && risk1.length === 0 && (
-            <div style={{ fontSize: '12px', color: 'var(--green)', paddingTop: '4px' }}>
+            <div className="text-[12px] text-[color:var(--green)] pt-[4px]">
               ✓ Aucune copropriété avec anomalie
             </div>
           )}
@@ -1741,11 +1736,11 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
               </div>
               <div className="ratio-bar-wrap">
                 <div className="ratio-bar-track">
-                  <div className="ratio-bar-fill" style={{ width: `${Math.min(100, ratio).toFixed(1)}%`, background: barColor }} />
+                  <div className="ratio-bar-fill" style={{ width: `${Math.min(100, ratio).toFixed(1)}%`, background: barColor }} />{/* dynamic width + color */}
                 </div>
                 <div className="ratio-bar-labels">
                   <span>0%</span>
-                  <span style={{ color: barColor, fontWeight: 600 }}>{pct(ratio)}</span>
+                  <span className="font-[600]" style={{ color: barColor }}>{pct(ratio)}</span>{/* dynamic color */}
                   <span>100%</span>
                 </div>
               </div>
@@ -1799,7 +1794,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
                 )}
               </>
             ) : (
-              <div style={{ fontSize: '12px', color: 'var(--green)', paddingTop: '4px' }}>✓ Aucun propriétaire débiteur actif</div>
+              <div className="text-[12px] text-[color:var(--green)] pt-[4px]">✓ Aucun propriétaire débiteur actif</div>
             )}
             {score && anomPropDeb && renderScoreDetail(anomPropDeb)}
             {renderSectionNote('propdeb')}
@@ -1844,7 +1839,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
                 )}
               </>
             ) : (
-              <div style={{ fontSize: '12px', color: 'var(--green)', paddingTop: '4px' }}>✓ Aucun propriétaire sorti débiteur</div>
+              <div className="text-[12px] text-[color:var(--green)] pt-[4px]">✓ Aucun propriétaire sorti débiteur</div>
             )}
             {score && anomPropSorti && renderScoreDetail(anomPropSorti)}
             {renderSectionNote('propdbsorti')}
@@ -1889,7 +1884,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
                 )}
               </>
             ) : (
-              <div style={{ fontSize: '12px', color: 'var(--info)', paddingTop: '4px' }}>Aucun créditeur à signaler</div>
+              <div className="text-[12px] text-[color:var(--info)] pt-[4px]">Aucun créditeur à signaler</div>
             )}
             {renderSectionNote('propcred')}
           </div>
@@ -1939,7 +1934,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
                 )}
               </>
             ) : (
-              <div style={{ fontSize: '12px', color: 'var(--green)', paddingTop: '4px' }}>✓ Aucun compte d&apos;attente débiteur</div>
+              <div className="text-[12px] text-[color:var(--green)] pt-[4px]">✓ Aucun compte d&apos;attente débiteur</div>
             )}
             {score && anomAttDeb && renderScoreDetail(anomAttDeb)}
             {renderSectionNote('attdeb')}
@@ -2015,7 +2010,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
                 )}
               </>
             ) : (
-              <div style={{ fontSize: '12px', color: 'var(--green)', paddingTop: '4px' }}>✓ Aucune balance déséquilibrée</div>
+              <div className="text-[12px] text-[color:var(--green)] pt-[4px]">✓ Aucune balance déséquilibrée</div>
             )}
             {score && anomBalance && renderScoreDetail(anomBalance)}
             {renderSectionNote('balance')}
@@ -2062,7 +2057,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
                 )}
               </>
             ) : (
-              <div style={{ fontSize: '12px', color: 'var(--green)', paddingTop: '4px' }}>✓ Aucun fournisseur débiteur</div>
+              <div className="text-[12px] text-[color:var(--green)] pt-[4px]">✓ Aucun fournisseur débiteur</div>
             )}
             {score && anomFournDeb && renderScoreDetail(anomFournDeb)}
             {renderSectionNote('fourndeb')}
@@ -2109,7 +2104,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
                 )}
               </>
             ) : (
-              <div style={{ fontSize: '12px', color: 'var(--green)', paddingTop: '4px' }}>✓ Aucun</div>
+              <div className="text-[12px] text-[color:var(--green)] pt-[4px]">✓ Aucun</div>
             )}
             {score && anomAttDeb && renderScoreDetail(anomAttDeb)}
             {renderSectionNote('cattdeb')}
@@ -2157,7 +2152,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
                 )}
               </>
             ) : (
-              <div style={{ fontSize: '12px', color: 'var(--info)', paddingTop: '4px' }}>Aucun</div>
+              <div className="text-[12px] text-[color:var(--info)] pt-[4px]">Aucun</div>
             )}
             {renderSectionNote('cattcred')}
           </div>
@@ -2204,7 +2199,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
                 )}
               </>
             ) : (
-              <div style={{ fontSize: '12px', color: 'var(--green)', paddingTop: '4px' }}>✓ Aucun</div>
+              <div className="text-[12px] text-[color:var(--green)] pt-[4px]">✓ Aucun</div>
             )}
             {score && anomVentesDeb && renderScoreDetail(anomVentesDeb)}
             {renderSectionNote('ventesdeb')}
@@ -2253,7 +2248,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
                 )}
               </>
             ) : (
-              <div style={{ fontSize: '12px', color: 'var(--info)', paddingTop: '4px' }}>Aucun</div>
+              <div className="text-[12px] text-[color:var(--info)] pt-[4px]">Aucun</div>
             )}
             {renderSectionNote('ventescred')}
           </div>
@@ -2290,27 +2285,32 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
               const vTvx  = r[18] != null && !isNaN(Number(r[18])) ? parseFloat(String(r[18])) : null
               const vBq   = parseFloat(String(r[25] ?? 0))
               const kpi = (val: string, bad: boolean, label: string, seuil: string, na: boolean) => (
-                <div style={{
-                  display: 'flex', flexDirection: 'column', alignItems: 'center',
-                  padding: '7px 10px', borderRadius: '8px', flex: 1, minWidth: '80px',
-                  background: na ? 'var(--cream)' : bad ? 'var(--red-bg)' : 'var(--green-bg)',
-                }}>
-                  <span style={{ fontSize: '18px', fontWeight: 700, color: na ? 'var(--muted)' : bad ? 'var(--red)' : 'var(--green)' }}>{val}</span>
-                  <span style={{ fontSize: '10px', color: 'var(--muted)', textAlign: 'center', marginTop: '2px' }}>{label}</span>
-                  <span style={{ fontSize: '9px', color: na ? 'var(--muted)' : bad ? 'var(--red)' : 'var(--green)', marginTop: '2px' }}>
+                <div
+                  className="flex flex-col items-center p-[7px_10px] rounded-[8px] flex-1 min-w-[80px]"
+                  style={{ background: na ? 'var(--cream)' : bad ? 'var(--red-bg)' : 'var(--green-bg)' }}
+                >{/* dynamic bg based on na/bad booleans */}
+                  <span
+                    className="text-[18px] font-[700]"
+                    style={{ color: na ? 'var(--muted)' : bad ? 'var(--red)' : 'var(--green)' }}
+                  >{/* dynamic color */}{val}</span>
+                  <span className="text-[10px] text-[color:var(--muted)] text-center mt-[2px]">{label}</span>
+                  <span
+                    className="text-[9px] mt-[2px]"
+                    style={{ color: na ? 'var(--muted)' : bad ? 'var(--red)' : 'var(--green)' }}
+                  >{/* dynamic color */}
                     {na ? 'n/a' : 'seuil ' + seuil}
                   </span>
                 </div>
               )
               return (
-                <div key={i} className="modal-row" style={{ flexWrap: 'wrap', alignItems: 'flex-start' }}>
-                  <div style={{ width: '100%', marginBottom: '8px' }}>
-                    <div style={{ fontSize: '13px', fontWeight: 700 }}>{String(r[1] || '—').replace(/^\d+-/, '')}</div>
-                    <div style={{ fontSize: '10px', color: 'var(--muted)', marginTop: '2px' }}>
+                <div key={i} className="modal-row flex-wrap items-start">
+                  <div className="w-full mb-[8px]">
+                    <div className="text-[13px] font-[700]">{String(r[1] || '—').replace(/^\d+-/, '')}</div>
+                    <div className="text-[10px] text-[color:var(--muted)] mt-[2px]">
                       {r[0]} · {r[4] || '?'} lots · <b>{r[7]}</b> anomalie(s)
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', width: '100%' }}>
+                  <div className="flex gap-[6px] flex-wrap w-full">
                     {kpi((vCop * 100).toFixed(0) + '%',  vCop > 0.30,           'Impayés coprop.',    '>30\u202f%',    false)}
                     {kpi((vChrg * 100).toFixed(0) + '%', vChrg > 1.00,          'Charges / Prov.',    '>100\u202f%',   false)}
                     {kpi(vTvx != null ? (vTvx * 100).toFixed(0) + '%' : '—', vTvx != null && vTvx > 1.00, 'Dépassem. travaux', '>100\u202f%', vTvx == null)}
@@ -2365,15 +2365,15 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
           </div>
           <div className="modal-body">
             {cols ? (
-              <div style={{ overflowX: 'auto' }}>
+              <div className="overflow-x-auto">
                 <table className="modal-multi-table">
                   <thead>
                     <tr>
                       {cols.map((c, ci) => (
-                        <th key={ci} style={{ textAlign: c.right ? 'right' : 'left' }}>{c.header}</th>
+                        <th key={ci} className={c.right ? 'text-right' : 'text-left'}>{c.header}</th>
                       ))}
-                      {!isInfo && <th style={{ whiteSpace: 'nowrap' }}>Statut</th>}
-                      <th style={{ width: '32px' }} />
+                      {!isInfo && <th className="whitespace-nowrap">Statut</th>}
+                      <th className="w-[32px]" />
                     </tr>
                   </thead>
                   <tbody>
@@ -2383,14 +2383,14 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
                       const excl = !ann.include
                       const hasC = !!ann.comment
                       acc.push(
-                        <tr key={k} style={excl ? { opacity: 0.55 } : undefined}>
+                        <tr key={k} style={excl ? { opacity: 0.55 } : undefined}>{/* dynamic opacity */}
                           {cols!.map((c, ci) => (
-                            <td key={ci} style={{ textAlign: c.right ? 'right' : 'left', textDecoration: excl ? 'line-through' : undefined }}>
+                            <td key={ci} className={c.right ? 'text-right' : 'text-left'} style={{ textDecoration: excl ? 'line-through' : undefined }}>{/* dynamic textDecoration */}
                               {c.fn(r, nc ?? null) || '—'}
                             </td>
                           ))}
                           {!isInfo && (
-                            <td style={{ whiteSpace: 'nowrap' }}>
+                            <td className="whitespace-nowrap">
                               <div className="status-toggle">
                                 <button className={`status-seg${ann.include ? ' seg-injustifie' : ''}`} onClick={() => { if (!ann.include) toggleInclude(cId, i) }}>✗</button>
                                 <button className={`status-seg${!ann.include ? ' seg-justifie' : ''}`} onClick={() => { if (ann.include) toggleInclude(cId, i) }}>✓</button>
@@ -2417,7 +2417,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
                       )
                       acc.push(
                         <tr key={k + '-c'}>
-                          <td colSpan={cols!.length + (isInfo ? 1 : 2)} style={{ padding: '0 10px 4px', borderBottom: 'none' }}>
+                          <td colSpan={cols!.length + (isInfo ? 1 : 2)} className="p-[0_10px_4px] border-b-0">
                             <div className={`modal-comment-zone${hasC ? ' open' : ''}`} id={`mcz_${k}`}>
                               <textarea
                                 className="modal-comment-input"
@@ -2443,7 +2443,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
                   <span className="modal-col-h-right">
                     <span className="modal-col-h-val">Montant</span>
                     {!isInfo && <span className="modal-col-h-status">Statut</span>}
-                    <span style={{ width: '28px' }} />
+                    <span className="w-[28px]" />
                   </span>
                 </div>
                 {displayPairs.map(({ r, i }) => {
@@ -2460,7 +2460,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
                       <div className="modal-row-body">
                         <div className="modal-row-top">
                           <span className={`modal-row-name${excl ? ' exclu' : ''}`}>{name}</span>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <div className="flex items-center gap-[6px]">
                             <span className={`modal-row-val ${valClass}${excl ? ' exclu' : ''}`}>{val}</span>
                             {!isInfo && (
                               <div className="status-toggle">
@@ -2512,12 +2512,12 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
           </div>
           <div className="modal-footer">
             {isInfo ? (
-              <span style={{ color: 'var(--info)', fontWeight: 600 }}>{rows.length} ligne(s)</span>
+              <span className="text-[color:var(--info)] font-[600]">{rows.length} ligne(s)</span>
             ) : (
               <span>
-                <span style={{ color: 'var(--red)', fontWeight: 600 }}>{includedRows.length} injustifiée(s)</span>
+                <span className="text-[color:var(--red)] font-[600]">{includedRows.length} injustifiée(s)</span>
                 {rows.length - includedRows.length > 0 && (
-                  <span style={{ color: 'var(--green)', marginLeft: '8px' }}>· {rows.length - includedRows.length} justifiée(s)</span>
+                  <span className="text-[color:var(--green)] ml-[8px]">· {rows.length - includedRows.length} justifiée(s)</span>
                 )}
               </span>
             )}
@@ -2604,7 +2604,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
         <div className="modal-box summary-modal" onClick={e => e.stopPropagation()}>
           <div className="modal-header">
             <span className="modal-title">📊 Synthèse — {mode === 'gerance' ? 'Gérance' : 'Copropriété'}</span>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <div className="flex gap-[8px] items-center">
               <button className="export-btn" onClick={exportSummary}>↓ Excel</button>
               <button className="modal-close" onClick={() => setShowSummary(false)}>✕</button>
             </div>
@@ -2708,7 +2708,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
       <div className="modal-overlay open" onClick={() => { setShowHistory(false); setSelectedHistoryIds(new Set()) }}>
         <div className="modal-box history-panel" onClick={e => e.stopPropagation()}>
           <div className="modal-header">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div className="flex items-center gap-[10px]">
               <input
                 type="checkbox"
                 className="history-checkbox"
@@ -2717,7 +2717,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
                 title="Tout sélectionner"
               />
               <span className="modal-title">📋 Historique des rapports</span>
-              <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 400 }}>
+              <span className="text-[12px] text-[color:var(--muted)] font-normal">
                 {filtered.length}/{reportHistory.length} entrée(s)
               </span>
             </div>
@@ -2795,7 +2795,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
                       {isCurrent && <span className="history-batch-now">Session en cours · </span>}
                       {fmtTs(entries[0].timestamp)}
                     </span>
-                    <span style={{ fontSize: '11px', color: 'var(--muted)', marginLeft: '4px' }}>
+                    <span className="text-[11px] text-[color:var(--muted)] ml-[4px]">
                       · {entries.length} rapport(s)
                     </span>
                     <button
@@ -2820,7 +2820,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
                       <span className="history-entry-date">{fmtTs(e.timestamp)}</span>
                       <span className="history-entry-agence">{e.agence}</span>
                       <span className="history-entry-mode">{e.mode === 'gerance' ? 'Gérance' : 'Copro'}</span>
-                      <span className="history-entry-score" style={{ color: e.scoreGlobal >= 80 ? 'var(--green)' : e.scoreGlobal >= 60 ? 'var(--orange)' : 'var(--red)' }}>
+                      <span className="history-entry-score" style={{ color: e.scoreGlobal >= 80 ? 'var(--green)' : e.scoreGlobal >= 60 ? 'var(--orange)' : 'var(--red)' }}>{/* dynamic score color */}
                         {e.scoreGlobal}/100
                       </span>
                       <span className="history-entry-niveau">{e.niveau}</span>
@@ -2841,13 +2841,11 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
             <div className="history-actions-bar">
               <span className="history-actions-count">{nbSelected} sélectionné(s)</span>
               <button
-                className="btn-danger"
-                style={{ fontSize: '12px', padding: '6px 16px' }}
+                className="btn-danger text-[12px] py-[6px] px-[16px]"
                 onClick={() => deleteSelectedHistory(selectedHistoryIds)}
               >🗑 Supprimer la sélection</button>
               <button
-                className="btn-secondary"
-                style={{ fontSize: '12px', padding: '6px 14px', background: 'transparent', color: 'var(--muted)', border: '1px solid var(--border)', borderRadius: '6px' }}
+                className="btn-secondary text-[12px] py-[6px] px-[14px] bg-transparent text-[color:var(--muted)] border border-[color:var(--border)] rounded-[6px]"
                 onClick={() => setSelectedHistoryIds(new Set())}
               >Annuler</button>
             </div>
@@ -2864,7 +2862,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
   function renderDeleteConfirmModal() {
     if (!deleteConfirm) return null
     return (
-      <div className="modal-overlay open" style={{ zIndex: 3000 }} onClick={() => setDeleteConfirm(null)}>
+      <div className="modal-overlay open z-[3000]" onClick={() => setDeleteConfirm(null)}>
         <div className="modal-box confirm-modal" onClick={e => e.stopPropagation()}>
           <div className="confirm-icon">🗑</div>
           <div className="confirm-title">Supprimer ce lot ?</div>
@@ -2892,7 +2890,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
     const agence = validateConfirm
     const hasScore = !!score
     return (
-      <div className="modal-overlay open" style={{ zIndex: 3000 }} onClick={() => setValidateConfirm(null)}>
+      <div className="modal-overlay open z-[3000]" onClick={() => setValidateConfirm(null)}>
         <div className="modal-box confirm-modal" onClick={e => e.stopPropagation()}>
           <div className="confirm-icon">✅</div>
           <div className="confirm-title">Valider l&apos;agence ?</div>
@@ -2916,7 +2914,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
     const norms = validateMultiConfirm
     const hasScore = !!score
     return (
-      <div className="modal-overlay open" style={{ zIndex: 3000 }} onClick={() => setValidateMultiConfirm(null)}>
+      <div className="modal-overlay open z-[3000]" onClick={() => setValidateMultiConfirm(null)}>
         <div className="modal-box confirm-modal" onClick={e => e.stopPropagation()}>
           <div className="confirm-icon">✅</div>
           <div className="confirm-title">Valider {norms.length} agences ?</div>
@@ -3000,11 +2998,11 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
         <tr key={a.id} className="comp-row">
           <td className="comp-label">{a.label}</td>
           <td className="comp-cell-num">
-            <div className="comp-curr" style={{ color: nbColor }}>{currNb ?? '—'}</div>
+            <div className="comp-curr" style={{ color: nbColor }}>{currNb ?? '—'}</div>{/* dynamic color */}
             {nbD !== null && nbD !== 0 && (
               <div className="comp-sub">
                 <span className="comp-prev-strike">{prevNb}</span>
-                <span className="comp-pill" style={{ background: nbD > 0 ? 'var(--red-bg)' : 'var(--green-bg)', color: nbColor }}>
+                <span className="comp-pill" style={{ background: nbD > 0 ? 'var(--red-bg)' : 'var(--green-bg)', color: nbColor }}>{/* dynamic bg+color */}
                   {nbD > 0 ? '↑' : '↓'} {nbSign}{nbD}
                 </span>
               </div>
@@ -3013,11 +3011,11 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
           <td className="comp-cell-num">
             {currMontant !== null && prevMontant !== null ? (
               <>
-                <div className="comp-curr" style={{ color: mtColor }}>{eur(currMontant, 0)}</div>
+                <div className="comp-curr" style={{ color: mtColor }}>{eur(currMontant, 0)}</div>{/* dynamic color */}
                 {mtD !== null && mtD !== 0 && (
                   <div className="comp-sub">
                     <span className="comp-prev-strike">{eur(prevMontant, 0)}</span>
-                    <span className="comp-pill" style={{ background: mtD > 0 ? 'var(--red-bg)' : 'var(--green-bg)', color: mtColor }}>
+                    <span className="comp-pill" style={{ background: mtD > 0 ? 'var(--red-bg)' : 'var(--green-bg)', color: mtColor }}>{/* dynamic bg+color */}
                       {mtD > 0 ? '↑' : '↓'} {mtSign}{eur(Math.abs(mtD), 0)}
                     </span>
                   </div>
@@ -3031,7 +3029,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
 
     return (
       <div className="comparison-panel">
-        <div className="comp-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div className="comp-header flex items-center justify-between">
           <span className="comp-title">🔄 Évolution vs audit précédent</span>
           <label className="comp-enable-label">
             <input
@@ -3044,7 +3042,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
         </div>
 
         {!comparisonEnabled ? (
-          <div className="comp-empty" style={{ fontStyle: 'italic' }}>Comparaison désactivée — non incluse dans le PDF.</div>
+          <div className="comp-empty italic">Comparaison désactivée — non incluse dans le PDF.</div>
         ) : (<>
 
         {/* Ref selector */}
@@ -3054,7 +3052,7 @@ export default function AuditClient({ mode }: { mode: AuditMode }) {
             <span className="comp-ref-single">
               <span className="comp-ref-date">{fmtDateTime(ref.timestamp)}</span>
               {ref.agence && <span className="comp-ref-agence">{ref.agence}</span>}
-              <span className="comp-ref-score" style={{ color: ref.scoreGlobal >= 80 ? 'var(--green)' : ref.scoreGlobal >= 60 ? 'var(--orange)' : 'var(--red)' }}>
+              <span className="comp-ref-score" style={{ color: ref.scoreGlobal >= 80 ? 'var(--green)' : ref.scoreGlobal >= 60 ? 'var(--orange)' : 'var(--red)' }}>{/* dynamic score color */}
                 {ref.scoreGlobal}/100
               </span>
             </span>

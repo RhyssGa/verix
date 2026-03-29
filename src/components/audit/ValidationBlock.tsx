@@ -25,34 +25,24 @@ export function ValidationBlock() {
   const allValidated = uniqueAgencies.every((a) => validatedAgencies.has(normalizeAgency(a)))
 
   return (
-    <div style={{
-      marginTop: 0,
-      borderRadius: 12,
-      border: allValidated ? '1.5px solid #1A7A4A' : '1.5px solid rgba(196,154,46,0.5)',
-      background: allValidated ? '#EAF6EF' : '#0B1929',
-      padding: '18px 20px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: 16,
-      flexWrap: 'wrap',
-    }}>
+    <div className={[
+      'mt-0 rounded-[12px] p-[18px_20px] flex items-center gap-4 flex-wrap',
+      allValidated
+        ? 'border-[1.5px] border-[#1A7A4A] bg-[#EAF6EF]'
+        : 'border-[1.5px] border-[rgba(196,154,46,0.5)] bg-[#0B1929]',
+    ].join(' ')}>
       {/* Icône + texte */}
-      <div style={{ flex: 1, minWidth: 180 }}>
-        <div style={{
-          fontSize: 11,
-          fontWeight: 700,
-          letterSpacing: '1px',
-          textTransform: 'uppercase',
-          color: allValidated ? '#1A7A4A' : 'rgba(196,154,46,0.8)',
-          marginBottom: 4,
-        }}>
+      <div className="flex-1 min-w-[180px]">
+        <div className={[
+          'text-[11px] font-bold tracking-[1px] uppercase mb-1',
+          allValidated ? 'text-[#1A7A4A]' : 'text-[rgba(196,154,46,0.8)]',
+        ].join(' ')}>
           {allValidated ? 'Audit sauvegardé' : 'Clôturer l\'audit'}
         </div>
-        <div style={{
-          fontSize: 13,
-          fontWeight: 600,
-          color: allValidated ? '#1A7A4A' : '#FFFFFF',
-        }}>
+        <div className={[
+          'text-[13px] font-semibold',
+          allValidated ? 'text-[#1A7A4A]' : 'text-white',
+        ].join(' ')}>
           {allValidated
             ? 'L\'audit a été validé et enregistré dans l\'historique.'
             : 'Validez et sauvegardez cet audit dans l\'historique.'}
@@ -60,44 +50,28 @@ export function ValidationBlock() {
       </div>
 
       {/* Boutons */}
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      <div className="flex gap-2 flex-wrap">
         {uniqueAgencies.length === 1 ? (
           <button
             onClick={() => setValidateConfirm(uniqueAgencies[0])}
-            style={{
-              padding: '10px 22px',
-              borderRadius: 8,
-              border: 'none',
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-              fontWeight: 700,
-              fontSize: 13,
-              letterSpacing: '0.3px',
-              background: allValidated
-                ? 'transparent'
-                : 'linear-gradient(135deg, #C49A2E, #A87E20)',
-              color: allValidated ? '#1A7A4A' : '#0B1929',
-              border: allValidated ? '1.5px solid #1A7A4A' : 'none',
-              boxShadow: allValidated ? 'none' : '0 2px 8px rgba(196,154,46,0.35)',
-            } as React.CSSProperties}
+            className={[
+              'px-[22px] py-[10px] rounded-[8px] cursor-pointer font-[inherit] font-bold text-[13px] tracking-[0.3px]',
+              allValidated
+                ? 'bg-transparent text-[#1A7A4A] border-[1.5px] border-[#1A7A4A] shadow-none'
+                : 'bg-gradient-to-br from-[#C49A2E] to-[#A87E20] text-[#0B1929] border-none shadow-[0_2px_8px_rgba(196,154,46,0.35)]',
+            ].join(' ')}
           >
             {allValidated ? '↩ Re-valider' : `Valider — ${normalizeAgency(uniqueAgencies[0])}`}
           </button>
         ) : (
           <button
             onClick={() => setValidateMultiConfirm(uniqueAgencies)}
-            style={{
-              padding: '10px 22px',
-              borderRadius: 8,
-              border: allValidated ? '1.5px solid #1A7A4A' : 'none',
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-              fontWeight: 700,
-              fontSize: 13,
-              background: allValidated ? 'transparent' : 'linear-gradient(135deg, #C49A2E, #A87E20)',
-              color: allValidated ? '#1A7A4A' : '#0B1929',
-              boxShadow: allValidated ? 'none' : '0 2px 8px rgba(196,154,46,0.35)',
-            }}
+            className={[
+              'px-[22px] py-[10px] rounded-[8px] cursor-pointer font-[inherit] font-bold text-[13px]',
+              allValidated
+                ? 'bg-transparent text-[#1A7A4A] border-[1.5px] border-[#1A7A4A] shadow-none'
+                : 'bg-gradient-to-br from-[#C49A2E] to-[#A87E20] text-[#0B1929] border-none shadow-[0_2px_8px_rgba(196,154,46,0.35)]',
+            ].join(' ')}
           >
             {allValidated ? `↩ Re-valider ${uniqueAgencies.length} agences` : `Valider ${uniqueAgencies.length} agences`}
           </button>

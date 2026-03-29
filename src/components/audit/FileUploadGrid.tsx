@@ -11,12 +11,10 @@ export function FileUploadGrid({ mode }: FileUploadGridProps) {
   const configs = mode === 'gerance' ? GERANCE_FILE_CONFIGS : COPRO_FILE_CONFIGS
 
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: `repeat(${configs.length}, 1fr)`,
-      gap: 8,
-      marginBottom: 32,
-    }}>
+    <div
+      className="grid gap-2 mb-8"
+      style={{ gridTemplateColumns: `repeat(${configs.length}, 1fr)` }}
+    >
       {configs.map((config) => (
         <FileDropCard key={config.id} config={config} mode={mode} />
       ))}

@@ -4,17 +4,6 @@ import { useState, useEffect } from 'react'
 import { useAuditStore } from '@/stores/useAuditStore'
 import { useAgencySelection } from '@/hooks/useAgencySelection'
 
-const sbLabel: React.CSSProperties = {
-  fontSize: 10,
-  fontWeight: 600,
-  letterSpacing: '0.8px',
-  textTransform: 'uppercase',
-  color: '#7A7A8C',
-  marginBottom: 14,
-  paddingBottom: 8,
-  borderBottom: '1px solid #E8E4DC',
-}
-
 export function AgencySelector() {
   const agencies = useAuditStore((s) => s.agencies)
   const reportAgencies = useAuditStore((s) => s.reportAgencies)
@@ -73,42 +62,35 @@ export function AgencySelector() {
 
   return (
     <div>
-      <div style={sbLabel}>
+      <div className="text-[10px] font-semibold tracking-[0.8px] uppercase text-[#7A7A8C] mb-[14px] pb-2 border-b border-[#E8E4DC]">
         Agences ({uniqueAgencies.length})
         {uniqueAgencies.length > 1 && (
-          <div style={{ fontWeight: 400, fontSize: 9, color: '#AAA', textTransform: 'none', letterSpacing: 0, marginTop: 3 }}>
+          <div className="font-normal text-[9px] text-[#AAA] normal-case tracking-normal mt-[3px]">
             ⌘/Ctrl+clic pour multi
           </div>
         )}
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <div className="flex flex-col gap-0.5">
         {uniqueAgencies.map((agency) => {
           const checked = isChecked(agency)
           return (
             <div
               key={normalizeAgency(agency)}
               onClick={(e) => handleClick(agency, e)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '4px 8px',
-                borderRadius: 6,
-                cursor: 'pointer',
-                fontSize: 12,
-                background: checked ? 'rgba(15,31,53,0.08)' : 'transparent',
-                color: checked ? '#1A1A2E' : '#7A7A8C',
-                fontWeight: checked ? 500 : 400,
-                userSelect: 'none',
-              }}
+              className={[
+                'flex items-center gap-2 px-2 py-1 rounded-[6px] cursor-pointer text-[12px] select-none',
+                checked
+                  ? 'bg-[rgba(15,31,53,0.08)] text-[#1A1A2E] font-medium'
+                  : 'bg-transparent text-[#7A7A8C] font-normal',
+              ].join(' ')}
             >
               <input
                 type="checkbox"
                 checked={checked}
                 onChange={() => {}}
-                style={{ accentColor: '#1A3252', width: 13, height: 13, cursor: 'pointer', pointerEvents: 'none' }}
+                className="w-[13px] h-[13px] cursor-pointer pointer-events-none accent-[#1A3252]"
               />
-              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={agency}>
+              <span className="overflow-hidden text-ellipsis whitespace-nowrap" title={agency}>
                 {normalizeAgency(agency)}
               </span>
             </div>

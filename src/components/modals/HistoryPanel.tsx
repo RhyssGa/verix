@@ -110,16 +110,12 @@ export function HistoryPanel() {
                 ...availableYears.map(y => [y, y] as [string, string]),
               ]},
             ].map(({ label, value, onChange, options }) => (
-              <div key={label} style={{ flex: 1 }}>
+              <div key={label} className="flex-1">
                 <div className="text-[10px] text-muted-foreground mb-0.5">{label}</div>
                 <select
                   value={value}
                   onChange={(e) => onChange(e.target.value)}
-                  style={{
-                    width: '100%', padding: '3px 6px', fontSize: 11,
-                    border: '1px solid #E8E4DC', borderRadius: 6,
-                    fontFamily: 'inherit', background: '#FAF8F4', color: '#1A1A2E',
-                  }}
+                  className="w-full px-1.5 py-[3px] text-[11px] border border-[#E8E4DC] rounded-[6px] font-[inherit] bg-[#FAF8F4] text-[#1A1A2E]"
                 >
                   {options.map(([v, l]) => (
                     <option key={v} value={v}>{l}</option>

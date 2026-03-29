@@ -7,34 +7,6 @@ interface ManualDataFormProps {
   mode: 'gerance' | 'copro'
 }
 
-const labelStyle: React.CSSProperties = {
-  display: 'block',
-  fontSize: 11,
-  fontWeight: 500,
-  color: '#7A7A8C',
-  marginBottom: 4,
-  textTransform: 'uppercase',
-  letterSpacing: '0.4px',
-}
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '8px 10px',
-  border: '1px solid #E8E4DC',
-  borderRadius: 7,
-  fontFamily: 'inherit',
-  fontSize: 13,
-  color: '#1A1A2E',
-  background: '#FAF8F4',
-  boxSizing: 'border-box',
-}
-
-const manualInputStyle: React.CSSProperties = {
-  ...inputStyle,
-  background: '#FFFCF0',
-  borderColor: '#E8C840',
-}
-
 export function ManualDataForm({ mode }: ManualDataFormProps) {
   const startDate = useAuditStore((s) => s.startDate)
   const endDate = useAuditStore((s) => s.endDate)
@@ -50,63 +22,53 @@ export function ManualDataForm({ mode }: ManualDataFormProps) {
   const setMandateCount = useAuditStore((s) => s.setMandateCount)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <div className="flex flex-col gap-5">
       {/* Identification */}
       <div>
-        <div style={{
-          fontSize: 10, fontWeight: 600, letterSpacing: '0.8px',
-          textTransform: 'uppercase', color: '#7A7A8C',
-          marginBottom: 14, paddingBottom: 8,
-          borderBottom: '1px solid #E8E4DC',
-        }}>
-        
+        <div className="text-[10px] font-semibold tracking-[0.8px] uppercase text-muted-foreground mb-3.5 pb-2 border-b border-border">
+
         </div>
         <AgencySelector />
-        <div style={{ marginTop: 16, marginBottom: 12 }}>
-          <label style={labelStyle}>Début de période</label>
+        <div className="mt-4 mb-3">
+          <label className="block text-[11px] font-medium text-muted-foreground mb-1 uppercase tracking-[0.4px]">Début de période</label>
           <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
-            style={inputStyle} />
+            className="w-full px-[10px] py-2 border border-border rounded-[7px] font-[inherit] text-[13px] text-text bg-cream box-border" />
         </div>
-        <div style={{ marginBottom: 12 }}>
-          <label style={labelStyle}>Fin de période</label>
+        <div className="mb-3">
+          <label className="block text-[11px] font-medium text-muted-foreground mb-1 uppercase tracking-[0.4px]">Fin de période</label>
           <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
-            style={inputStyle} />
+            className="w-full px-[10px] py-2 border border-border rounded-[7px] font-[inherit] text-[13px] text-text bg-cream box-border" />
         </div>
       </div>
 
       {/* Données manuelles */}
       <div>
-        <div style={{
-          fontSize: 10, fontWeight: 600, letterSpacing: '0.8px',
-          textTransform: 'uppercase', color: '#7A7A8C',
-          marginBottom: 14, paddingBottom: 8,
-          borderBottom: '1px solid #E8E4DC',
-        }}>
+        <div className="text-[10px] font-semibold tracking-[0.8px] uppercase text-muted-foreground mb-3.5 pb-2 border-b border-border">
           Informations agences
-          <div style={{ fontWeight: 400, fontSize: 9, color: '#AAA', textTransform: 'none', letterSpacing: 0, marginTop: 3 }}>Modifications possibles</div>
+          <div className="font-normal text-[9px] text-[#AAA] normal-case tracking-normal mt-[3px]">Modifications possibles</div>
         </div>
-        <div style={{ marginBottom: 12 }}>
-          <label style={labelStyle}>Garantie financière (€) ✏</label>
+        <div className="mb-3">
+          <label className="block text-[11px] font-medium text-muted-foreground mb-1 uppercase tracking-[0.4px]">Garantie financière (€) ✏</label>
           <input type="number" value={guarantee || ''} onChange={(e) => setGuarantee(parseFloat(e.target.value) || 0)}
-            placeholder="0" style={manualInputStyle} />
+            placeholder="0" className="w-full px-[10px] py-2 border border-[#E8C840] rounded-[7px] font-[inherit] text-[13px] text-text bg-[#FFFCF0] box-border" />
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+        <div className="grid grid-cols-2 gap-2 mb-3">
           <div>
-            <label style={labelStyle}>Pointe (€) ✏</label>
+            <label className="block text-[11px] font-medium text-muted-foreground mb-1 uppercase tracking-[0.4px]">Pointe (€) ✏</label>
             <input type="number" value={peak || ''} onChange={(e) => setPeak(parseFloat(e.target.value) || 0)}
-              placeholder="0" style={manualInputStyle} />
+              placeholder="0" className="w-full px-[10px] py-2 border border-[#E8C840] rounded-[7px] font-[inherit] text-[13px] text-text bg-[#FFFCF0] box-border" />
           </div>
           <div>
-            <label style={labelStyle}>Date pointe ✏</label>
+            <label className="block text-[11px] font-medium text-muted-foreground mb-1 uppercase tracking-[0.4px]">Date pointe ✏</label>
             <input type="date" value={peakDate} onChange={(e) => setPeakDate(e.target.value)}
-              style={manualInputStyle} />
+              className="w-full px-[10px] py-2 border border-[#E8C840] rounded-[7px] font-[inherit] text-[13px] text-text bg-[#FFFCF0] box-border" />
           </div>
         </div>
         {mode === 'gerance' && (
-          <div style={{ marginBottom: 12 }}>
-            <label style={labelStyle}>Nb mandats ✏</label>
+          <div className="mb-3">
+            <label className="block text-[11px] font-medium text-muted-foreground mb-1 uppercase tracking-[0.4px]">Nb mandats ✏</label>
             <input type="number" value={mandateCount || ''} onChange={(e) => setMandateCount(parseInt(e.target.value) || 0)}
-              placeholder="0" style={manualInputStyle} />
+              placeholder="0" className="w-full px-[10px] py-2 border border-[#E8C840] rounded-[7px] font-[inherit] text-[13px] text-text bg-[#FFFCF0] box-border" />
           </div>
         )}
       </div>

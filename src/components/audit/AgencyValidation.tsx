@@ -4,17 +4,6 @@ import { useAuditStore } from '@/stores/useAuditStore'
 import { useScore } from '@/stores/computed'
 import { normalizeAgency } from '@/lib/utils/helpers'
 
-const sbLabel: React.CSSProperties = {
-  fontSize: 10,
-  fontWeight: 600,
-  letterSpacing: '0.8px',
-  textTransform: 'uppercase',
-  color: '#7A7A8C',
-  marginBottom: 14,
-  paddingBottom: 8,
-  borderBottom: '1px solid #E8E4DC',
-}
-
 export function AgencyValidation() {
   const reportAgencies = useAuditStore((s) => s.reportAgencies)
   const validatedAgencies = useAuditStore((s) => s.validatedAgencies)
@@ -35,8 +24,8 @@ export function AgencyValidation() {
 
   return (
     <div>
-      <div style={sbLabel}>Validation</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div className="text-[10px] font-semibold tracking-[0.8px] uppercase text-muted-foreground mb-3.5 pb-2 border-b border-border">Validation</div>
+      <div className="flex flex-col gap-1.5">
         {uniqueAgencies.map((agency) => {
           const norm = normalizeAgency(agency)
           const isValidated = validatedAgencies.has(norm)
@@ -45,27 +34,10 @@ export function AgencyValidation() {
               key={agency}
               disabled={!score}
               onClick={() => setValidateConfirm(agency)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                fontSize: 12,
-                padding: '6px 8px',
-                borderRadius: 6,
-                border: '1px solid #1A7A4A',
-                color: '#1A7A4A',
-                background: 'transparent',
-                cursor: score ? 'pointer' : 'not-allowed',
-                opacity: score ? 1 : 0.4,
-                fontFamily: 'inherit',
-                transition: 'background .15s',
-                textAlign: 'left' as const,
-              }}
-              onMouseOver={(e) => { if (score) e.currentTarget.style.background = '#EAF6EF' }}
-              onMouseOut={(e) => { e.currentTarget.style.background = 'transparent' }}
+              className={`flex items-center gap-2 text-xs px-2 py-1.5 rounded-md border border-[#1A7A4A] text-[#1A7A4A] bg-transparent font-[inherit] transition-colors duration-150 text-left hover:bg-[#EAF6EF] ${score ? 'cursor-pointer opacity-100' : 'cursor-not-allowed opacity-40'}`}
             >
               <span>{isValidated ? '✅' : '☐'}</span>
-              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{norm}</span>
+              <span className="overflow-hidden text-ellipsis whitespace-nowrap">{norm}</span>
             </button>
           )
         })}
@@ -73,21 +45,7 @@ export function AgencyValidation() {
           <button
             disabled={!score}
             onClick={() => setValidateMultiConfirm(uniqueAgencies)}
-            style={{
-              marginTop: 4,
-              fontSize: 11,
-              padding: '6px 8px',
-              borderRadius: 6,
-              border: '1px solid #1A3252',
-              color: '#1A3252',
-              background: 'transparent',
-              cursor: score ? 'pointer' : 'not-allowed',
-              opacity: score ? 1 : 0.4,
-              fontFamily: 'inherit',
-              fontWeight: 500,
-            }}
-            onMouseOver={(e) => { if (score) e.currentTarget.style.background = 'rgba(15,31,53,0.08)' }}
-            onMouseOut={(e) => { e.currentTarget.style.background = 'transparent' }}
+            className={`mt-1 text-[11px] px-2 py-1.5 rounded-md border border-navy2 text-navy2 bg-transparent font-[inherit] font-medium hover:bg-[rgba(15,31,53,0.08)] ${score ? 'cursor-pointer opacity-100' : 'cursor-not-allowed opacity-40'}`}
           >
             ✅ Valider {uniqueAgencies.length} agences ensemble
           </button>

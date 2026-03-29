@@ -49,35 +49,17 @@ export function FinancialStateModal() {
         </DialogHeader>
 
         <div className="overflow-y-auto flex-1">
-          <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+          <table className="w-full border-collapse table-fixed">
             {/* En-têtes */}
             <thead>
-              <tr style={{ background: '#FAF8F4', borderBottom: '2px solid #E8E4DC' }}>
-                <th style={{
-                  textAlign: 'left',
-                  padding: '10px 16px',
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: '#7A7A8C',
-                  letterSpacing: '0.6px',
-                  textTransform: 'uppercase',
-                  width: '36%',
-                }}>
+              <tr className="bg-[#FAF8F4] border-b-2 border-[#E8E4DC]">
+                <th className="text-left px-4 py-[10px] text-[11px] font-semibold text-[#7A7A8C] tracking-[0.6px] uppercase w-[36%]">
                   Copropriété
                 </th>
                 {COLS.map((col) => (
-                  <th key={col.key} style={{
-                    textAlign: 'center',
-                    padding: '10px 8px',
-                    fontSize: 11,
-                    fontWeight: 600,
-                    color: '#7A7A8C',
-                    letterSpacing: '0.6px',
-                    textTransform: 'uppercase',
-                    width: '16%',
-                  }}>
+                  <th key={col.key} className="text-center px-2 py-[10px] text-[11px] font-semibold text-[#7A7A8C] tracking-[0.6px] uppercase w-[16%]">
                     <div>{col.label}</div>
-                    <div style={{ fontSize: 9, fontWeight: 400, color: '#AAA', marginTop: 1 }}>seuil {col.seuil}</div>
+                    <div className="text-[9px] font-normal text-[#AAA] mt-px">seuil {col.seuil}</div>
                   </th>
                 ))}
               </tr>
@@ -101,10 +83,10 @@ export function FinancialStateModal() {
                 ]
 
                 return (
-                  <tr key={i} style={{ borderBottom: '1px solid #F0EDE8' }}>
+                  <tr key={i} className="border-b border-[#F0EDE8]">
                     {/* Nom */}
-                    <td style={{ padding: '10px 16px' }}>
-                      <span style={{ fontSize: 12, fontWeight: 500, color: '#1A1A2E' }}>
+                    <td className="px-4 py-[10px]">
+                      <span className="text-[12px] font-medium text-[#1A1A2E]">
                         {truncate(String(r[1] || '—').replace(/^\d+-/, ''), 40)}
                       </span>
                     </td>
@@ -113,21 +95,16 @@ export function FinancialStateModal() {
                     {cells.map((cell, j) => {
                       const s = LEVEL_STYLES[cell.level]
                       return (
-                        <td key={j} style={{ padding: '8px', textAlign: 'center' }}>
-                          <div style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            background: s.bg,
-                            border: `2px solid ${s.border}`,
-                            borderRadius: 8,
-                            padding: '6px 12px',
-                            fontSize: 13,
-                            fontWeight: 800,
-                            color: s.text,
-                            minWidth: 68,
-                            boxShadow: `0 1px 4px ${s.border}33`,
-                          }}>
+                        <td key={j} className="p-2 text-center">
+                          <div
+                            className="inline-flex items-center justify-center rounded-[8px] px-3 py-1.5 text-[13px] font-extrabold min-w-[68px]"
+                            style={{
+                              background: s.bg,
+                              border: `2px solid ${s.border}`,
+                              color: s.text,
+                              boxShadow: `0 1px 4px ${s.border}33`,
+                            }}
+                          >
                             {cell.value}
                           </div>
                         </td>
