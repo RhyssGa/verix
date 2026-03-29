@@ -140,8 +140,9 @@ export function AgencyTable({ rows, groupAvg, target }: AgencyTableProps) {
               <td className="py-3 px-4 text-[12px] font-bold text-[#7A7A8C] uppercase tracking-[0.5px]">
                 Moyenne groupe
               </td>
-              <td className="py-3 px-4 text-center text-[18px] font-extrabold text-[#C49A2E]">
-                {groupAvg.toFixed(1)}
+              <td className="py-3 px-4 text-center">
+                <span className="text-[18px] font-extrabold text-[#C49A2E]">{groupAvg.toFixed(1)}</span>
+                <span className="text-[10px] text-[#B0B0C8] ml-1">/100</span>
               </td>
               <td colSpan={5} />
             </tr>
