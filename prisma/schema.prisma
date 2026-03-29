@@ -27,6 +27,23 @@ model AuditSnapshot {
   @@index([createdAt])
 }
 
+// ── Import Sessions ─────────────────────────────────────────────────────────
+
+model ImportSession {
+  id          String   @id @default(uuid())
+  mode        String   // 'gerance' | 'copro'
+  label       String?  // optionnel — ex: "Import Q1 Mars 2025"
+  agences     Json     // string[] — agences détectées au moment de la validation
+  quarterYear Int      // ex: 2025
+  quarter     Int      // 1 | 2 | 3 | 4
+  snapshot    Json     // HistorySnapshot complet (même structure que AuditSnapshot.snapshot)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([mode, quarterYear, quarter])
+  @@index([createdAt])
+}
+
 // ── Better Auth ─────────────────────────────────────────────────────────────
 
 model user {

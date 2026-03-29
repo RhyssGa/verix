@@ -1,6 +1,7 @@
 'use client'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import { QuarterlyMemory } from '@/components/home/QuarterlyMemory'
 
 export default function HomePage() {
   const router = useRouter()
@@ -61,6 +62,9 @@ export default function HomePage() {
       }}>
         Sélectionnez le type d&apos;audit
       </div>
+
+      {/* Mémoire trimestrielle */}
+      <QuarterlyMemory />
 
       {/* Cards de sélection */}
       <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center' }}>

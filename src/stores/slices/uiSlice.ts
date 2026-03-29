@@ -34,6 +34,7 @@ export interface UiSlice {
   nonClosedIncluded: Record<string, boolean>
   showAllNonClosed: boolean
   modalSearchTerm: string
+  importSessionId: string | null
   openModal: (modal: Omit<ModalState, 'open'>) => void
   closeModal: () => void
   openFinancialStateModal: (title: string, rows: ExcelRow[]) => void
@@ -49,6 +50,7 @@ export interface UiSlice {
   setNonClosedIncluded: (included: Record<string, boolean>) => void
   setShowAllNonClosed: (show: boolean) => void
   setModalSearchTerm: (term: string) => void
+  setImportSessionId: (id: string | null) => void
   resetUi: () => void
 }
 
@@ -76,6 +78,7 @@ const initialUiState = {
   nonClosedIncluded: {} as Record<string, boolean>,
   showAllNonClosed: false,
   modalSearchTerm: '',
+  importSessionId: null as string | null,
 }
 
 export const createUiSlice: StateCreator<UiSlice, [], [], UiSlice> = (set) => ({
@@ -103,5 +106,6 @@ export const createUiSlice: StateCreator<UiSlice, [], [], UiSlice> = (set) => ({
   setNonClosedIncluded: (included) => set({ nonClosedIncluded: included }),
   setShowAllNonClosed: (show) => set({ showAllNonClosed: show }),
   setModalSearchTerm: (term) => set({ modalSearchTerm: term }),
+  setImportSessionId: (id) => set({ importSessionId: id }),
   resetUi: () => set(initialUiState),
 })
