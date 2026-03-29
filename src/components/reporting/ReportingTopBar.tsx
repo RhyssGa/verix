@@ -1,7 +1,7 @@
 'use client'
 
-import Link from 'next/link'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 export function ReportingTopBar() {
@@ -10,8 +10,8 @@ export function ReportingTopBar() {
   return (
     <header className="sticky top-0 z-40 flex items-center h-[68px] px-6 gap-4 shrink-0 bg-[#0B1929] border-b border-[rgba(196,154,46,0.3)]">
 
-      {/* Logo + identité */}
-      <div className="flex items-center gap-4 shrink-0">
+      {/* Logo + identité — clic = accueil */}
+      <Link href="/" className="flex items-center gap-4 shrink-0 no-underline">
         <div className="relative h-10 w-10 shrink-0">
           <Image
             src="/report-assets/logo_sceau_blanc.png"
@@ -28,7 +28,7 @@ export function ReportingTopBar() {
             Reporting groupe
           </div>
         </div>
-      </div>
+      </Link>
 
       <div className="flex-1" />
 
