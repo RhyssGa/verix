@@ -40,7 +40,7 @@ function ScoreBar({ score, target }: { score: number; target: number }) {
         className="absolute inset-y-0 left-0 rounded-full"
         style={{
           width: `${score}%`,
-          background: score >= 85 ? '#1A7A4A' : score >= 60 ? '#C05C1A' : '#B01A1A',
+          background: score >= 80 ? '#1A7A4A' : score >= 70 ? '#C8A020' : score >= 60 ? '#C05C1A' : '#B01A1A',
         }}
       />
       {/* Ligne objectif */}
