@@ -68,11 +68,8 @@ export async function POST(req: NextRequest) {
         </div>
       </div>`
 
-    const puppeteer = await import('puppeteer')
-    const browser = await puppeteer.default.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-web-security', '--disable-dev-shm-usage', '--disable-gpu'],
-    })
+    const { launchBrowser } = await import('@/lib/browser')
+    const browser = await launchBrowser()
     const page = await browser.newPage()
     page.setDefaultNavigationTimeout(0)
     page.setDefaultTimeout(0)

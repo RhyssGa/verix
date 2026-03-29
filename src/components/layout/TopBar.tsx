@@ -84,6 +84,13 @@ export function TopBar({ mode }: TopBarProps) {
 
       {/* Actions */}
       <div className="flex items-center gap-2 shrink-0">
+        <Link
+          href="/reporting"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all border border-[rgba(255,255,255,0.12)] no-underline text-[rgba(255,255,255,0.6)] hover:bg-[rgba(255,255,255,0.12)] hover:text-white"
+        >
+          <span>📊</span> Reporting
+        </Link>
+
         <button
           onClick={() => setShowHistory(!showHistory)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all border border-[rgba(255,255,255,0.12)]"
