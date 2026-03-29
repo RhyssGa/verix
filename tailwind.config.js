@@ -54,6 +54,8 @@ module.exports = {
         status: {
           green: '#1A7A4A',
           'green-bg': '#EAF6EF',
+          yellow: '#C8A020',
+          'yellow-bg': '#FFFBEC',
           orange: '#C05C1A',
           'orange-bg': '#FDF0E6',
           red: '#B01A1A',

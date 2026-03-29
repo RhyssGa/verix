@@ -141,8 +141,8 @@ export function ComparisonPanel() {
                 <div
                   className="inline-block mt-1.5 px-2 py-[2px] rounded-[20px] text-[10px] font-semibold"
                   style={{
-                    background: prev.niveau === 'Excellent' || prev.niveau === 'Bien' || prev.niveau === 'Satisfaisant' ? '#EAF6EF' : prev.niveau === 'Vigilance' ? '#FDF0E6' : '#FAEAEA',
-                    color: prev.niveau === 'Excellent' || prev.niveau === 'Bien' || prev.niveau === 'Satisfaisant' ? '#1A7A4A' : prev.niveau === 'Vigilance' ? '#C05C1A' : '#B01A1A',
+                    background: ['Excellent','Bien','Satisfaisant'].includes(prev.niveau) ? '#EAF6EF' : prev.niveau === 'Attention' ? '#FFFBEC' : prev.niveau === 'Vigilance' ? '#FDF0E6' : '#FAEAEA',
+                    color: ['Excellent','Bien','Satisfaisant'].includes(prev.niveau) ? '#1A7A4A' : prev.niveau === 'Attention' ? '#C8A020' : prev.niveau === 'Vigilance' ? '#C05C1A' : '#B01A1A',
                   }}
                 >
                   {prev.niveau}

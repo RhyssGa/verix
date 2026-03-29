@@ -63,12 +63,14 @@ function deltaFmt(delta: number | null): string {
 
 function niveauColor(niveau: string): string {
   if (['Excellent', 'Bien', 'Satisfaisant'].includes(niveau)) return '#1A7A4A'
+  if (niveau === 'Attention') return '#C8A020'
   if (niveau === 'Vigilance') return '#C05C1A'
   return '#B01A1A'
 }
 
 function niveauBg(niveau: string): string {
   if (['Excellent', 'Bien', 'Satisfaisant'].includes(niveau)) return '#EAF6EF'
+  if (niveau === 'Attention') return '#FFFBEC'
   if (niveau === 'Vigilance') return '#FDF0E6'
   return '#FAEAEA'
 }
@@ -144,7 +146,7 @@ function renderScoreTable(agencies: AgencyRow[]): string {
 function renderGroupAvg(groupAvg: number | null, target: number, count: number): string {
   const delta = groupAvg !== null ? Math.round((groupAvg - target) * 10) / 10 : null
   const avgNiveau = groupAvg !== null
-    ? (groupAvg >= 90 ? 'Excellent' : groupAvg >= 85 ? 'Bien' : groupAvg >= 80 ? 'Satisfaisant' : groupAvg >= 60 ? 'Vigilance' : 'Dégradé')
+    ? (groupAvg >= 90 ? 'Excellent' : groupAvg >= 85 ? 'Bien' : groupAvg >= 80 ? 'Satisfaisant' : groupAvg >= 70 ? 'Attention' : groupAvg >= 60 ? 'Vigilance' : 'Dégradé')
     : null
 
   const kpi = (val: string, label: string, color: string = NAVY, bg = '#fff') => `
@@ -187,7 +189,7 @@ function renderTrendTable(rows: TrendRow[], year: number): string {
       const s = row.scores[q]
       if (s === null) return `<td style="padding:8px 12px;text-align:center;color:#D0D0DC;font-size:9pt">—</td>`
       return `<td style="padding:8px 12px;text-align:center">
-        <span style="display:inline-block;padding:2px 10px;border-radius:12px;font-size:9pt;font-weight:700;background:${niveauBg(s >= 85 ? 'Bien' : s >= 60 ? 'Vigilance' : 'Dégradé')};color:${niveauColor(s >= 85 ? 'Bien' : s >= 60 ? 'Vigilance' : 'Dégradé')}">${s.toFixed(1)}</span>
+        <span style="display:inline-block;padding:2px 10px;border-radius:12px;font-size:9pt;font-weight:700;background:${niveauBg(s >= 80 ? 'Bien' : s >= 70 ? 'Attention' : s >= 60 ? 'Vigilance' : 'Dégradé')};color:${niveauColor(s >= 80 ? 'Bien' : s >= 70 ? 'Attention' : s >= 60 ? 'Vigilance' : 'Dégradé')}">${s.toFixed(1)}</span>
       </td>`
     }).join('')
 

@@ -20,6 +20,7 @@ function formatTs(ts: string): string {
 
 function scoreColor(score: number): string {
   if (score >= 80) return 'text-status-green'
+  if (score >= 70) return 'text-status-yellow'
   if (score >= 60) return 'text-status-orange'
   return 'text-status-red'
 }

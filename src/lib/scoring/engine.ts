@@ -128,8 +128,9 @@ const BAREME_ANCIENNETE_RAPP: { max: number; pen: number }[] = [
 // Niveaux d'interprétation (inchangés)
 const NIVEAUX: NiveauScore[] = [
   { min: 90, label: 'Excellent',    color: '#1A7A4A', bg: '#EAF6EF' },
-  { min: 85, label: 'Bien',         color: '#2A7A3A', bg: '#EAF6EF' },
-  { min: 80, label: 'Satisfaisant', color: '#4A8A2A', bg: '#EAF6EF' },
+  { min: 85, label: 'Bien',         color: '#1A7A4A', bg: '#EAF6EF' },
+  { min: 80, label: 'Satisfaisant', color: '#1A7A4A', bg: '#EAF6EF' },
+  { min: 70, label: 'Attention',    color: '#C8A020', bg: '#FFFBEC' },
   { min: 60, label: 'Vigilance',    color: '#C05C1A', bg: '#FDF0E6' },
   { min: 0,  label: 'Dégradé',      color: '#B01A1A', bg: '#FAEAEA' },
 ]
@@ -224,6 +225,7 @@ export function scoreLevelText(niveau: NiveauScore): string {
     case 'Excellent':    return 'Niveau de maîtrise comptable excellent'
     case 'Bien':         return 'Niveau de maîtrise comptable bien maîtrisé'
     case 'Satisfaisant': return 'Niveau de maîtrise comptable satisfaisant'
+    case 'Attention':    return 'Des points d\'attention ont été identifiés'
     case 'Vigilance':    return 'Des points de vigilance ont été identifiés'
     default:             return "Des anomalies significatives nécessitent une attention immédiate"
   }

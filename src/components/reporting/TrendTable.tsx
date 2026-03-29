@@ -9,14 +9,16 @@ interface TrendTableProps {
 
 function scoreColor(score: number | null): string {
   if (score === null) return '#B0B0C8'
-  if (score >= 85) return '#1A7A4A'
+  if (score >= 80) return '#1A7A4A'
+  if (score >= 70) return '#C8A020'
   if (score >= 60) return '#C05C1A'
   return '#B01A1A'
 }
 
 function scoreBg(score: number | null): string {
   if (score === null) return 'transparent'
-  if (score >= 85) return '#EAF6EF'
+  if (score >= 80) return '#EAF6EF'
+  if (score >= 70) return '#FFFBEC'
   if (score >= 60) return '#FDF0E6'
   return '#FAEAEA'
 }

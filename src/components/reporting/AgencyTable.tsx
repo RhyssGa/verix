@@ -10,8 +10,8 @@ interface AgencyTableProps {
 }
 
 function niveauStyle(niveau: string): { color: string; bg: string } {
-  if (niveau === 'Excellent' || niveau === 'Bien' || niveau === 'Satisfaisant')
-    return { color: '#1A7A4A', bg: '#EAF6EF' }
+  if (['Excellent', 'Bien', 'Satisfaisant'].includes(niveau)) return { color: '#1A7A4A', bg: '#EAF6EF' }
+  if (niveau === 'Attention') return { color: '#C8A020', bg: '#FFFBEC' }
   if (niveau === 'Vigilance') return { color: '#C05C1A', bg: '#FDF0E6' }
   return { color: '#B01A1A', bg: '#FAEAEA' }
 }

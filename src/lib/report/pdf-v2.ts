@@ -545,10 +545,11 @@ h1, h2, h3, .section-title {
     const sArrow  = sDelta > 0 ? '↑' : sDelta < 0 ? '↓' : '→'
 
     // Compute prev niveau from score
-    const pn = comparison.prevScore >= 90 ? { label: 'Excellent', color: '#1A7A4A', bg: '#EAF6EF' }
-             : comparison.prevScore >= 85 ? { label: 'Bien',      color: '#2A7A3A', bg: '#EAF6EF' }
-             : comparison.prevScore >= 80 ? { label: 'Satisfaisant', color: '#4A8A2A', bg: '#EAF6EF' }
-             : comparison.prevScore >= 60 ? { label: 'Vigilance', color: '#C05C1A', bg: '#FDF0E6' }
+    const pn = comparison.prevScore >= 90 ? { label: 'Excellent',    color: '#1A7A4A', bg: '#EAF6EF' }
+             : comparison.prevScore >= 85 ? { label: 'Bien',         color: '#1A7A4A', bg: '#EAF6EF' }
+             : comparison.prevScore >= 80 ? { label: 'Satisfaisant', color: '#1A7A4A', bg: '#EAF6EF' }
+             : comparison.prevScore >= 70 ? { label: 'Attention',    color: '#C8A020', bg: '#FFFBEC' }
+             : comparison.prevScore >= 60 ? { label: 'Vigilance',    color: '#C05C1A', bg: '#FDF0E6' }
              : { label: 'Dégradé', color: '#B01A1A', bg: '#FAEAEA' }
 
     // nb anomalies (rows with non-zero counts)

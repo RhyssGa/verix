@@ -8,10 +8,11 @@ interface GroupAvgCardProps {
 }
 
 function niveauFromScore(score: number): { label: string; color: string; bg: string } {
-  if (score >= 90) return { label: 'Excellent', color: '#1A7A4A', bg: '#EAF6EF' }
-  if (score >= 85) return { label: 'Bien', color: '#2A7A3A', bg: '#EAF6EF' }
-  if (score >= 80) return { label: 'Satisfaisant', color: '#4A8A2A', bg: '#EAF6EF' }
-  if (score >= 60) return { label: 'Vigilance', color: '#C05C1A', bg: '#FDF0E6' }
+  if (score >= 90) return { label: 'Excellent',    color: '#1A7A4A', bg: '#EAF6EF' }
+  if (score >= 85) return { label: 'Bien',         color: '#1A7A4A', bg: '#EAF6EF' }
+  if (score >= 80) return { label: 'Satisfaisant', color: '#1A7A4A', bg: '#EAF6EF' }
+  if (score >= 70) return { label: 'Attention',    color: '#C8A020', bg: '#FFFBEC' }
+  if (score >= 60) return { label: 'Vigilance',    color: '#C05C1A', bg: '#FDF0E6' }
   return { label: 'Dégradé', color: '#B01A1A', bg: '#FAEAEA' }
 }
 
