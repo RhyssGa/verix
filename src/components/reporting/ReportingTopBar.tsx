@@ -25,34 +25,19 @@ export function ReportingTopBar() {
             Century 21 · Groupe Martinot
           </div>
           <div className="text-[14px] font-semibold text-white leading-tight tracking-wide">
-            Reporting <span className="text-[#C49A2E]">groupe</span>
+            Reporting groupe
           </div>
         </div>
       </div>
 
       <div className="flex-1" />
 
-      {/* Retour à l'audit */}
       <button
         onClick={() => router.back()}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all border border-[rgba(255,255,255,0.12)] text-[rgba(255,255,255,0.6)] hover:bg-[rgba(255,255,255,0.12)] hover:text-white"
       >
         ← Retour à l&apos;audit
       </button>
-
-      <Link
-        href="/audit/gerance"
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all border border-[rgba(255,255,255,0.12)] no-underline text-[rgba(255,255,255,0.6)] hover:bg-[rgba(255,255,255,0.12)] hover:text-white"
-      >
-        🏠 Gérance
-      </Link>
-
-      <Link
-        href="/audit/copro"
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all border border-[rgba(255,255,255,0.12)] no-underline text-[rgba(255,255,255,0.6)] hover:bg-[rgba(255,255,255,0.12)] hover:text-white"
-      >
-        🏢 Copro
-      </Link>
 
     </header>
   )
