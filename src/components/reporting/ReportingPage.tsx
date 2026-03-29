@@ -171,7 +171,15 @@ export function ReportingPage() {
 
       <div className="flex-1 px-8 py-7 flex flex-col gap-6 max-w-[1100px] w-full mx-auto">
 
-        {/* ① Filtres + Options PDF en haut */}
+        {/* ① Moyenne groupe + objectif — toujours en haut */}
+        <GroupAvgCard
+          groupAvg={activeGroupAvg}
+          target={target}
+          entryCount={activeEntryCount}
+          onTargetChange={handleTargetChange}
+        />
+
+        {/* ② Filtres + Options PDF */}
         <div className={CARD}>
           <div className="flex flex-col gap-5">
             <div>
@@ -216,13 +224,6 @@ export function ReportingPage() {
 
         {!loading && !error && (
           <>
-            {/* ② KPIs groupe */}
-            <GroupAvgCard
-              groupAvg={activeGroupAvg}
-              target={target}
-              entryCount={activeEntryCount}
-              onTargetChange={handleTargetChange}
-            />
 
             {/* ③ Tableau principal */}
             <div className={CARD}>
