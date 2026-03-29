@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useAuditStore } from '@/stores/useAuditStore'
 import { useScore } from '@/stores/computed'
 import { useExport } from '@/hooks/useExport'
-import { useAuth } from '@/hooks/useAuth'
+import { UserMenu } from '@/components/layout/UserMenu'
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
   AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
@@ -27,7 +27,6 @@ export function TopBar({ mode }: TopBarProps) {
   const score = useScore()
   const { generateReportV2 } = useExport()
   const router = useRouter()
-  const { user, signOut } = useAuth()
   const [showGoHomeConfirm, setShowGoHomeConfirm] = useState(false)
 
   function handleGoHome(e: React.MouseEvent) {
@@ -127,30 +126,7 @@ export function TopBar({ mode }: TopBarProps) {
           <span>↺</span> Réinitialiser
         </button>
 
-        {/* User info + déconnexion */}
-        {user && (
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] text-[rgba(255,255,255,0.45)] max-w-[140px] overflow-hidden text-ellipsis whitespace-nowrap">
-              {user.name || user.email}
-            </span>
-            <button
-              onClick={signOut}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium transition-all border border-[rgba(255,255,255,0.08)] bg-transparent text-[rgba(255,255,255,0.4)]"
-              onMouseOver={(e) => {
-                e.currentTarget.style.background = 'rgba(176,26,26,0.12)'
-                e.currentTarget.style.color = '#f87171'
-                e.currentTarget.style.borderColor = 'rgba(176,26,26,0.25)'
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.background = 'transparent'
-                e.currentTarget.style.color = 'rgba(255,255,255,0.4)'
-                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
-              }}
-            >
-              Déconnexion
-            </button>
-          </div>
-        )}
+        <UserMenu />
 
         {score && (
           <button

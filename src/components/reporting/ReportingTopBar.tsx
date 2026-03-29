@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { UserMenu } from '@/components/layout/UserMenu'
 
 export function ReportingTopBar() {
   const router = useRouter()
@@ -31,6 +32,8 @@ export function ReportingTopBar() {
       </Link>
 
       <div className="flex-1" />
+
+      <UserMenu />
 
       <button
         onClick={() => router.back()}
