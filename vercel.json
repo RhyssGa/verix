@@ -1,0 +1,16 @@
+{
+  "functions": {
+    "src/app/api/rapport/pdf/route.ts": {
+      "maxDuration": 60,
+      "memory": 1024
+    },
+    "src/app/api/rapport/pdf-v2/route.ts": {
+      "maxDuration": 60,
+      "memory": 1024
+    },
+    "src/app/api/rapport/reporting/route.ts": {
+      "maxDuration": 60,
+      "memory": 1024
+    }
+  }
+}

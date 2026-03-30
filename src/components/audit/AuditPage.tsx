@@ -49,8 +49,10 @@ export function AuditPage({ mode }: AuditPageProps) {
             <span>Imports Power BI</span>
             <span className="flex-1 h-px bg-[#E8E4DC]" />
           </div>
-          <FileUploadGrid mode={mode} />
-          <ImportBanner />
+          <div className="mb-8">
+            <FileUploadGrid mode={mode} />
+            <ImportBanner />
+          </div>
 
           {/* Scoring global */}
           {score && (

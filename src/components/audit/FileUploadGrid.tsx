@@ -12,7 +12,7 @@ export function FileUploadGrid({ mode }: FileUploadGridProps) {
 
   return (
     <div
-      className="grid gap-2 mb-8"
+      className="grid gap-2"
       style={{ gridTemplateColumns: `repeat(${configs.length}, 1fr)` }}
     >
       {configs.map((config) => (
