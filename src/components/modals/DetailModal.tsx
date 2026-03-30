@@ -16,12 +16,14 @@ export function DetailModal() {
 
   const { title, categoryId, rows, nameFn, valFn, valClass, subFn = null } = modal
 
-  const filtered = searchTerm
-    ? rows.filter((r) =>
-        nameFn(r).toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (subFn && subFn(r).toLowerCase().includes(searchTerm.toLowerCase()))
-      )
-    : rows
+  const filteredWithIndex = searchTerm
+    ? rows
+        .map((r, i) => ({ row: r, originalIndex: i }))
+        .filter(({ row }) =>
+          nameFn(row).toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (subFn && subFn(row).toLowerCase().includes(searchTerm.toLowerCase()))
+        )
+    : rows.map((r, i) => ({ row: r, originalIndex: i }))
 
   const valFormat = (r: typeof rows[0]) => eur(valFn(r), 2)
 
@@ -43,14 +45,14 @@ export function DetailModal() {
           )}
         </DialogHeader>
         <div className="overflow-y-auto flex-1 px-4 py-2">
-          {filtered.length === 0 ? (
+          {filteredWithIndex.length === 0 ? (
             <div className="text-xs text-muted-foreground text-center py-4">Aucun résultat</div>
           ) : (
-            filtered.map((row, i) => (
+            filteredWithIndex.map(({ row, originalIndex }) => (
               <MiniListItem
-                key={i}
+                key={originalIndex}
                 categoryId={categoryId}
-                index={i}
+                index={originalIndex}
                 name={nameFn(row)}
                 value={valFormat(row)}
                 valueClass={valClass}
