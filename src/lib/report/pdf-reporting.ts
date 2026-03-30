@@ -119,7 +119,7 @@ function renderPage1(payload: ReportingPDFPayload): string {
     <tr style="background:${CREAM};border-top:2px solid ${BORDER}">
       <td style="padding:7px 10px;font-size:7.5pt;font-weight:700;color:#9A9AB0;text-transform:uppercase;letter-spacing:0.05em">Moyenne groupe</td>
       <td style="padding:7px 10px;text-align:center">
-        <span style="font-size:13pt;font-weight:900;color:${GOLD}">${groupAvg.toFixed(1)}</span>
+        <span style="font-size:13pt;font-weight:900;color:${niveauColor(groupAvg)}">${groupAvg.toFixed(1)}</span>
         <span style="font-size:7pt;color:#B0B0C4;font-weight:500">/100</span>
       </td>
       <td colspan="2"></td>
