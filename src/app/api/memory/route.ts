@@ -68,9 +68,11 @@ export async function GET(req: NextRequest) {
 
     // Agences du trimestre précédent → "à faire" par défaut
     for (const a of prevAudits) {
-      const norm = normalizeAgency(a.agence)
-      if (!statusMap.has(norm)) {
-        statusMap.set(norm, { agence: norm, status: 'a_faire', lastImportAt: null, lastAuditAt: null })
+      for (const part of a.agence.split(' + ').map(s => s.trim()).filter(Boolean)) {
+        const norm = normalizeAgency(part)
+        if (!statusMap.has(norm)) {
+          statusMap.set(norm, { agence: norm, status: 'a_faire', lastImportAt: null, lastAuditAt: null })
+        }
       }
     }
 
@@ -101,17 +103,19 @@ export async function GET(req: NextRequest) {
 
     // Agences dans les audits validés → "audit_fait" (écrase tout)
     for (const a of auditsDone) {
-      const norm = normalizeAgency(a.agence)
       const auditAt = a.createdAt.toISOString()
-      const existing = statusMap.get(norm)
-      statusMap.set(norm, {
-        agence: norm,
-        status: 'audit_fait',
-        lastImportAt: existing?.lastImportAt ?? null,
-        lastAuditAt: existing?.lastAuditAt
-          ? (existing.lastAuditAt > auditAt ? existing.lastAuditAt : auditAt)
-          : auditAt,
-      })
+      for (const part of a.agence.split(' + ').map(s => s.trim()).filter(Boolean)) {
+        const norm = normalizeAgency(part)
+        const existing = statusMap.get(norm)
+        statusMap.set(norm, {
+          agence: norm,
+          status: 'audit_fait',
+          lastImportAt: existing?.lastImportAt ?? null,
+          lastAuditAt: existing?.lastAuditAt
+            ? (existing.lastAuditAt > auditAt ? existing.lastAuditAt : auditAt)
+            : auditAt,
+        })
+      }
     }
 
     // Trier : audit_fait > import_valide > a_faire, puis alphabétique
