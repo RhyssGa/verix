@@ -892,15 +892,50 @@ export function renderReportHTML(payload: PDFPayload, bgCoverBase64 = '', header
     return `${sign}${grouped}\u00a0€`
   }
 
-  function statusPill(level: string): string {
-    const map: Record<string, [string, string, string]> = {
-      ok:   ['#EAF6EF', '#1A7A4A', '✓ Conforme'],
-      warn: ['#FDF0E6', '#C05C1A', '⚠ Attention'],
-      bad:  ['#FAEAEA', '#B01A1A', '✗ Anomalie'],
-      info: ['#EAF0FA', '#1A3A8A', 'ℹ Information'],
+  // ── SVG symbol helpers (font-independent — guaranteed render in headless Chromium) ──
+  function svgCheck(color: string, size = 10): string {
+    return `<svg style="display:inline-block;vertical-align:middle;margin-right:3px;flex-shrink:0" width="${size}" height="${size}" viewBox="0 0 10 10"><polyline points="1.5,5 4,8 8.5,2" stroke="${color}" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+  }
+  function svgCross(color: string, size = 10): string {
+    return `<svg style="display:inline-block;vertical-align:middle;margin-right:3px;flex-shrink:0" width="${size}" height="${size}" viewBox="0 0 10 10"><line x1="2" y1="2" x2="8" y2="8" stroke="${color}" stroke-width="1.8" stroke-linecap="round"/><line x1="8" y1="2" x2="2" y2="8" stroke="${color}" stroke-width="1.8" stroke-linecap="round"/></svg>`
+  }
+  function svgArrow(color = '#9A9AB0'): string {
+    return `<svg style="display:inline-block;vertical-align:middle;margin:0 3px" width="12" height="8" viewBox="0 0 12 8"><path d="M1 4h9M7 1.5l3 2.5-3 2.5" stroke="${color}" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+  }
+  function svgArrowUp(color: string): string {
+    return `<svg style="display:inline-block;vertical-align:middle;margin-right:2px" width="9" height="9" viewBox="0 0 9 9"><path d="M4.5 8V2M1.5 5l3-3 3 3" stroke="${color}" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+  }
+  function svgArrowDown(color: string): string {
+    return `<svg style="display:inline-block;vertical-align:middle;margin-right:2px" width="9" height="9" viewBox="0 0 9 9"><path d="M4.5 1v6M1.5 4l3 3 3-3" stroke="${color}" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+  }
+  function svgWarn(color: string): string {
+    return `<svg style="display:inline-block;vertical-align:middle;margin-right:3px;flex-shrink:0" width="11" height="11" viewBox="0 0 11 11"><path d="M5.5 1L10 10H1Z" stroke="${color}" stroke-width="1.5" fill="none" stroke-linejoin="round"/><line x1="5.5" y1="4.5" x2="5.5" y2="7" stroke="${color}" stroke-width="1.5" stroke-linecap="round"/><circle cx="5.5" cy="8.5" r="0.7" fill="${color}"/></svg>`
+  }
+  function svgInfo(color: string): string {
+    return `<svg style="display:inline-block;vertical-align:middle;margin-right:3px;flex-shrink:0" width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" stroke="${color}" stroke-width="1.4" fill="none"/><line x1="5" y1="4.5" x2="5" y2="7.5" stroke="${color}" stroke-width="1.4" stroke-linecap="round"/><circle cx="5" cy="2.8" r="0.6" fill="${color}"/></svg>`
+  }
+  /** Replace an emoji icon with a CSS-colored dot (no font glyph needed) */
+  function iconDot(color: string): string {
+    return `<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:${color};flex-shrink:0;margin-top:1px"></span>`
+  }
+  function sectionDot(emoji: string): string {
+    const map: Record<string, string> = {
+      '🔄': '#5A7AB0', '💰': '#1A7A4A', '🔴': '#B01A1A', '🟡': '#D09030',
+      '⏳': '#7A7A8C', '🏦': '#2A5A9A', '📒': '#3A6A9A', '⚖️': '#5A3A8A',
+      '🧾': '#1A7A4A', '📊': '#0B1929', '📝': '#C49A2E',
     }
-    const [bg, color, label] = map[level] ?? map.info
-    return `<span style="padding:3px 12px;border-radius:20px;font-size:8pt;font-weight:700;letter-spacing:0.04em;background:${bg};color:${color};white-space:nowrap">${label}</span>`
+    return iconDot(map[emoji] ?? '#7A7A8C')
+  }
+
+  function statusPill(level: string): string {
+    const map: Record<string, [string, string, () => string]> = {
+      ok:   ['#EAF6EF', '#1A7A4A', () => `${svgCheck('#1A7A4A')}Conforme`],
+      warn: ['#FDF0E6', '#C05C1A', () => `${svgWarn('#C05C1A')}Attention`],
+      bad:  ['#FAEAEA', '#B01A1A', () => `${svgCross('#B01A1A')}Anomalie`],
+      info: ['#EAF0FA', '#1A3A8A', () => `${svgInfo('#1A3A8A')}Information`],
+    }
+    const [bg, color, labelFn] = map[level] ?? map.info
+    return `<span style="display:inline-flex;align-items:center;padding:3px 12px;border-radius:20px;font-size:8pt;font-weight:700;letter-spacing:0.04em;background:${bg};color:${color};white-space:nowrap">${labelFn()}</span>`
   }
 
   function scoreArc(global: number, color: string): string {
@@ -1039,7 +1074,7 @@ export function renderReportHTML(payload: PDFPayload, bgCoverBase64 = '', header
         <td style="text-align:right;font-weight:600;white-space:nowrap;color:#0B1929">${esc(r.amount)}</td>
         ${hasDetail ? `<td style="color:#7A7A8C;font-size:9pt;word-break:break-word">${esc(r.detail || '—')}</td>` : ''}
         <td style="color:#7A7A8C;font-style:italic;font-size:9pt">${esc(r.comment || '—')}</td>
-        ${showStatus ? `<td style="text-align:center;white-space:nowrap;font-size:8.5pt;font-weight:700;color:${r.justified ? '#1A7A4A' : '#B01A1A'}">${r.justified ? '✓ Justifié' : '✗ Injustifié'}</td>` : ''}
+        ${showStatus ? `<td style="text-align:center;white-space:nowrap;font-size:8.5pt;font-weight:700;color:${r.justified ? '#1A7A4A' : '#B01A1A'}"><span style="display:inline-flex;align-items:center">${r.justified ? svgCheck('#1A7A4A') + 'Justifié' : svgCross('#B01A1A') + 'Injustifié'}</span></td>` : ''}
       </tr>`).join('')
     return `
     <div style="margin-top:22px">
@@ -1092,17 +1127,17 @@ export function renderReportHTML(payload: PDFPayload, bgCoverBase64 = '', header
       : ''
 
     const exclHtml = sec.nbExclu > 0
-      ? `<div style="margin-top:10px;font-size:8.5pt;color:#1A7A4A">✓ ${sec.nbExclu} ligne(s) justifiée(s) et exclue(s) du calcul</div>`
+      ? `<div style="display:flex;align-items:center;margin-top:10px;font-size:8.5pt;color:#1A7A4A">${svgCheck('#1A7A4A')} ${sec.nbExclu} ligne(s) justifiée(s) et exclue(s) du calcul</div>`
       : ''
 
     const infoOnlyHtml = sec.infoOnly
-      ? `<div style="margin-top:10px;font-size:8.5pt;color:#1A3A8A;font-style:italic">ℹ Ce poste est présenté à titre informatif — il n'entre pas dans le calcul du score.</div>`
+      ? `<div style="display:flex;align-items:center;margin-top:10px;font-size:8.5pt;color:#1A3A8A;font-style:italic">${svgInfo('#1A3A8A')} Ce poste est présenté à titre informatif — il n'entre pas dans le calcul du score.</div>`
       : ''
 
     const tableHtml = sec.rows.length > 0
       ? renderAnomalyTable(sec.rows, sec.tableHeaders, !sec.infoOnly)
       : (parseInt(sec.mainStat) === 0
-          ? `<div style="margin-top:18px;font-size:9.5pt;color:#1A7A4A">✓ Aucune anomalie à signaler sur ce poste.</div>`
+          ? `<div style="display:flex;align-items:center;margin-top:18px;font-size:9.5pt;color:#1A7A4A">${svgCheck('#1A7A4A', 11)} Aucune anomalie à signaler sur ce poste.</div>`
           : '')
 
     return `
@@ -1110,7 +1145,7 @@ export function renderReportHTML(payload: PDFPayload, bgCoverBase64 = '', header
     <div style="border:1px solid #E4E4EC;border-radius:10px;overflow:hidden;page-break-inside:avoid">
       <div style="border-top:3px solid ${accentColor}"></div>
       <div style="display:flex;align-items:flex-start;gap:14px;padding:18px 24px 16px;border-bottom:1px solid #F0F0F6">
-        <span style="font-size:19pt;flex-shrink:0;margin-top:1px">${sec.icon}</span>
+        ${sectionDot(sec.icon)}
         <div style="flex:1">
           <div style="font-size:12pt;font-weight:700;color:#0B1929;line-height:1.2">${esc(sec.title)}</div>
           <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
@@ -1131,12 +1166,12 @@ export function renderReportHTML(payload: PDFPayload, bgCoverBase64 = '', header
           if (cr.prevNb !== null && cr.currNb !== null && cr.currNb !== cr.prevNb) {
             const d = cr.currNb - cr.prevNb
             const col = d > 0 ? '#B01A1A' : '#1A7A4A'
-            parts.push(`Nb&nbsp;: <span style="color:${col};font-weight:600">${cr.prevNb}&nbsp;→&nbsp;${cr.currNb} (${d > 0 ? '+' : ''}${d})</span>`)
+            parts.push(`Nb&nbsp;: <span style="color:${col};font-weight:600">${cr.prevNb}${svgArrow()}${cr.currNb} (${d > 0 ? '+' : ''}${d})</span>`)
           }
           if (cr.prevMontant !== null && cr.currMontant !== null && cr.currMontant !== cr.prevMontant) {
             const d = cr.currMontant - cr.prevMontant
             const col = d > 0 ? '#B01A1A' : '#1A7A4A'
-            parts.push(`Montant&nbsp;: <span style="color:${col};font-weight:600">${eurFmt(cr.prevMontant)}&nbsp;→&nbsp;${eurFmt(cr.currMontant)}</span>`)
+            parts.push(`Montant&nbsp;: <span style="color:${col};font-weight:600">${eurFmt(cr.prevMontant)}${svgArrow()}${eurFmt(cr.currMontant)}</span>`)
           }
           if (parts.length === 0) return ''
           return `<div style="font-size:8pt;color:#A0A0B8;margin-top:4px;margin-bottom:-4px">vs&nbsp;audit&nbsp;du&nbsp;${esc(refDate)}&nbsp;— ${parts.join('&nbsp;&nbsp;·&nbsp;&nbsp;')}</div>`
@@ -1252,8 +1287,8 @@ h1, h2, h3, .section-title {
     const statusHtml = row.exclu
       ? `<span style="color:#9A9AB0;font-size:8.5pt">Non scoré</span>`
       : row.penalite > 0
-        ? `<span style="color:#B01A1A;font-weight:700;font-size:8.5pt">✗ Anomalie</span>`
-        : `<span style="color:#1A7A4A;font-weight:700;font-size:8.5pt">✓ OK</span>`
+        ? `<span style="display:inline-flex;align-items:center;color:#B01A1A;font-weight:700;font-size:8.5pt">${svgCross('#B01A1A')}Anomalie</span>`
+        : `<span style="display:inline-flex;align-items:center;color:#1A7A4A;font-weight:700;font-size:8.5pt">${svgCheck('#1A7A4A')}OK</span>`
     const montantStr = row.montant != null ? eurFmt(row.montant) : '—'
     return `<tr>
       <td>${esc(row.label)}${row.exclu ? ' <em style="color:#9A9AB0;font-size:9pt">(exclu)</em>' : ''}</td>
@@ -1299,7 +1334,7 @@ h1, h2, h3, .section-title {
     synthComparisonBlock = `
     <div style="margin-top:28px;border:1.5px solid #DDD8CF;border-radius:10px;overflow:hidden;page-break-inside:avoid">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#F5F3EE;border-bottom:1px solid #DDD8CF">
-        <div style="font-size:10pt;font-weight:700;color:#0B1929">🔄 Évolution vs audit précédent</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:10pt;font-weight:700;color:#0B1929">${sectionDot('🔄')} Évolution vs audit précédent</div>
         <div style="font-size:8.5pt;color:#9A9AB0;font-style:italic">Réf. : ${esc(comparison.refAgence)} — ${esc(refDateFmtSynth)}</div>
       </div>
       <div style="display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid #DDD8CF">
@@ -1307,12 +1342,12 @@ h1, h2, h3, .section-title {
           <div style="font-size:7.5pt;text-transform:uppercase;letter-spacing:0.06em;color:#9A9AB0;font-weight:600;margin-bottom:3px">Score global</div>
           <div style="display:flex;align-items:baseline;gap:8px">
             <span style="font-size:11pt;color:#9A9AB0;text-decoration:line-through">${comparison.prevScore}</span>
-            <span style="font-size:9pt;color:#9A9AB0">→</span>
+            ${svgArrow()}
             <span style="font-size:15pt;font-weight:800;color:#0B1929">${comparison.currScore}<span style="font-size:9pt;font-weight:400;color:#9A9AB0">/100</span></span>
           </div>
         </div>
         <div style="margin-left:16px;padding:5px 14px;border-radius:20px;background:${sBg};color:${sColor};font-size:10.5pt;font-weight:800;white-space:nowrap">
-          ${sDelta >= 0 ? '↑ +' : '↓ '}${sDelta.toFixed(1)} pts
+          ${sDelta >= 0 ? svgArrowUp(sColor) + '+' : svgArrowDown(sColor)}${Math.abs(sDelta).toFixed(1)} pts
         </div>
       </div>
       ${miniRows ? `
@@ -1326,8 +1361,8 @@ h1, h2, h3, .section-title {
         </thead>
         <tbody>${miniRows}</tbody>
       </table>` : `
-      <div style="padding:12px 16px;font-size:9pt;color:#1A7A4A;font-weight:600;background:#EAF6EF">
-        ✓ Aucun écart significatif par rapport à l'audit de référence.
+      <div style="display:flex;align-items:center;padding:12px 16px;font-size:9pt;color:#1A7A4A;font-weight:600;background:#EAF6EF">
+        ${svgCheck('#1A7A4A', 11)} Aucun écart significatif par rapport à l'audit de référence.
       </div>`}
     </div>`
   }
@@ -1339,7 +1374,7 @@ h1, h2, h3, .section-title {
     ${synthKpi}
     ${globalNote ? `
     <div style="margin-top:18px;padding:14px 18px;background:#FAF8F4;border:1px solid #E8E4DC;border-left:3px solid #C49A2E;border-radius:8px">
-      <div style="font-size:9pt;font-weight:700;color:#C49A2E;text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px">📝 Note générale de l'auditeur</div>
+      <div style="font-size:9pt;font-weight:700;color:#C49A2E;text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px">Note générale de l'auditeur</div>
       <div style="font-size:10pt;font-weight:700;color:#1A1A2E;line-height:1.6;white-space:pre-wrap">${esc(globalNote)}</div>
     </div>` : ''}
     <table class="synth-table" style="margin-top:24px">
@@ -1381,10 +1416,10 @@ h1, h2, h3, .section-title {
   if (bilan && bilan.total > 0) {
     const bilanLvl = bilan.nbRisque > 0 ? (bilan.groups.some(g => g.riskColor === '#B01A1A') ? 'bad' : 'warn') : 'ok'
     const bilanColor = bilanLvl === 'bad' ? '#B01A1A' : bilanLvl === 'warn' ? '#D06020' : '#1A7A4A'
-    const risk4count = bilan.groups.find(g => g.riskColor === '#B01A1A' && g.riskLabel.startsWith('✗✗✗✗'))?.rows.length ?? 0
-    const risk3count = bilan.groups.find(g => g.riskLabel.startsWith('✗✗✗ '))?.rows.length ?? 0
-    const risk2count = bilan.groups.find(g => g.riskLabel.startsWith('✗✗ '))?.rows.length ?? 0
-    const risk1count = bilan.groups.find(g => g.riskLabel.startsWith('✗ '))?.rows.length ?? 0
+    const risk4count = bilan.groups.find(g => g.riskColor === '#B01A1A')?.rows.length ?? 0
+    const risk3count = bilan.groups.find(g => g.riskColor === '#C05C1A')?.rows.length ?? 0
+    const risk2count = bilan.groups.find(g => g.riskColor === '#C8A020')?.rows.length ?? 0
+    const risk1count = bilan.groups.find(g => g.riskColor === '#1A7A4A')?.rows.length ?? 0
     const sain = bilan.total - bilan.nbRisque - risk1count
     const bilanInterpret = bilan.nbRisque === 0
       ? `Le portefeuille de ${bilan.total} copropriété(s) ne présente aucune résidence avec plusieurs indicateurs dégradés simultanément — situation globalement saine.`
@@ -1402,7 +1437,7 @@ h1, h2, h3, .section-title {
       return `
       <div style="margin-top:20px">
         <div style="display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:6px;background:${grpBg};margin-bottom:8px">
-          <span style="font-size:10.5pt;font-weight:700;color:${g.riskColor}">${esc(g.riskLabel)}</span>
+          <span style="font-size:10.5pt;font-weight:700;color:${g.riskColor}">${esc(g.riskLabel.replace(/^[✗✓]+\s*/, ''))}</span>
           <span style="font-size:8.5pt;color:#9A9AB0;margin-left:auto">${g.rows.length} résidence(s)</span>
         </div>
         <table class="bilan-table">
@@ -1438,7 +1473,7 @@ h1, h2, h3, .section-title {
       <div style="border:1px solid #E4E4EC;border-radius:10px;overflow:hidden;page-break-inside:avoid">
         <div style="border-top:3px solid ${bilanColor}"></div>
         <div style="display:flex;align-items:flex-start;gap:14px;padding:16px 20px 14px;border-bottom:1px solid #F0F0F6">
-          <span style="font-size:19pt;flex-shrink:0;margin-top:1px">📊</span>
+          ${sectionDot('📊')}
           <div style="flex:1">
             <div style="font-size:12pt;font-weight:700;color:#0B1929">État financier des copropriétés</div>
             <div style="margin-top:6px">${statusPill(bilanLvl)}</div>

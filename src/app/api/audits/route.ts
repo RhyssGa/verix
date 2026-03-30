@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { gunzipSync } from 'zlib'
 import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/auth-guard'
 
@@ -63,6 +64,14 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
 
+    // Décompresse si le client a envoyé un snapshot compressé en base64 gzip
+    let snapshotData = body.snapshot
+    if (body.snapshotCompressed) {
+      const binary = Buffer.from(body.snapshotCompressed, 'base64')
+      const decompressed = gunzipSync(binary)
+      snapshotData = JSON.parse(decompressed.toString('utf8'))
+    }
+
     const snapshot = await prisma.auditSnapshot.create({
       data: {
         batchId: body.batchId,
@@ -74,7 +83,7 @@ export async function POST(req: NextRequest) {
         totalPenalite: body.totalPenalite,
         metrics: body.metrics ?? {},
         sectionNotes: body.sectionNotes ?? {},
-        snapshot: body.snapshot,
+        snapshot: snapshotData,
       },
     })
 

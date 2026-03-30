@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useAuditStore } from '@/stores/useAuditStore'
 import { useScore } from '@/stores/computed'
 import { useHistory } from '@/hooks/useHistory'
@@ -22,7 +23,9 @@ export function ConfirmDialog() {
   const resetAll = useAuditStore((s) => s.resetAll)
   const sectionNotes = useAuditStore((s) => s.sectionNotes)
   const score = useScore()
-  const { deleteHistoryBatch, saveToHistory, saveAgencesToHistory } = useHistory()
+  const { deleteHistoryBatch, saveAgencesToHistory } = useHistory()
+
+  const [isSaving, setIsSaving] = useState(false)
 
   return (
     <>
@@ -49,7 +52,7 @@ export function ConfirmDialog() {
       </AlertDialog>
 
       {/* Single agency validate confirm */}
-      <AlertDialog open={!!validateConfirm} onOpenChange={(o) => { if (!o) setValidateConfirm(null) }}>
+      <AlertDialog open={!!validateConfirm} onOpenChange={(o) => { if (!o && !isSaving) setValidateConfirm(null) }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Valider et sauvegarder ?</AlertDialogTitle>
@@ -59,24 +62,31 @@ export function ConfirmDialog() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-navy text-white hover:bg-navy-light"
-              onClick={() => {
-                if (score && validateConfirm) {
-                  saveToHistory(score, sectionNotes, validateConfirm)
-                  setValidateConfirm(null)
-                }
+            <AlertDialogCancel disabled={isSaving}>Annuler</AlertDialogCancel>
+            <button
+              disabled={isSaving}
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-[#0B1929] px-4 py-2 text-sm font-medium text-white hover:bg-[#1A3252] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+              onClick={async () => {
+                if (!score || !validateConfirm) return
+                setIsSaving(true)
+                await saveAgencesToHistory(score, sectionNotes, [validateConfirm])
+                setIsSaving(false)
+                setValidateConfirm(null)
               }}
             >
-              ✅ Valider
-            </AlertDialogAction>
+              {isSaving ? (
+                <>
+                  <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Sauvegarde…
+                </>
+              ) : '✅ Valider'}
+            </button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       {/* Multi agency validate confirm */}
-      <AlertDialog open={!!validateMultiConfirm} onOpenChange={(o) => { if (!o) setValidateMultiConfirm(null) }}>
+      <AlertDialog open={!!validateMultiConfirm} onOpenChange={(o) => { if (!o && !isSaving) setValidateMultiConfirm(null) }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Valider {validateMultiConfirm?.length} agences ensemble ?</AlertDialogTitle>
@@ -85,18 +95,25 @@ export function ConfirmDialog() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-navy text-white hover:bg-navy-light"
-              onClick={() => {
-                if (score && validateMultiConfirm) {
-                  saveAgencesToHistory(score, sectionNotes, validateMultiConfirm)
-                  setValidateMultiConfirm(null)
-                }
+            <AlertDialogCancel disabled={isSaving}>Annuler</AlertDialogCancel>
+            <button
+              disabled={isSaving}
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-[#0B1929] px-4 py-2 text-sm font-medium text-white hover:bg-[#1A3252] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+              onClick={async () => {
+                if (!score || !validateMultiConfirm) return
+                setIsSaving(true)
+                await saveAgencesToHistory(score, sectionNotes, validateMultiConfirm)
+                setIsSaving(false)
+                setValidateMultiConfirm(null)
               }}
             >
-              ✅ Valider
-            </AlertDialogAction>
+              {isSaving ? (
+                <>
+                  <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Sauvegarde…
+                </>
+              ) : '✅ Valider'}
+            </button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

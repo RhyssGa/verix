@@ -30,6 +30,12 @@ export function useFileUpload() {
         store.clearFileError(fileId)
         store.setFileObject(fileId, file)
 
+        // Reset annotations on first file of a new import (not a restore)
+        const isFirstFile = Object.keys(useAuditStore.getState().loadedFiles).length === 0
+        if (isFirstFile) {
+          store.resetAnnotations()
+        }
+
         if (result.type === 'z_pointe') {
           const peakMap = new Map(Object.entries(result.peakMap))
           if (mode === 'gerance') {

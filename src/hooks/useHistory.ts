@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from 'react'
 import { useAuditStore } from '@/stores/useAuditStore'
 import { normalizeAgency } from '@/lib/utils/helpers'
+import { compressToBase64 } from '@/lib/utils/compress'
 import type { ScoreResult, AnomalyMetric, HistorySnapshot, ReportEntry } from '@/types/audit'
 
 export function useHistory() {
@@ -91,6 +92,7 @@ export function useHistory() {
 
       // Save to Supabase
       try {
+        const snapshotCompressed = await compressToBase64(snapshot)
         const res = await fetch('/api/audits', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -104,7 +106,7 @@ export function useHistory() {
             totalPenalite: score.totalPenalite,
             metrics,
             sectionNotes: storedNotes,
-            snapshot,
+            snapshotCompressed,
           }),
         })
         if (res.ok) {
