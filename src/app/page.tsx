@@ -10,7 +10,7 @@ export default function HomePage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: '#0B1929',
+      background: '#0F1F35',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -24,7 +24,7 @@ export default function HomePage() {
       </div>
       {/* En-tête identité */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 56 }}>
-        <div style={{ position: 'relative', width: 72, height: 72, marginBottom: 24 }}>
+        <div style={{ position: 'relative', width: 64, height: 64, marginBottom: 20 }}>
           <Image
             src="/report-assets/logo_sceau_blanc.png"
             alt="Century 21"
@@ -33,26 +33,26 @@ export default function HomePage() {
           />
         </div>
         <div style={{
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: 700,
           letterSpacing: '3px',
           textTransform: 'uppercase',
           color: '#C49A2E',
-          marginBottom: 8,
+          marginBottom: 6,
         }}>
           Century 21 · Groupe Martinot
         </div>
         <div style={{
-          fontSize: 32,
+          fontSize: 26,
           fontWeight: 800,
           color: '#FFFFFF',
           letterSpacing: '0.5px',
-          marginBottom: 10,
+          marginBottom: 8,
         }}>
           Audit Comptable
         </div>
         <div style={{
-          width: 48,
+          width: 40,
           height: 2,
           background: 'linear-gradient(90deg, #C49A2E, #A87E20)',
           borderRadius: 2,
@@ -125,7 +125,7 @@ export default function HomePage() {
               padding: '7px 20px',
               borderRadius: 8,
               background: 'linear-gradient(135deg, #C49A2E, #A87E20)',
-              color: '#0B1929',
+              color: '#0F1F35',
               fontSize: 11,
               fontWeight: 700,
               letterSpacing: '0.5px',
