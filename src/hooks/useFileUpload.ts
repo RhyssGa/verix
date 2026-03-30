@@ -16,6 +16,7 @@ export function useFileUpload() {
       formData.append('fileId', fileId)
       formData.append('mode', mode)
 
+      store.setFileLoading(fileId, true)
       try {
         const response = await fetch('/api/parse', { method: 'POST', body: formData })
 
@@ -71,6 +72,8 @@ export function useFileUpload() {
         store.setLoadedFile(fileId, result.fileName)
       } catch {
         store.setFileError(fileId, 'Erreur réseau lors du parsing')
+      } finally {
+        store.setFileLoading(fileId, false)
       }
     },
     [],

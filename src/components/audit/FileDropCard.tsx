@@ -14,6 +14,7 @@ export function FileDropCard({ config, mode }: FileDropCardProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const loadedFiles = useAuditStore((s) => s.loadedFiles)
   const fileErrors = useAuditStore((s) => s.fileErrors)
+  const loadingFiles = useAuditStore((s) => s.loadingFiles)
   const forcedOk = useAuditStore((s) => s.forcedOk)
   const toggleForcedOk = useAuditStore((s) => s.toggleForcedOk)
   const { handleFile, removeFile } = useFileUpload()
@@ -23,6 +24,7 @@ export function FileDropCard({ config, mode }: FileDropCardProps) {
 
   const loaded = mounted ? loadedFiles[config.id] : undefined
   const error = mounted ? fileErrors[config.id] : undefined
+  const isLoading = mounted ? !!loadingFiles[config.id] : false
   const isForced = mounted ? forcedOk[config.id] : false
 
   const NO_FORCE_IDS: Record<string, string[]> = {
@@ -39,33 +41,39 @@ export function FileDropCard({ config, mode }: FileDropCardProps) {
         'rounded-[10px] p-[10px_6px] relative text-center min-w-0 flex flex-col items-center transition-[border-color,background] duration-150',
         isOk
           ? 'border-[1.5px] border-[#1A7A4A] bg-[#EAF6EF] cursor-default'
+          : isLoading
+          ? 'border-[1.5px] border-[#C49A2E] bg-[#FDF5E0] cursor-wait'
           : error
           ? 'border-[1.5px] border-[#B01A1A] bg-[#FAEAEA] cursor-pointer'
           : 'border-[1.5px] border-dashed border-[#E8E4DC] bg-white cursor-pointer',
       ].join(' ')}
-      onClick={() => !isOk && inputRef.current?.click()}
+      onClick={() => !isOk && !isLoading && inputRef.current?.click()}
       onMouseOver={(e) => {
-        if (!isOk && !error) {
+        if (!isOk && !error && !isLoading) {
           e.currentTarget.style.borderColor = '#1A3252'
           e.currentTarget.style.background = '#EAF0FA'
         }
       }}
       onMouseOut={(e) => {
-        if (!isOk && !error) {
+        if (!isOk && !error && !isLoading) {
           e.currentTarget.style.borderColor = '#E8E4DC'
           e.currentTarget.style.background = '#fff'
         }
       }}
     >
-      <span className="text-[18px] mb-1 block shrink-0">{config.icon}</span>
+      {isLoading ? (
+        <span className="w-[18px] h-[18px] mb-1 block shrink-0 border-2 border-[#C49A2E]/30 border-t-[#C49A2E] rounded-full animate-spin mx-auto" />
+      ) : (
+        <span className="text-[18px] mb-1 block shrink-0">{config.icon}</span>
+      )}
       <div className="text-[10px] font-semibold text-[#1A1A2E] mb-0.5 leading-[1.3] flex-1 flex items-center justify-center">
         {config.name}
       </div>
       <div className={[
         'text-[9px] font-semibold mt-1 shrink-0',
-        isOk ? 'text-[#1A7A4A]' : error ? 'text-[#B01A1A]' : 'text-[#7A7A8C]',
+        isOk ? 'text-[#1A7A4A]' : isLoading ? 'text-[#C49A2E]' : error ? 'text-[#B01A1A]' : 'text-[#7A7A8C]',
       ].join(' ')}>
-        {loaded ? '✓ Chargé' : isForced ? '✓ OK' : error ? '⚠ Erreur' : '+ Importer'}
+        {loaded ? '✓ Chargé' : isForced ? '✓ OK' : isLoading ? 'Chargement…' : error ? '⚠ Erreur' : '+ Importer'}
       </div>
 
       {/* Bouton supprimer (fichier chargé ou en erreur) */}
@@ -85,7 +93,7 @@ export function FileDropCard({ config, mode }: FileDropCardProps) {
           isForced
             ? 'border border-[#1A7A4A] bg-[#1A7A4A] text-white'
             : 'border border-[#E8E4DC] bg-transparent text-[#7A7A8C]',
-          (canForce && !loaded) ? 'cursor-pointer visible' : 'cursor-default invisible',
+          (canForce && !loaded && !isLoading) ? 'cursor-pointer visible' : 'cursor-default invisible',
         ].join(' ')}
         onClick={(e) => { e.stopPropagation(); if (canForce && !loaded) toggleForcedOk(config.id) }}
         title={isForced ? 'Annuler — remettre ce fichier en attente' : 'Forcer aucune anomalie sans importer le fichier'}

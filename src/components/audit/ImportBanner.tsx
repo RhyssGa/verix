@@ -22,6 +22,7 @@ export function ImportBanner() {
 
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [justSaved, setJustSaved] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   // Flash "Sauvegardé !" pendant 3 secondes après validation
   useEffect(() => {
@@ -38,8 +39,13 @@ export function ImportBanner() {
 
   const handleConfirm = async () => {
     setConfirmOpen(false)
+    setSaveError(null)
     const id = await saveImportSession()
-    if (id) setJustSaved(true)
+    if (id) {
+      setJustSaved(true)
+    } else {
+      setSaveError('La sauvegarde a échoué. Vérifiez votre connexion et réessayez.')
+    }
   }
 
   // ── Import sauvegardé ──────────────────────────────────────────────────────
@@ -83,24 +89,36 @@ export function ImportBanner() {
           </div>
         </div>
 
-        <button
-          onClick={() => setConfirmOpen(true)}
-          disabled={isSaving}
-          className="shrink-0 px-[14px] py-[8px] rounded-[8px] font-[inherit] font-bold text-[12px] border-none cursor-pointer relative overflow-hidden"
-          style={{
-            background: isSaving ? 'rgba(196,154,46,0.3)' : 'linear-gradient(135deg, #C49A2E, #A87E20)',
-            color: isSaving ? 'rgba(255,255,255,0.5)' : '#FFFFFF',
-            cursor: isSaving ? 'not-allowed' : 'pointer',
-            boxShadow: isSaving ? 'none' : '0 2px 8px rgba(196,154,46,0.3)',
-            minWidth: 140,
-          }}
-        >
-          {justSaved
-            ? '✅ Sauvegardé !'
-            : isSaving
-            ? '⏳ Sauvegarde…'
-            : '💾 Valider l\'import'}
-        </button>
+        <div className="flex flex-col items-end gap-1 shrink-0">
+          <button
+            onClick={() => setConfirmOpen(true)}
+            disabled={isSaving}
+            className="flex items-center gap-2 px-[14px] py-[8px] rounded-[8px] font-[inherit] font-bold text-[12px] border-none"
+            style={{
+              background: isSaving ? 'rgba(196,154,46,0.3)' : 'linear-gradient(135deg, #C49A2E, #A87E20)',
+              color: isSaving ? 'rgba(255,255,255,0.5)' : '#FFFFFF',
+              cursor: isSaving ? 'not-allowed' : 'pointer',
+              boxShadow: isSaving ? 'none' : '0 2px 8px rgba(196,154,46,0.3)',
+              minWidth: 140,
+            }}
+          >
+            {justSaved ? (
+              '✅ Sauvegardé !'
+            ) : isSaving ? (
+              <>
+                <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Sauvegarde…
+              </>
+            ) : (
+              '💾 Valider l\'import'
+            )}
+          </button>
+          {saveError && (
+            <div className="text-[10px] text-[#B01A1A] font-semibold max-w-[200px] text-right">
+              {saveError}
+            </div>
+          )}
+        </div>
       </div>
 
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>

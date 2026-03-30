@@ -77,9 +77,12 @@ export function useImportSession() {
         state.setImportSessionId(id)
         await refreshSessions()
         return id
+      } else {
+        const errBody = await res.json().catch(() => ({}))
+        console.error('[ImportSession] Save failed', res.status, errBody)
       }
-    } catch {
-      console.warn('Sauvegarde import session échouée')
+    } catch (err) {
+      console.error('[ImportSession] Network error', err)
     } finally {
       setIsSaving(false)
     }
