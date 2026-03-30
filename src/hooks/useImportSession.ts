@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useAuditStore } from '@/stores/useAuditStore'
 import type { HistorySnapshot } from '@/types/audit'
+import { compressToBase64 } from '@/lib/utils/compress'
 
 export interface ImportSessionSummary {
   id: string
@@ -67,10 +68,11 @@ export function useImportSession() {
     }
 
     try {
+      const snapshotCompressed = await compressToBase64(snapshot)
       const res = await fetch('/api/import-sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode: state.mode, label: label ?? null, snapshot }),
+        body: JSON.stringify({ mode: state.mode, label: label ?? null, snapshotCompressed }),
       })
       if (res.ok) {
         const { id } = await res.json()

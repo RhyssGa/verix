@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { gunzipSync } from 'zlib'
 import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/auth-guard'
 import { getQuarter } from '@/lib/reporting/quarters'
@@ -48,9 +49,17 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
 
-    const { mode, label, snapshot } = body
-    if (!mode || !snapshot) {
+    const { mode, label, snapshot: rawSnapshot, snapshotCompressed } = body
+    if (!mode || (!rawSnapshot && !snapshotCompressed)) {
       return NextResponse.json({ error: 'mode et snapshot sont requis' }, { status: 400 })
+    }
+
+    // Décompresse si le client a envoyé un snapshot compressé en base64 gzip
+    let snapshot = rawSnapshot
+    if (snapshotCompressed) {
+      const binary = Buffer.from(snapshotCompressed, 'base64')
+      const decompressed = gunzipSync(binary)
+      snapshot = JSON.parse(decompressed.toString('utf8'))
     }
 
     // Calcule le trimestre courant

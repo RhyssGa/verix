@@ -95,7 +95,7 @@ export function ImportBanner() {
           <button
             onClick={() => setConfirmOpen(true)}
             disabled={isSaving}
-            className="flex items-center gap-2 px-[14px] py-[8px] rounded-[8px] font-[inherit] font-bold text-[12px] border-none"
+            className="flex items-center justify-center gap-2 px-[14px] py-[8px] rounded-[8px] font-[inherit] font-bold text-[12px] border-none"
             style={{
               background: isSaving ? 'rgba(196,154,46,0.3)' : 'linear-gradient(135deg, #C49A2E, #A87E20)',
               color: isSaving ? 'rgba(255,255,255,0.5)' : '#FFFFFF',

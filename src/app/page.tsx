@@ -1,37 +1,11 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { QuarterlyMemory } from '@/components/home/QuarterlyMemory'
-import { authClient } from '@/lib/auth-client'
+import { UserMenu } from '@/components/layout/UserMenu'
 
 export default function HomePage() {
   const router = useRouter()
-  const [session, setSession] = useState<{ name: string } | null>(null)
-  const [menuOpen, setMenuOpen] = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    authClient.getSession().then((res) => {
-      if (res?.data?.user) setSession({ name: res.data.user.name || res.data.user.email })
-    })
-  }, [])
-
-  // Ferme le menu si clic en dehors
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false)
-      }
-    }
-    if (menuOpen) document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [menuOpen])
-
-  async function handleSignOut() {
-    await authClient.signOut()
-    router.push('/login')
-  }
 
   return (
     <div style={{
@@ -45,93 +19,9 @@ export default function HomePage() {
     }}>
 
       {/* Menu utilisateur — coin supérieur droit */}
-      {session && (
-        <div ref={menuRef} style={{ position: 'absolute', top: 20, right: 24, zIndex: 50 }}>
-          <button
-            onClick={() => setMenuOpen(o => !o)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '7px 14px',
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(196,154,46,0.25)',
-              borderRadius: 10,
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-              color: 'rgba(255,255,255,0.8)',
-              fontSize: 12,
-              fontWeight: 600,
-              transition: 'all 0.15s',
-            }}
-          >
-            <span style={{
-              width: 24, height: 24,
-              borderRadius: '50%',
-              background: 'rgba(196,154,46,0.2)',
-              border: '1.5px solid rgba(196,154,46,0.4)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 10, fontWeight: 800, color: '#C49A2E', flexShrink: 0,
-            }}>
-              {session.name.charAt(0).toUpperCase()}
-            </span>
-            Bonjour, {session.name.split(' ')[0]}
-            <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 9, marginLeft: 2 }}>
-              {menuOpen ? '▲' : '▼'}
-            </span>
-          </button>
-
-          {menuOpen && (
-            <div style={{
-              position: 'absolute',
-              top: 'calc(100% + 6px)',
-              right: 0,
-              minWidth: 160,
-              background: '#0F2238',
-              border: '1px solid rgba(196,154,46,0.2)',
-              borderRadius: 10,
-              overflow: 'hidden',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-            }}>
-              <div style={{
-                padding: '10px 14px 8px',
-                borderBottom: '1px solid rgba(255,255,255,0.06)',
-              }}>
-                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-                  Connecté en tant que
-                </div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', fontWeight: 600, marginTop: 2, wordBreak: 'break-all' }}>
-                  {session.name}
-                </div>
-              </div>
-              <button
-                onClick={handleSignOut}
-                style={{
-                  width: '100%',
-                  padding: '10px 14px',
-                  background: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontFamily: 'inherit',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: '#E07070',
-                  textAlign: 'left',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  transition: 'background 0.1s',
-                }}
-                onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,100,100,0.08)'}
-                onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
-              >
-                <span style={{ fontSize: 13 }}>↩</span>
-                Se déconnecter
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+      <div style={{ position: 'absolute', top: 20, right: 24, zIndex: 50 }}>
+        <UserMenu />
+      </div>
       {/* En-tête identité */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 56 }}>
         <div style={{ position: 'relative', width: 72, height: 72, marginBottom: 24 }}>
