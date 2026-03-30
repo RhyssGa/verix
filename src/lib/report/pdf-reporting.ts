@@ -92,7 +92,7 @@ function renderPage1(payload: ReportingPDFPayload): string {
       <div style="flex:1;height:8px;background:#F0EDE8;border-radius:4px;overflow:hidden">
         <div style="height:100%;width:${pct}%;background:${t.color};border-radius:4px;opacity:0.85"></div>
       </div>
-      <div style="width:52px;text-align:right;font-size:8pt;font-weight:800;color:${t.color}">${count} · ${pct}%</div>
+      <div style="width:52px;text-align:right;font-size:8pt;font-weight:800;color:${t.color}">${pct}%</div>
     </div>`
   }).join('')
 
