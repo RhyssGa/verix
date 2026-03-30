@@ -58,15 +58,30 @@ export function ValidationBlock() {
         <button
           onClick={generateReportV2}
           disabled={isGeneratingPdf}
-          className="px-[22px] py-[10px] rounded-[8px] cursor-pointer font-[inherit] font-bold text-[13px] tracking-[0.3px] flex items-center gap-2 border-none"
+          className="px-[22px] py-[10px] rounded-[8px] font-[inherit] font-bold text-[13px] tracking-[0.3px] flex items-center gap-2 border-none transition-all"
           style={{
-            background: isGeneratingPdf ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.1)',
-            color: isGeneratingPdf ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.85)',
+            background: isGeneratingPdf
+              ? 'rgba(255,255,255,0.07)'
+              : allValidated ? 'rgba(26,122,74,0.12)' : 'rgba(255,255,255,0.1)',
+            color: isGeneratingPdf
+              ? 'rgba(196,154,46,0.7)'
+              : allValidated ? '#1A7A4A' : 'rgba(255,255,255,0.85)',
             cursor: isGeneratingPdf ? 'not-allowed' : 'pointer',
-            ...(allValidated ? { background: 'rgba(26,122,74,0.12)', color: '#1A7A4A' } : {}),
           }}
         >
-          {isGeneratingPdf ? '⏳ Génération…' : '📄 Rapport PDF'}
+          {isGeneratingPdf ? (
+            <>
+              <span className="w-4 h-4 border-2 border-[#C49A2E]/30 border-t-[#C49A2E] rounded-full animate-spin" />
+              Génération…
+            </>
+          ) : (
+            <>
+              <svg width="14" height="14" viewBox="0 0 15 15" fill="none">
+                <path d="M2 11.5V13H13V11.5M7.5 2V10M7.5 10L4.5 7M7.5 10L10.5 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Rapport PDF
+            </>
+          )}
         </button>
         {uniqueAgencies.length === 1 ? (
           <button
