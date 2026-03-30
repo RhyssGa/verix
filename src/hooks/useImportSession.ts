@@ -43,7 +43,7 @@ export function useImportSession() {
     } catch {}
   }, [])
 
-  const saveImportSession = useCallback(async (label?: string): Promise<string | null> => {
+  const saveImportSession = useCallback(async (label?: string): Promise<{ id: string } | { error: string } | null> => {
     const state = useAuditStore.getState()
     setIsSaving(true)
 
@@ -76,13 +76,15 @@ export function useImportSession() {
         const { id } = await res.json()
         state.setImportSessionId(id)
         await refreshSessions()
-        return id
+        return { id }
       } else {
         const errBody = await res.json().catch(() => ({}))
         console.error('[ImportSession] Save failed', res.status, errBody)
+        return { error: `HTTP ${res.status} — ${errBody?.error ?? 'Erreur serveur'}` }
       }
     } catch (err) {
       console.error('[ImportSession] Network error', err)
+      return { error: `Erreur réseau : ${String(err)}` }
     } finally {
       setIsSaving(false)
     }

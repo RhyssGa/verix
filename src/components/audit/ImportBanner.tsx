@@ -40,11 +40,13 @@ export function ImportBanner() {
   const handleConfirm = async () => {
     setConfirmOpen(false)
     setSaveError(null)
-    const id = await saveImportSession()
-    if (id) {
+    const result = await saveImportSession()
+    if (result && 'id' in result) {
       setJustSaved(true)
+    } else if (result && 'error' in result) {
+      setSaveError(result.error)
     } else {
-      setSaveError('La sauvegarde a échoué. Vérifiez votre connexion et réessayez.')
+      setSaveError('La sauvegarde a échoué.')
     }
   }
 

@@ -13,8 +13,7 @@ export default function HomePage() {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      justifyContent: 'center',
-      padding: '32px 24px',
+      padding: '64px 24px 48px',
     }}>
       {/* En-tête identité */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 56 }}>
@@ -62,9 +61,6 @@ export default function HomePage() {
       }}>
         Sélectionnez le type d&apos;audit
       </div>
-
-      {/* Mémoire trimestrielle */}
-      <QuarterlyMemory />
 
       {/* Cards de sélection */}
       <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
@@ -134,10 +130,14 @@ export default function HomePage() {
         ))}
       </div>
 
+      {/* Mémoire trimestrielle */}
+      <div style={{ width: '100%', maxWidth: 600, marginTop: 48 }}>
+        <QuarterlyMemory />
+      </div>
+
       {/* Pied de page */}
       <div style={{
-        position: 'absolute',
-        bottom: 24,
+        marginTop: 48,
         fontSize: 10,
         color: 'rgba(255,255,255,0.2)',
         letterSpacing: '0.5px',

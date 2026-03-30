@@ -100,7 +100,12 @@ export function LoginForm() {
             cursor: loading ? 'not-allowed' : 'pointer',
           }}
         >
-          {loading ? '⏳ Chargement…' : isSignUp ? 'Créer le compte' : 'Se connecter'}
+          {loading ? (
+            <span className="flex items-center justify-center gap-2">
+              <span className="w-4 h-4 border-2 border-[#0B1929]/30 border-t-[#0B1929] rounded-full animate-spin" />
+              Chargement…
+            </span>
+          ) : isSignUp ? 'Créer le compte' : 'Se connecter'}
         </button>
       </form>
 
