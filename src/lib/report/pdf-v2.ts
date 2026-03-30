@@ -580,7 +580,7 @@ h1, h2, h3, .section-title {
     }).filter(Boolean).join('')
 
     synthComparisonBlock = `
-    <div style="margin-top:30px;page-break-inside:avoid">
+    <div style="page-break-before:always;padding-top:40px;page-break-inside:avoid">
 
       <!-- Section title -->
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">

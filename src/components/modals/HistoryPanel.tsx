@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuditStore } from '@/stores/useAuditStore'
 import { useHistory } from '@/hooks/useHistory'
 import { useImportSession, type ImportSessionSummary } from '@/hooks/useImportSession'
@@ -32,10 +32,20 @@ export function HistoryPanel() {
   const reportHistory = useAuditStore((s) => s.reportHistory)
   const setDeleteConfirm = useAuditStore((s) => s.setDeleteConfirm)
   const mode = useAuditStore((s) => s.mode)
+  const historyInitialTab = useAuditStore((s) => s.historyInitialTab)
   const { restoreFromHistory } = useHistory()
-  const { importSessions, importSessionId, restoreImportSession, deleteImportSession } = useImportSession()
+  const { importSessions, importSessionId, restoreImportSession, deleteImportSession, refreshSessions } = useImportSession()
 
-  const [tab, setTab] = useState<'audits' | 'imports'>('audits')
+  const [tab, setTab] = useState<'audits' | 'imports'>(historyInitialTab)
+
+  // Sync tab + refresh imports à chaque ouverture du panel
+  useEffect(() => {
+    if (showHistory) {
+      setTab(historyInitialTab)
+      refreshSessions()
+    }
+  }, [showHistory, historyInitialTab, refreshSessions])
+
   const [nameFilter, setNameFilter] = useState('')
   const [monthFilter, setMonthFilter] = useState('')
   const [yearFilter, setYearFilter] = useState('')

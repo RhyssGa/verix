@@ -16,30 +16,31 @@ export interface ImportSessionSummary {
 }
 
 export function useImportSession() {
-  const [importSessions, setImportSessions] = useState<ImportSessionSummary[]>([])
   const [isSaving, setIsSaving] = useState(false)
 
   const mode = useAuditStore((s) => s.mode)
   const importSessionId = useAuditStore((s) => s.importSessionId)
+  const importSessions = useAuditStore((s) => s.importSessions)
   const setImportSessionId = useAuditStore((s) => s.setImportSessionId)
+  const setImportSessions = useAuditStore((s) => s.setImportSessions)
 
-  // Charge la liste des sessions au montage (et quand le mode change)
+  // Charge la liste au montage (et quand le mode change)
   useEffect(() => {
     fetch(`/api/import-sessions?mode=${mode}`)
       .then((res) => res.json())
       .then((data: ImportSessionSummary[]) => {
         if (Array.isArray(data)) setImportSessions(data)
       })
-      .catch(() => { /* noop — app works without DB */ })
-  }, [mode])
+      .catch(() => {})
+  }, [mode, setImportSessions])
 
   const refreshSessions = useCallback(async () => {
     const state = useAuditStore.getState()
     try {
       const res = await fetch(`/api/import-sessions?mode=${state.mode}`)
       const data = await res.json()
-      if (Array.isArray(data)) setImportSessions(data)
-    } catch { /* noop */ }
+      if (Array.isArray(data)) state.setImportSessions(data)
+    } catch {}
   }, [])
 
   const saveImportSession = useCallback(async (label?: string): Promise<string | null> => {
@@ -73,7 +74,7 @@ export function useImportSession() {
       })
       if (res.ok) {
         const { id } = await res.json()
-        setImportSessionId(id)
+        state.setImportSessionId(id)
         await refreshSessions()
         return id
       }
@@ -83,7 +84,7 @@ export function useImportSession() {
       setIsSaving(false)
     }
     return null
-  }, [setImportSessionId, refreshSessions])
+  }, [refreshSessions])
 
   const restoreImportSession = useCallback(async (session: ImportSessionSummary) => {
     const state = useAuditStore.getState()
@@ -95,10 +96,7 @@ export function useImportSession() {
 
     try {
       const res = await fetch(`/api/import-sessions/${session.id}`)
-      if (!res.ok) {
-        alert('Session introuvable.')
-        return
-      }
+      if (!res.ok) { alert('Session introuvable.'); return }
       const data = await res.json()
       const snapshot: HistorySnapshot = data.snapshot
       const store = useAuditStore.getState()
@@ -114,16 +112,9 @@ export function useImportSession() {
       store.setAnnotations(snapshot.annots)
       store.setSectionNotes(snapshot.sectionNotes)
       store.setForcedOk(snapshot.forcedOk)
-
-      Object.entries(snapshot.fileLoaded).forEach(([id, name]) => {
-        store.setLoadedFile(id, name)
-      })
-
+      Object.entries(snapshot.fileLoaded).forEach(([id, name]) => store.setLoadedFile(id, name))
       store.setAgencies(snapshot.agences)
-      if (snapshot.agences.length > 0) {
-        store.setSelectedAgency(snapshot.agences[0])
-      }
-
+      if (snapshot.agences.length > 0) store.setSelectedAgency(snapshot.agences[0])
       if (snapshot.zGerancePointe) store.setZGerancePeak(new Map(snapshot.zGerancePointe))
       if (snapshot.zCoproPointe) store.setZCoproPeak(new Map(snapshot.zCoproPointe))
       if (snapshot.zGeranceMandats) store.setZGeranceMandates(new Map(snapshot.zGeranceMandats))
@@ -139,14 +130,13 @@ export function useImportSession() {
   const deleteImportSession = useCallback(async (id: string) => {
     try {
       await fetch(`/api/import-sessions/${id}`, { method: 'DELETE' })
-      setImportSessions((prev) => prev.filter((s) => s.id !== id))
-      if (importSessionId === id) {
-        useAuditStore.getState().setImportSessionId(null)
-      }
+      const state = useAuditStore.getState()
+      state.setImportSessions(state.importSessions.filter((s) => s.id !== id))
+      if (state.importSessionId === id) state.setImportSessionId(null)
     } catch {
       console.warn('Suppression import session échouée')
     }
-  }, [importSessionId])
+  }, [])
 
   return {
     importSessions,

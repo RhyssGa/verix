@@ -35,6 +35,8 @@ export interface UiSlice {
   showAllNonClosed: boolean
   modalSearchTerm: string
   importSessionId: string | null
+  importSessions: import('@/hooks/useImportSession').ImportSessionSummary[]
+  historyInitialTab: 'audits' | 'imports'
   openModal: (modal: Omit<ModalState, 'open'>) => void
   closeModal: () => void
   openFinancialStateModal: (title: string, rows: ExcelRow[]) => void
@@ -51,6 +53,8 @@ export interface UiSlice {
   setShowAllNonClosed: (show: boolean) => void
   setModalSearchTerm: (term: string) => void
   setImportSessionId: (id: string | null) => void
+  setImportSessions: (sessions: import('@/hooks/useImportSession').ImportSessionSummary[]) => void
+  setHistoryInitialTab: (tab: 'audits' | 'imports') => void
   resetUi: () => void
 }
 
@@ -79,6 +83,8 @@ const initialUiState = {
   showAllNonClosed: false,
   modalSearchTerm: '',
   importSessionId: null as string | null,
+  importSessions: [] as import('@/hooks/useImportSession').ImportSessionSummary[],
+  historyInitialTab: 'audits' as 'audits' | 'imports',
 }
 
 export const createUiSlice: StateCreator<UiSlice, [], [], UiSlice> = (set) => ({
@@ -107,5 +113,7 @@ export const createUiSlice: StateCreator<UiSlice, [], [], UiSlice> = (set) => ({
   setShowAllNonClosed: (show) => set({ showAllNonClosed: show }),
   setModalSearchTerm: (term) => set({ modalSearchTerm: term }),
   setImportSessionId: (id) => set({ importSessionId: id }),
+  setImportSessions: (sessions) => set({ importSessions: sessions }),
+  setHistoryInitialTab: (tab) => set({ historyInitialTab: tab }),
   resetUi: () => set(initialUiState),
 })

@@ -96,20 +96,7 @@ const CREAM = '#FAF8F4'
 const BORDER = '#E8E4DC'
 
 // ── Shared page chrome ─────────────────────────────────────────────────────────
-
-function pageHeader(periodLabel: string, modeLabel: string): string {
-  return `<div style="background:${NAVY};padding:10px 36px;display:flex;align-items:center;justify-content:space-between">
-    <div style="font-size:8.5pt;font-weight:700;color:rgba(255,255,255,0.45)">Century 21 — Groupe Martinot · Reporting groupe</div>
-    <div style="font-size:8.5pt;font-weight:700;color:${GOLD}">${esc(periodLabel)} · ${esc(modeLabel)}</div>
-  </div>`
-}
-
-function pageFooter(exportDate: string, year: number): string {
-  return `<div style="background:${NAVY};border-top:3px solid ${GOLD};padding:10px 36px;display:flex;justify-content:space-between;align-items:center">
-    <span style="font-size:7.5pt;font-weight:600;color:rgba(255,255,255,0.5)">Century 21 — Groupe Martinot · Reporting ${year}</span>
-    <span style="font-size:7.5pt;color:rgba(255,255,255,0.4)">Généré le ${dateFmt(exportDate)}</span>
-  </div>`
-}
+// Header/footer are injected by Puppeteer's displayHeaderFooter — nothing inline needed.
 
 function sectionTitle(title: string, subtitle?: string): string {
   return `<div style="margin-bottom:22px">
@@ -221,8 +208,6 @@ function renderCover(payload: ReportingPDFPayload): string {
       </div>
     </div>
   </div>
-
-  ${pageFooter(exportDate, period.year)}
 </div>`
 }
 
@@ -237,18 +222,16 @@ function renderGroupAvgPage(payload: ReportingPDFPayload): string {
   const aboveTarget = agencies.filter(a => a.scoreGlobal >= target).length
 
   const kpi = (val: string, label: string, color: string, bg: string, valColor = color) => `
-    <div style="padding:20px 24px;border:1px solid ${BORDER};border-radius:12px;background:${bg};flex:1;min-width:130px;position:relative;overflow:hidden">
-      <div style="position:absolute;top:0;left:0;right:0;height:4px;background:${color};border-radius:12px 12px 0 0;opacity:0.8"></div>
-      <div style="font-size:26pt;font-weight:900;color:${valColor};line-height:1.05;margin-top:4px">${esc(val)}</div>
+    <div style="padding:20px 24px 20px 24px;border:1px solid ${BORDER};border-top:4px solid ${color};border-radius:12px;background:${bg};flex:1;min-width:140px">
+      <div style="font-size:24pt;font-weight:900;color:${valColor};line-height:1.05;word-break:break-all">${esc(val)}</div>
       <div style="font-size:7.5pt;margin-top:8px;text-transform:uppercase;letter-spacing:0.08em;font-weight:600;color:${bg === NAVY ? 'rgba(255,255,255,0.4)' : '#9A9AB0'}">${esc(label)}</div>
     </div>`
 
   return `<div class="page" style="display:flex;flex-direction:column">
-  ${pageHeader(periodLabel, modeLabel)}
-  <div style="padding:28px 36px;flex:1">
+  <div style="padding:48px 52px;flex:1">
     ${sectionTitle('Moyenne groupe & objectif', `${agencies.length} agence${agencies.length > 1 ? 's' : ''} · ${periodLabel} · ${modeLabel}`)}
 
-    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px">
+    <div style="display:flex;gap:12px;margin-bottom:24px;align-items:stretch">
       ${kpi(groupAvg !== null ? `${groupAvg.toFixed(1)}/100` : '—', `Moyenne (${agencies.length} agence${agencies.length > 1 ? 's' : ''})`, GOLD, NAVY, GOLD)}
       ${kpi(`${target}/100`, 'Objectif groupe', NAVY, '#fff')}
       ${delta !== null ? kpi(
@@ -268,7 +251,6 @@ function renderGroupAvgPage(payload: ReportingPDFPayload): string {
       ${aboveTarget < agencies.length ? ` · <strong style="color:#B01A1A">${agencies.length - aboveTarget}</strong> en dessous` : ''}.
     </div>` : ''}
   </div>
-  ${pageFooter(exportDate, period.year)}
 </div>`
 }
 
@@ -315,8 +297,7 @@ function renderScoreTablePage(payload: ReportingPDFPayload): string {
     </tr>` : ''
 
   return `<div class="page" style="display:flex;flex-direction:column">
-  ${pageHeader(periodLabel, modeLabel)}
-  <div style="padding:28px 36px;flex:1">
+  <div style="padding:48px 52px;flex:1">
     ${sectionTitle(`Scores par agence`, `${agencies.length} agence${agencies.length > 1 ? 's' : ''} auditée${agencies.length > 1 ? 's' : ''} · ${periodLabel} · ${modeLabel}`)}
     ${agencies.length === 0
       ? `<p style="color:#9A9AB0;font-size:9pt;text-align:center;padding:32px 0">Aucun audit sur cette période.</p>`
@@ -336,7 +317,6 @@ function renderScoreTablePage(payload: ReportingPDFPayload): string {
           <tfoot>${avgRow}</tfoot>
         </table>`}
   </div>
-  ${pageFooter(exportDate, period.year)}
 </div>`
 }
 
@@ -366,8 +346,7 @@ function renderTrendPage(payload: ReportingPDFPayload): string {
   }).join('')
 
   return `<div class="page" style="display:flex;flex-direction:column">
-  ${pageHeader(periodLabel, modeLabel)}
-  <div style="padding:28px 36px;flex:1">
+  <div style="padding:48px 52px;flex:1">
     ${sectionTitle(`Évolution trimestrielle ${year}`, `${modeLabel} · Scores Q1 à Q4`)}
     ${trend.length === 0
       ? `<p style="color:#9A9AB0;font-size:9pt;text-align:center;padding:32px 0">Aucune donnée d'évolution pour ${year}.</p>`
@@ -383,7 +362,6 @@ function renderTrendPage(payload: ReportingPDFPayload): string {
           <tbody>${tbody}</tbody>
         </table>`}
   </div>
-  ${pageFooter(exportDate, period.year)}
 </div>`
 }
 
@@ -422,8 +400,7 @@ function renderAnomalyPage(payload: ReportingPDFPayload): string {
     </tr>`).join('')
 
   return `<div class="page" style="display:flex;flex-direction:column">
-  ${pageHeader(periodLabel, modeLabel)}
-  <div style="padding:28px 36px;flex:1">
+  <div style="padding:48px 52px;flex:1">
     ${sectionTitle('Détail des anomalies agrégées', `${modeLabel} · ${periodLabel}`)}
     ${anomalyAggregates.length === 0
       ? `<p style="color:#9A9AB0;font-size:9pt;text-align:center;padding:32px 0">Aucune anomalie sur cette période.</p>`
@@ -440,7 +417,6 @@ function renderAnomalyPage(payload: ReportingPDFPayload): string {
           <tbody>${rows}</tbody>
         </table>`}
   </div>
-  ${pageFooter(exportDate, period.year)}
 </div>`
 }
 

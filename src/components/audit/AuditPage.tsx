@@ -16,6 +16,7 @@ import { HistoryPanel } from '@/components/modals/HistoryPanel'
 import { ComparisonPanel } from '@/components/comparison/ComparisonPanel'
 import { GlobalNote } from '@/components/comparison/GlobalNote'
 import { ValidationBlock } from './ValidationBlock'
+import { ImportBanner } from './ImportBanner'
 
 interface AuditPageProps {
   mode: 'gerance' | 'copro'
@@ -49,6 +50,7 @@ export function AuditPage({ mode }: AuditPageProps) {
             <span className="flex-1 h-px bg-[#E8E4DC]" />
           </div>
           <FileUploadGrid mode={mode} />
+          <ImportBanner />
 
           {/* Scoring global */}
           {score && (
