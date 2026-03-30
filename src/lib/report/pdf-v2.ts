@@ -44,10 +44,10 @@ export function renderReportHTMLV2(payload: PDFPayload, bgCoverBase64 = '', _log
   const BORDER = '#E8E4DC'
 
   const STATUS: Record<string, { bg: string; text: string; border: string; label: string; dot: string }> = {
-    ok:   { bg: '#EAF6EF', text: '#1A7A4A', border: '#A8D8BC', label: '✓ Conforme',    dot: '#1A7A4A' },
-    warn: { bg: '#FEF3E8', text: '#C05C1A', border: '#F5C89A', label: '⚠ Attention',   dot: '#C05C1A' },
-    bad:  { bg: '#FAEAEA', text: '#B01A1A', border: '#F5AAAA', label: '✗ Anomalie',    dot: '#B01A1A' },
-    info: { bg: '#EEF3FF', text: '#2A50C8', border: '#B0C0F0', label: 'ℹ Information', dot: '#2A50C8' },
+    ok:   { bg: '#EAF6EF', text: '#1A7A4A', border: '#A8D8BC', label: 'Conforme',    dot: '#1A7A4A' },
+    warn: { bg: '#FEF3E8', text: '#C05C1A', border: '#F5C89A', label: 'Attention',   dot: '#C05C1A' },
+    bad:  { bg: '#FAEAEA', text: '#B01A1A', border: '#F5AAAA', label: 'Anomalie',    dot: '#B01A1A' },
+    info: { bg: '#EEF3FF', text: '#2A50C8', border: '#B0C0F0', label: 'Information', dot: '#2A50C8' },
   }
 
   function pill(level: string): string {
@@ -171,8 +171,8 @@ export function renderReportHTMLV2(payload: PDFPayload, bgCoverBase64 = '', _log
         <td style="color:#9A9AB0;font-style:italic;font-size:8.5pt">${esc(r.comment || '—')}</td>
         ${showStatus ? `<td style="text-align:center">
           ${r.justified
-            ? `<span style="display:inline-block;padding:2px 9px;border-radius:12px;font-size:7.5pt;font-weight:700;background:#EAF6EF;color:#1A7A4A;border:1px solid #A8D8BC">✓ Justifié</span>`
-            : `<span style="display:inline-block;padding:2px 9px;border-radius:12px;font-size:7.5pt;font-weight:700;background:#FAEAEA;color:#B01A1A;border:1px solid #F5AAAA">✗ Injustifié</span>`
+            ? `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:12px;font-size:7.5pt;font-weight:700;background:#EAF6EF;color:#1A7A4A;border:1px solid #A8D8BC"><span style="width:6px;height:6px;border-radius:50%;background:#1A7A4A;flex-shrink:0"></span>Justifié</span>`
+            : `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:12px;font-size:7.5pt;font-weight:700;background:#FAEAEA;color:#B01A1A;border:1px solid #F5AAAA"><span style="width:6px;height:6px;border-radius:50%;background:#B01A1A;flex-shrink:0"></span>Injustifié</span>`
           }
         </td>` : ''}
       </tr>`).join('')
@@ -223,20 +223,20 @@ export function renderReportHTMLV2(payload: PDFPayload, bgCoverBase64 = '', _log
 
     const noteHtml = sec.note
       ? `<div style="margin:18px 0 0;padding:12px 16px;border-radius:8px;background:#FAF7EE;border:1px solid #E8D89A;border-left:4px solid ${GOLD}">
-          <div style="font-size:7.5pt;font-weight:700;color:${GOLD};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">✏ Commentaire de l'auditeur</div>
+          <div style="font-size:7.5pt;font-weight:700;color:${GOLD};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">Commentaire de l'auditeur</div>
           <div style="font-size:10pt;color:#1A1A2E;font-style:italic;line-height:1.65">${esc(sec.note)}</div>
         </div>`
       : ''
 
     const exclHtml = sec.nbExclu > 0
       ? `<div style="margin-top:10px;display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;background:#EAF6EF;font-size:8pt;color:#1A7A4A;font-weight:600">
-          <span>✓</span> ${sec.nbExclu} ligne(s) justifiée(s) exclue(s) du calcul
+          <span style="width:8px;height:8px;border-radius:50%;background:#1A7A4A;display:inline-block;flex-shrink:0"></span> ${sec.nbExclu} ligne(s) justifiée(s) exclue(s) du calcul
         </div>`
       : ''
 
     const infoOnlyHtml = sec.infoOnly
       ? `<div style="margin-top:10px;display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;background:#EEF3FF;font-size:8pt;color:#2A50C8;font-weight:600">
-          <span>ℹ</span> Poste présenté à titre informatif — hors calcul du score
+          <span style="width:8px;height:8px;border-radius:50%;background:#2A50C8;display:inline-block;flex-shrink:0"></span> Poste présenté à titre informatif — hors calcul du score
         </div>`
       : ''
 
@@ -244,7 +244,7 @@ export function renderReportHTMLV2(payload: PDFPayload, bgCoverBase64 = '', _log
       ? renderAnomalyTable(sec.rows, sec.tableHeaders, !sec.infoOnly)
       : (parseInt(sec.mainStat) === 0
           ? `<div style="margin-top:16px;display:flex;align-items:center;gap:8px;padding:12px 16px;border-radius:8px;background:#EAF6EF;border:1px solid #A8D8BC;font-size:9.5pt;color:#1A7A4A;font-weight:600">
-              <span style="font-size:13pt">✓</span> Aucune anomalie à signaler sur ce poste.
+              <span style="width:10px;height:10px;border-radius:50%;background:#1A7A4A;display:inline-block;flex-shrink:0"></span> Aucune anomalie à signaler sur ce poste.
             </div>`
           : '')
 
@@ -256,12 +256,12 @@ export function renderReportHTMLV2(payload: PDFPayload, bgCoverBase64 = '', _log
       if (cr.prevNb !== null && cr.currNb !== null && cr.currNb !== cr.prevNb) {
         const d = cr.currNb - cr.prevNb
         const col = d > 0 ? '#B01A1A' : '#1A7A4A'
-        parts.push(`Nb : <span style="color:${col};font-weight:700">${cr.prevNb} → ${cr.currNb} <span style="font-size:7.5pt">(${d > 0 ? '+' : ''}${d})</span></span>`)
+        parts.push(`Nb : <span style="color:${col};font-weight:700">${cr.prevNb} &gt; ${cr.currNb} <span style="font-size:7.5pt">(${d > 0 ? '+' : ''}${d})</span></span>`)
       }
       if (cr.prevMontant !== null && cr.currMontant !== null && cr.currMontant !== cr.prevMontant) {
         const d = cr.currMontant - cr.prevMontant
         const col = d > 0 ? '#B01A1A' : '#1A7A4A'
-        parts.push(`Montant : <span style="color:${col};font-weight:700">${eurFmt(cr.prevMontant)} → ${eurFmt(cr.currMontant)}</span>`)
+        parts.push(`Montant : <span style="color:${col};font-weight:700">${eurFmt(cr.prevMontant)} &gt; ${eurFmt(cr.currMontant)}</span>`)
       }
       if (parts.length === 0) return ''
       return `<div style="margin-top:8px;padding:6px 12px;border-radius:6px;background:#F5F3EE;font-size:8pt;color:#9A9AB0">
@@ -273,7 +273,7 @@ export function renderReportHTMLV2(payload: PDFPayload, bgCoverBase64 = '', _log
     <h2 class="section-title">${esc(sec.title)}</h2>
     <div class="card" style="border-left:4px solid ${accentColor}">
       <div class="card-header">
-        <span style="font-size:20pt;flex-shrink:0;line-height:1">${sec.icon}</span>
+        <span style="width:30px;height:30px;border-radius:50%;background:${accentColor}22;border:2px solid ${accentColor};flex-shrink:0;display:inline-block;margin-top:2px"></span>
         <div style="flex:1;min-width:0">
           <div style="font-size:12.5pt;font-weight:700;color:${NAVY};line-height:1.2;margin-bottom:6px">${esc(sec.title)}</div>
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
@@ -518,8 +518,8 @@ h1, h2, h3, .section-title {
     const statusHtml = row.exclu
       ? `<span style="display:inline-block;padding:2px 9px;border-radius:12px;font-size:7.5pt;font-weight:600;background:#F3F3F9;color:#9A9AB0">Non scoré</span>`
       : row.penalite > 0
-        ? `<span style="display:inline-block;padding:2px 9px;border-radius:12px;font-size:7.5pt;font-weight:700;background:#FAEAEA;color:#B01A1A;border:1px solid #F5AAAA">✗ Anomalie</span>`
-        : `<span style="display:inline-block;padding:2px 9px;border-radius:12px;font-size:7.5pt;font-weight:700;background:#EAF6EF;color:#1A7A4A;border:1px solid #A8D8BC">✓ OK</span>`
+        ? `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:12px;font-size:7.5pt;font-weight:700;background:#FAEAEA;color:#B01A1A;border:1px solid #F5AAAA"><span style="width:6px;height:6px;border-radius:50%;background:#B01A1A;flex-shrink:0"></span>Anomalie</span>`
+        : `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:12px;font-size:7.5pt;font-weight:700;background:#EAF6EF;color:#1A7A4A;border:1px solid #A8D8BC"><span style="width:6px;height:6px;border-radius:50%;background:#1A7A4A;flex-shrink:0"></span>OK</span>`
     const montantStr = row.montant != null ? eurFmt(row.montant) : '—'
     const rowBg = i % 2 === 0 ? '' : 'background:#FAFAFA'
     return `<tr style="${rowBg}">
@@ -542,7 +542,7 @@ h1, h2, h3, .section-title {
     const sColor  = sDelta > 0 ? '#1A7A4A' : sDelta < 0 ? '#B01A1A' : '#7A7A8C'
     const sBg     = sDelta > 0 ? '#EAF6EF' : sDelta < 0 ? '#FAEAEA' : '#F2F2F2'
     const sBorder = sDelta > 0 ? '#A8D8BC' : sDelta < 0 ? '#F5AAAA' : '#DCDCEC'
-    const sArrow  = sDelta > 0 ? '↑' : sDelta < 0 ? '↓' : '→'
+    const sArrow  = sDelta > 0 ? '+' : sDelta < 0 ? '-' : '='
 
     // Compute prev niveau from score
     const pn = comparison.prevScore >= 90 ? { label: 'Excellent',    color: '#1A7A4A', bg: '#EAF6EF' }
@@ -634,7 +634,7 @@ h1, h2, h3, .section-title {
             <span style="font-size:8.5pt;color:#9A9AB0">Postes en anomalie</span>
             <span style="font-size:9.5pt;font-weight:700;color:#1A1A2E">
               <span style="color:#C0C0D0;font-weight:400">${prevNbAnom}</span>
-              <span style="color:#9A9AB0;margin:0 4px">→</span>
+              <span style="color:#9A9AB0;margin:0 4px">&gt;</span>
               <span style="color:${anomColor}">${currNbAnom}</span>
             </span>
           </div>
@@ -642,7 +642,7 @@ h1, h2, h3, .section-title {
             <span style="font-size:8.5pt;color:#9A9AB0">Score</span>
             <span style="font-size:9.5pt;font-weight:700;color:#1A1A2E">
               <span style="color:#C0C0D0;font-weight:400">${comparison.prevScore}</span>
-              <span style="color:#9A9AB0;margin:0 4px">→</span>
+              <span style="color:#9A9AB0;margin:0 4px">&gt;</span>
               <span style="color:${esc(niveauColor)}">${comparison.currScore}</span>
             </span>
           </div>
@@ -661,7 +661,7 @@ h1, h2, h3, .section-title {
           <tbody>${miniRows}</tbody>
         </table>` : `
         <div style="padding:14px 18px;font-size:9pt;color:#1A7A4A;font-weight:600;background:#EAF6EF;display:flex;align-items:center;gap:8px">
-          <span>✓</span> Aucun écart significatif par rapport à l'audit de référence.
+          <span style="width:8px;height:8px;border-radius:50%;background:#1A7A4A;display:inline-block;flex-shrink:0"></span> Aucun écart significatif par rapport à l'audit de référence.
         </div>`}
 
       </div>
@@ -715,7 +715,7 @@ h1, h2, h3, .section-title {
 
     ${globalNote ? `
     <div style="margin-top:16px;padding:14px 18px;background:#FAF7EE;border:1px solid #E8D89A;border-left:4px solid ${GOLD};border-radius:8px">
-      <div style="font-size:8pt;font-weight:700;color:${GOLD};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:7px">✏ Note générale de l'auditeur</div>
+      <div style="font-size:8pt;font-weight:700;color:${GOLD};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:7px">Note generale de l'auditeur</div>
       <div style="font-size:10pt;color:#1A1A2E;line-height:1.65;white-space:pre-wrap">${esc(globalNote)}</div>
     </div>` : ''}
 
@@ -765,7 +765,7 @@ h1, h2, h3, .section-title {
 
     const bilanNoteHtml = bilan.note
       ? `<div style="margin:16px 0 0;padding:12px 16px;border-radius:8px;background:#FAF7EE;border:1px solid #E8D89A;border-left:4px solid ${GOLD}">
-          <div style="font-size:7.5pt;font-weight:700;color:${GOLD};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px">✏ Commentaire de l'auditeur</div>
+          <div style="font-size:7.5pt;font-weight:700;color:${GOLD};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px">Commentaire de l'auditeur</div>
           <div style="font-size:10pt;color:#1A1A2E;font-style:italic;line-height:1.65">${esc(bilan.note)}</div>
         </div>`
       : ''
@@ -776,7 +776,7 @@ h1, h2, h3, .section-title {
       return `
       <div style="margin-top:22px">
         <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:8px;background:${grpBg};margin-bottom:10px;border:1px solid ${grpBorder}">
-          <span style="font-size:10.5pt;font-weight:700;color:${g.riskColor}">${esc(g.riskLabel)}</span>
+          <span style="display:inline-flex;align-items:center;gap:7px"><span style="width:10px;height:10px;border-radius:50%;background:${g.riskColor};flex-shrink:0"></span><span style="font-size:10.5pt;font-weight:700;color:${g.riskColor}">${esc(g.riskLabel.replace(/^[✗✓\s]+/, ''))}</span></span>
           <span style="font-size:8.5pt;color:#9A9AB0;margin-left:auto">${g.rows.length} résidence(s)</span>
         </div>
         <table class="bilan-table">
@@ -882,7 +882,7 @@ h1, h2, h3, .section-title {
       <h1 class="section-title" style="font-size:12pt;color:${NAVY};border-bottom:2px solid ${GOLD};letter-spacing:0.06em">État financier des copropriétés</h1>
       <div class="card" style="border-left:4px solid ${bilanColor}">
         <div class="card-header">
-          <span style="font-size:20pt;flex-shrink:0;line-height:1">📊</span>
+          <span style="width:30px;height:30px;border-radius:50%;background:${bilanColor}22;border:2px solid ${bilanColor};flex-shrink:0;display:inline-block;margin-top:2px"></span>
           <div style="flex:1">
             <div style="font-size:12.5pt;font-weight:700;color:${NAVY};margin-bottom:6px">État financier des copropriétés</div>
             <div style="display:flex;align-items:center;gap:8px">${pill(bilanLvl)}</div>
