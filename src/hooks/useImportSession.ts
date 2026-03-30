@@ -116,11 +116,17 @@ export function useImportSession() {
       store.setStartDate(snapshot.dateDebut)
       store.setEndDate(snapshot.dateFin)
       store.setMandateCount(snapshot.nbMandats)
-      store.setAnnotations(snapshot.annots)
-      store.setSectionNotes(snapshot.sectionNotes)
       store.setForcedOk(snapshot.forcedOk)
       Object.entries(snapshot.fileLoaded).forEach(([id, name]) => store.setLoadedFile(id, name))
       store.setAgencies(snapshot.agences)
+
+      // Repartir d'une ardoise vierge pour les annotations/notes par agence
+      // pour éviter que des données d'une session précédente ne contaminent les agences
+      useAuditStore.setState({ annotsByAgency: {}, notesByAgency: {} })
+
+      // Restaurer les annotations/notes uniquement pour l'agence sélectionnée
+      store.setAnnotations(snapshot.annots)
+      store.setSectionNotes(snapshot.sectionNotes)
       if (snapshot.agences.length > 0) store.setSelectedAgency(snapshot.agences[0])
       if (snapshot.zGerancePointe) store.setZGerancePeak(new Map(snapshot.zGerancePointe))
       if (snapshot.zCoproPointe) store.setZCoproPeak(new Map(snapshot.zCoproPointe))
