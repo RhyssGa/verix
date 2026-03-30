@@ -23,6 +23,14 @@ function scoreBg(score: number | null): string {
   return '#FAEAEA'
 }
 
+function TrendIndicator({ current, prev }: { current: number | null; prev: number | null }) {
+  if (current === null || prev === null) return null
+  const delta = current - prev
+  if (delta > 0.5) return <span className="text-[10px] font-bold ml-1" style={{ color: '#1A7A4A' }}>↑</span>
+  if (delta < -0.5) return <span className="text-[10px] font-bold ml-1" style={{ color: '#B01A1A' }}>↓</span>
+  return <span className="text-[10px] font-bold ml-1" style={{ color: '#9A9AB0' }}>→</span>
+}
+
 const QUARTER_LABELS = ['Q1 — Mars', 'Q2 — Juin', 'Q3 — Sept.', 'Q4 — Déc.']
 
 export function TrendTable({ rows, year }: TrendTableProps) {
@@ -63,14 +71,16 @@ export function TrendTable({ rows, year }: TrendTableProps) {
               </td>
               {([1, 2, 3, 4] as const).map((q) => {
                 const score = row.scores[q]
+                const prevScore = q > 1 ? row.scores[(q - 1) as 1 | 2 | 3] : null
                 return (
                   <td key={q} className="py-3 px-4 text-center">
                     {score !== null ? (
                       <span
-                        className="inline-block px-[10px] py-[3px] rounded-full text-[13px] font-bold"
+                        className="inline-flex items-center px-[10px] py-[3px] rounded-full text-[13px] font-bold"
                         style={{ background: scoreBg(score), color: scoreColor(score) }}
                       >
                         {score.toFixed(1)}
+                        <TrendIndicator current={score} prev={prevScore} />
                       </span>
                     ) : (
                       <span className="text-[#D0D0DC] text-[13px]">—</span>

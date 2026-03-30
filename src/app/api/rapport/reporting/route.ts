@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
 
     const modeUpperCase = payload.mode === 'gerance' ? 'GÉRANCE' : 'COPROPRIÉTÉ'
     const reportDate = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-    const periodStr = `Q${payload.period.quarter} ${payload.period.year}`
+    const yearStr = String(payload.period.year)
 
     const footerTemplate = `
       <div style="-webkit-print-color-adjust:exact;color-adjust:exact;width:100%;box-sizing:border-box;padding:0 52px;height:32px;display:flex;justify-content:space-between;align-items:center;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:7pt;background:#fff;border-top:1px solid #E8E4DC">
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
           <span style="color:#DCDCDC">&nbsp;·&nbsp;</span>
           <span style="color:#7A7A8C;letter-spacing:0.03em">REPORTING GROUPE ${modeUpperCase}</span>
           <span style="color:#DCDCDC">&nbsp;·&nbsp;</span>
-          <span style="color:#9A9AB0">${periodStr}</span>
+          <span style="color:#9A9AB0">${yearStr}</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           <span style="color:#BCBCCC">Généré le ${reportDate}</span>
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     await browser.close()
 
     const { period, mode } = payload
-    const filename = `reporting-Q${period.quarter}-${period.year}-${mode}.pdf`
+    const filename = `reporting-${period.year}-${mode}.pdf`
 
     return new NextResponse(Buffer.from(pdf), {
       status: 200,

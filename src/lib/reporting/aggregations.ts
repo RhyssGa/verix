@@ -222,6 +222,48 @@ export function buildCumulatedRows(
 }
 
 /**
+ * Construit les lignes du tableau agences avec score = moyenne sur tous les trimestres de l'année.
+ * Une ligne par agence, deltaGroupe calculé sur les moyennes.
+ */
+export function buildMultiQuarterAgencyRows(
+  allEntries: ReportingEntry[],
+  year: number,
+  mode: 'gerance' | 'copro',
+): AgencyRow[] {
+  const agenceScores = new Map<string, number[]>()
+
+  for (const q of [1, 2, 3, 4] as const) {
+    const entries = filterByQuarter(allEntries, { year, quarter: q }, mode)
+    for (const e of entries) {
+      if (!agenceScores.has(e.agence)) agenceScores.set(e.agence, [])
+      agenceScores.get(e.agence)!.push(e.scoreGlobal)
+    }
+  }
+
+  if (agenceScores.size === 0) return []
+
+  const rows: AgencyRow[] = Array.from(agenceScores.entries()).map(([agence, scores]) => {
+    const avg = Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10
+    return {
+      agence,
+      scoreGlobal: avg,
+      niveau: scoreToNiveau(avg),
+      nbAnomalies: 0,
+      totalPenalite: 0,
+      deltaGroupe: null,
+      deltaPrev: null,
+      timestamp: '',
+    }
+  }).sort((a, b) => b.scoreGlobal - a.scoreGlobal)
+
+  const groupAvg = Math.round((rows.reduce((s, r) => s + r.scoreGlobal, 0) / rows.length) * 10) / 10
+  return rows.map(r => ({
+    ...r,
+    deltaGroupe: Math.round((r.scoreGlobal - groupAvg) * 10) / 10,
+  }))
+}
+
+/**
  * Agrège les métriques par type d'anomalie sur toutes les entrées.
  */
 export function buildAnomalyAggregates(entries: ReportingEntry[]): AnomalyAggregate[] {

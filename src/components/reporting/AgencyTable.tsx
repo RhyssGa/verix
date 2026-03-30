@@ -92,9 +92,6 @@ export function AgencyTable({ rows, groupAvg, target }: AgencyTableProps) {
             <th className="text-center py-3 px-4 text-[11px] font-semibold text-[#7A7A8C] uppercase tracking-[0.6px]">
               Δ Groupe
             </th>
-            <th className="text-center py-3 px-4 text-[11px] font-semibold text-[#7A7A8C] uppercase tracking-[0.6px]">
-              Δ Trim. préc.
-            </th>
             <th className="py-3 px-4 text-[11px] font-semibold text-[#7A7A8C] uppercase tracking-[0.6px] min-w-[100px]">
               Jauge
             </th>
@@ -133,9 +130,6 @@ export function AgencyTable({ rows, groupAvg, target }: AgencyTableProps) {
                 <td className="py-3 px-4 text-center">
                   <DeltaBadge delta={row.deltaGroupe} />
                 </td>
-                <td className="py-3 px-4 text-center">
-                  <DeltaBadge delta={row.deltaPrev} />
-                </td>
                 <td className="py-3 px-4">
                   <ScoreBar score={row.scoreGlobal} target={target} />
                 </td>
@@ -153,7 +147,7 @@ export function AgencyTable({ rows, groupAvg, target }: AgencyTableProps) {
                 <span className="text-[18px] font-extrabold text-[#C49A2E]">{groupAvg.toFixed(1)}</span>
                 <span className="text-[10px] text-[#B0B0C8] ml-1">/100</span>
               </td>
-              <td colSpan={5} />
+              <td colSpan={4} />
             </tr>
           </tfoot>
         )}

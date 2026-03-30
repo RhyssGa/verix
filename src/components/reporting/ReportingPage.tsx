@@ -2,32 +2,22 @@
 
 import { useEffect, useState, useMemo, useCallback } from 'react'
 import { ReportingTopBar } from './ReportingTopBar'
-import { ReportingFilters, type ViewMode } from './ReportingFilters'
+import { ReportingFilters } from './ReportingFilters'
 import { GroupAvgCard } from './GroupAvgCard'
 import { AgencyTable } from './AgencyTable'
-import { CumulatedTable } from './CumulatedTable'
 import { TrendTable } from './TrendTable'
-import { PDFOptions, type PDFSections } from './PDFOptions'
 import {
   filterByQuarter,
   computeGroupAvg,
   buildAgencyRows,
   buildTrendRows,
-  buildAnomalyAggregates,
-  buildCumulatedRows,
+  buildMultiQuarterAgencyRows,
   type ReportingEntry,
 } from '@/lib/reporting/aggregations'
 import { getAvailableYears, quarterLabel, type Quarter } from '@/lib/reporting/quarters'
 
 const SECTION_TITLE = 'text-[11px] font-bold text-[#7A7A8C] uppercase tracking-[0.8px] mb-4 pb-2 border-b border-[#E8E4DC]'
 const CARD = 'bg-white border border-[#E8E4DC] rounded-[14px] p-6'
-
-const DEFAULT_PDF_SECTIONS: PDFSections = {
-  scoreTable: true,
-  groupAvg: true,
-  trend: true,
-  anomalies: false,
-}
 
 export function ReportingPage() {
   const [entries, setEntries] = useState<ReportingEntry[]>([])
@@ -39,9 +29,7 @@ export function ReportingPage() {
   const [year, setYear] = useState(currentYear)
   const [quarter, setQuarter] = useState<Quarter>(1)
   const [mode, setMode] = useState<'gerance' | 'copro'>('gerance')
-  const [viewMode, setViewMode] = useState<ViewMode>('quarter')
   const [target, setTarget] = useState(85)
-  const [pdfSections, setPdfSections] = useState<PDFSections>(DEFAULT_PDF_SECTIONS)
 
   // Déterminer le trimestre courant au montage
   useEffect(() => {
@@ -68,13 +56,6 @@ export function ReportingPage() {
     localStorage.setItem('reporting_target', String(v))
   }, [])
 
-  // Quand on passe en mode cumulé, year=0 = toutes les années
-  function handleViewModeChange(v: ViewMode) {
-    setViewMode(v)
-    if (v === 'cumul') setYear(0)
-    else if (year === 0) setYear(currentYear)
-  }
-
   // Fetch tous les audits
   useEffect(() => {
     setLoading(true)
@@ -92,58 +73,44 @@ export function ReportingPage() {
   const years = useMemo(() => getAvailableYears(entries.map((e) => e.timestamp)), [entries])
 
   const quarterRef = useMemo(() => ({ year, quarter }), [year, quarter])
-  const isCumul = viewMode === 'cumul'
 
-  // Mode trimestriel
   const currentEntries = useMemo(
-    () => (isCumul ? [] : filterByQuarter(entries, quarterRef, mode)),
-    [isCumul, entries, quarterRef, mode],
+    () => filterByQuarter(entries, quarterRef, mode),
+    [entries, quarterRef, mode],
   )
   const groupAvg = useMemo(() => computeGroupAvg(currentEntries), [currentEntries])
   const agencyRows = useMemo(
-    () => (isCumul ? [] : buildAgencyRows(currentEntries, entries, quarterRef, mode)),
-    [isCumul, currentEntries, entries, quarterRef, mode],
+    () => buildAgencyRows(currentEntries, entries, quarterRef, mode),
+    [currentEntries, entries, quarterRef, mode],
   )
   const trendRows = useMemo(
-    () => buildTrendRows(entries, year === 0 ? currentYear : year, mode),
-    [entries, year, currentYear, mode],
-  )
-  const anomalyAggregates = useMemo(
-    () => buildAnomalyAggregates(isCumul ? [] : currentEntries),
-    [isCumul, currentEntries],
+    () => buildTrendRows(entries, year, mode),
+    [entries, year, mode],
   )
 
-  // Mode cumulé
-  const cumulatedRows = useMemo(
-    () => (isCumul ? buildCumulatedRows(entries, mode, year === 0 ? undefined : year) : []),
-    [isCumul, entries, mode, year],
+  // Multi-quarter averages pour le PDF
+  const multiQuarterAgencyRows = useMemo(
+    () => buildMultiQuarterAgencyRows(entries, year, mode),
+    [entries, year, mode],
   )
-  const cumulatedGroupAvg = useMemo(
-    () => (isCumul && cumulatedRows.length > 0
-      ? Math.round((cumulatedRows.reduce((s, r) => s + r.scoreGlobal, 0) / cumulatedRows.length) * 10) / 10
-      : null),
-    [isCumul, cumulatedRows],
+  const multiQuarterGroupAvg = useMemo(
+    () => multiQuarterAgencyRows.length > 0
+      ? Math.round((multiQuarterAgencyRows.reduce((s, r) => s + r.scoreGlobal, 0) / multiQuarterAgencyRows.length) * 10) / 10
+      : null,
+    [multiQuarterAgencyRows],
   )
-  const activeGroupAvg = isCumul ? cumulatedGroupAvg : groupAvg
-  const activeEntryCount = isCumul ? cumulatedRows.length : currentEntries.length
 
-  const periodLabel = isCumul
-    ? (year === 0 ? 'Tous trimestres' : `Toute l'année ${year}`)
-    : quarterLabel(quarterRef)
+  const periodLabel = quarterLabel(quarterRef)
 
   async function handleExportPDF() {
     setPdfLoading(true)
     try {
       const payload = {
-        period: quarterRef,
+        period: { year },
         mode,
-        exportDate: new Date().toISOString(),
-        groupAvg: activeGroupAvg,
-        target,
-        sections: pdfSections,
-        agencies: agencyRows,
+        groupAvg: multiQuarterGroupAvg,
+        agencies: multiQuarterAgencyRows,
         trend: trendRows,
-        anomalyAggregates,
       }
       const res = await fetch('/api/rapport/reporting', {
         method: 'POST',
@@ -155,7 +122,7 @@ export function ReportingPage() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `reporting-${periodLabel.replace(/\s/g, '-')}-${mode}.pdf`
+      a.download = `reporting-${year}-${mode}.pdf`
       a.click()
       URL.revokeObjectURL(url)
     } catch (e) {
@@ -171,15 +138,15 @@ export function ReportingPage() {
 
       <div className="flex-1 px-8 py-7 flex flex-col gap-6 max-w-[1100px] w-full mx-auto">
 
-        {/* ① Moyenne groupe + objectif — toujours en haut */}
+        {/* ① Moyenne groupe + objectif */}
         <GroupAvgCard
-          groupAvg={activeGroupAvg}
+          groupAvg={groupAvg}
           target={target}
-          entryCount={activeEntryCount}
+          entryCount={currentEntries.length}
           onTargetChange={handleTargetChange}
         />
 
-        {/* ② Filtres + Options PDF */}
+        {/* ② Filtres + Export PDF */}
         <div className={CARD}>
           <div className="flex flex-col gap-5">
             <div>
@@ -189,22 +156,39 @@ export function ReportingPage() {
                 year={year}
                 quarter={quarter}
                 mode={mode}
-                viewMode={viewMode}
                 onYearChange={setYear}
                 onQuarterChange={setQuarter}
                 onModeChange={setMode}
-                onViewModeChange={handleViewModeChange}
               />
             </div>
-            <div className="border-t border-[#F0EDE8] pt-5">
-              <div className={SECTION_TITLE}>Options du rapport PDF</div>
-              <PDFOptions
-                sections={pdfSections}
-                onChange={setPdfSections}
-                onExport={handleExportPDF}
-                loading={pdfLoading}
-                disabled={activeEntryCount === 0}
-              />
+            <div className="border-t border-[#F0EDE8] pt-5 flex items-center justify-between">
+              <div className="text-[12px] text-[#7A7A8C]">
+                Le PDF exporte le rapport annuel complet {year} (moyennes par agence + évolution trimestrielle).
+              </div>
+              <button
+                onClick={handleExportPDF}
+                disabled={pdfLoading || multiQuarterAgencyRows.length === 0}
+                className={[
+                  'flex items-center gap-2 px-5 py-[9px] rounded-[9px] text-[13px] font-bold transition-all whitespace-nowrap',
+                  pdfLoading || multiQuarterAgencyRows.length === 0
+                    ? 'bg-[#E8E4DC] text-[#B0B0C8] cursor-not-allowed'
+                    : 'bg-[#0B1929] text-[#C49A2E] hover:bg-[#1A3252] cursor-pointer',
+                ].join(' ')}
+              >
+                {pdfLoading ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-[#C49A2E]/30 border-t-[#C49A2E] rounded-full animate-spin" />
+                    Génération…
+                  </>
+                ) : (
+                  <>
+                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                      <path d="M2 11.5V13H13V11.5M7.5 2V10M7.5 10L4.5 7M7.5 10L10.5 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    Exporter PDF {year}
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
@@ -224,27 +208,20 @@ export function ReportingPage() {
 
         {!loading && !error && (
           <>
-
-            {/* ③ Tableau principal */}
+            {/* ③ Tableau par trimestre */}
             <div className={CARD}>
               <div className={SECTION_TITLE}>
-                {isCumul
-                  ? `Vue cumulée — ${periodLabel} · ${mode === 'gerance' ? 'Gérance' : 'Copropriété'}`
-                  : `Scores par agence — ${periodLabel} · ${mode === 'gerance' ? 'Gérance' : 'Copropriété'}`
-                }
+                Scores par agence — {periodLabel} · {mode === 'gerance' ? 'Gérance' : 'Copropriété'}
               </div>
-              {isCumul
-                ? <CumulatedTable rows={cumulatedRows} groupAvg={cumulatedGroupAvg} />
-                : <AgencyTable rows={agencyRows} groupAvg={groupAvg} target={target} />
-              }
+              <AgencyTable rows={agencyRows} groupAvg={groupAvg} target={target} />
             </div>
 
             {/* ④ Évolution trimestrielle */}
             <div className={CARD}>
               <div className={SECTION_TITLE}>
-                Évolution trimestrielle {year === 0 ? currentYear : year} · {mode === 'gerance' ? 'Gérance' : 'Copropriété'}
+                Évolution trimestrielle {year} · {mode === 'gerance' ? 'Gérance' : 'Copropriété'}
               </div>
-              <TrendTable rows={trendRows} year={year === 0 ? currentYear : year} />
+              <TrendTable rows={trendRows} year={year} />
             </div>
           </>
         )}
