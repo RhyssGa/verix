@@ -521,12 +521,13 @@ h1, h2, h3, .section-title {
         ? `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:12px;font-size:7.5pt;font-weight:700;background:#FAEAEA;color:#B01A1A;border:1px solid #F5AAAA"><span style="width:6px;height:6px;border-radius:50%;background:#B01A1A;flex-shrink:0"></span>Anomalie</span>`
         : `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:12px;font-size:7.5pt;font-weight:700;background:#EAF6EF;color:#1A7A4A;border:1px solid #A8D8BC"><span style="width:6px;height:6px;border-radius:50%;background:#1A7A4A;flex-shrink:0"></span>OK</span>`
     const montantStr = row.montant != null ? eurFmt(row.montant) : '—'
+    const indicatorStr = row.indicator ?? montantStr
     const rowBg = i % 2 === 0 ? '' : 'background:#FAFAFA'
     return `<tr style="${rowBg}">
       <td style="font-weight:500">${esc(row.label)}${row.exclu ? ' <em style="color:#9A9AB0;font-size:8.5pt">(exclu)</em>' : ''}</td>
       <td style="text-align:center"><span style="display:inline-block;padding:2px 9px;border-radius:12px;font-size:7.5pt;font-weight:600;background:${typeBg};color:${typeColor}">${esc(typeLabel)}</span></td>
       <td style="text-align:right;font-variant-numeric:tabular-nums">${row.nb != null ? row.nb : '—'}</td>
-      <td style="text-align:right;font-size:9pt;color:#3A3A5A;font-variant-numeric:tabular-nums">${montantStr}</td>
+      <td style="text-align:right;font-size:9pt;color:#3A3A5A;font-variant-numeric:tabular-nums">${esc(indicatorStr)}</td>
       <td class="pen ${penCls}">${penStr}</td>
       <td style="text-align:right;color:#9A9AB0;font-size:9pt">${maxStr}</td>
       <td style="text-align:center">${statusHtml}</td>
@@ -725,7 +726,7 @@ h1, h2, h3, .section-title {
           <th>Poste d'audit</th>
           <th style="width:75px;text-align:center">Type</th>
           <th style="width:50px;text-align:right">Nb</th>
-          <th style="width:95px;text-align:right">Montant</th>
+          <th style="width:95px;text-align:right">Indicateur</th>
           <th style="width:80px;text-align:right">Pénalité</th>
           <th style="width:60px;text-align:right">Max</th>
           <th style="width:100px;text-align:center">Statut</th>

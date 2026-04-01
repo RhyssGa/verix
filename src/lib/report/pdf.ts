@@ -83,7 +83,7 @@ export interface PDFPayload {
   nbMandats?: number
   nbCopro?: number
   score: { global: number; penalite: number; niveauLabel: string; niveauColor: string; niveauBg: string }
-  syntheseRows: Array<{ label: string; type: string; penalite: number; penaliteMax: number; nb: number | null; montant: number | null; exclu: boolean }>
+  syntheseRows: Array<{ label: string; type: string; penalite: number; penaliteMax: number; nb: number | null; montant: number | null; indicator?: string; exclu: boolean }>
   sections: PDFSection[]
   factures?: PDFFactures
   bilan?: { note: string; total: number; nbRisque: number; groups: PDFBilanGroup[] }
@@ -758,6 +758,7 @@ export function buildPDFPayload(
       penaliteMax: a.penaliteMax,
       nb: a.nb,
       montant: a.montant,
+      indicator: a.id === 'quitt' && a.ratio != null ? (a.ratio * 100).toFixed(1) + ' %' : undefined,
       exclu: a.exclu,
     }))
     // Insert nonClot info row before bq_nonrapp
